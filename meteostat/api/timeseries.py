@@ -6,6 +6,7 @@ A class to handle meteorological time series data.
 
 from copy import copy
 from datetime import datetime
+from itertools import chain
 from math import floor
 from statistics import mean
 from typing import List, Optional
@@ -13,6 +14,7 @@ from typing import List, Optional
 import pandas as pd
 
 from meteostat.core.parameters import parameter_service
+from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Granularity, Provider
 from meteostat.interpolation.lapserate import calculate_lapse_rate
@@ -102,19 +104,39 @@ class TimeSeries:
         Is the time series empty?
         """
         return True if self._df is None else self._df.empty
+    
+    @property
+    def providers(self) -> List[Provider]:
+        """
+        Get included providers
+        """
+        providers: List[str] = self._df.index.get_level_values("source").unique().to_list()
+        return list(set(chain.from_iterable([provider.split(' ') for provider in providers])))
 
+    @property
+    def licenses(self) -> List[License]:
+        """
+        Get licenses
+        """
+        providers = [
+            provider_service.get_provider(provider_id)
+            for provider_id in self.providers
+        ]
+
+        return [provider.license for provider in providers if provider.license is not None]
+    
     @property
     def attribution(self) -> str:
         """
-        Get attribution string
+        Attribution string
         """
         attributions = [
             "Meteostat",
-            *[
-                provider.license.attribution
-                for provider in self.providers
-                if provider.license.attribution
-            ],
+            *set([
+                license.attribution
+                for license in self.licenses
+                if license.attribution
+            ]),
         ]
 
         return ", ".join(attributions)
@@ -124,14 +146,7 @@ class TimeSeries:
         """
         Is commercial use allowed?
         """
-        return all(provider.license.commercial for provider in self.providers)
-
-    @property
-    def licenses(self) -> List[License]:
-        """
-        Get licenses
-        """
-        return [provider.license for provider in self.providers]
+        return all(license.commercial for license in self.licenses)
 
     @property
     def is_valid(self) -> bool:
