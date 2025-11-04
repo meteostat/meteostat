@@ -55,6 +55,7 @@ class ProviderSpec:
     """
 
     id: Provider | str  # The provider ID
+    name: str  # A descriptive provider name
     granularity: Granularity  # The provider's time series granularity
     priority: Priority  # The priority of the provider
     grade: Optional[Grade]  # The provider's data quality grade

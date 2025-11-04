@@ -11,6 +11,7 @@ from meteostat.enumerations import Grade, Granularity, Parameter, Provider, Prio
 
 PROVIDER_HOURLY = ProviderSpec(
     id=Provider.HOURLY,
+    name="Meteostat Hourly",
     granularity=Granularity.HOURLY,
     priority=Priority.NONE,
     grade=None,
@@ -35,6 +36,7 @@ PROVIDER_HOURLY = ProviderSpec(
 
 PROVIDER_DAILY = ProviderSpec(
     id=Provider.DAILY,
+    name="Meteostat Daily",
     granularity=Granularity.DAILY,
     priority=Priority.NONE,
     grade=None,
@@ -59,6 +61,7 @@ PROVIDER_DAILY = ProviderSpec(
 
 PROVIDER_DAILY_DERIVED = ProviderSpec(
     id=Provider.DAILY_DERIVED,
+    name="Meteostat Daily Derived",
     granularity=Granularity.DAILY,
     priority=Priority.NONE,
     grade=None,
@@ -83,6 +86,7 @@ PROVIDER_DAILY_DERIVED = ProviderSpec(
 
 PROVIDER_MONTHLY = ProviderSpec(
     id=Provider.MONTHLY,
+    name="Meteostat Monthly",
     granularity=Granularity.MONTHLY,
     priority=Priority.NONE,
     grade=None,
@@ -102,6 +106,7 @@ PROVIDER_MONTHLY = ProviderSpec(
 
 PROVIDER_MONTHLY_DERIVED = ProviderSpec(
     id=Provider.MONTHLY_DERIVED,
+    name="Meteostat Monthly Derived",
     granularity=Granularity.MONTHLY,
     priority=Priority.NONE,
     grade=None,
@@ -121,6 +126,7 @@ PROVIDER_MONTHLY_DERIVED = ProviderSpec(
 
 PROVIDER_DWD_HOURLY = ProviderSpec(
     id=Provider.DWD_HOURLY,
+    name="DWD Hourly",
     granularity=Granularity.HOURLY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -149,6 +155,7 @@ PROVIDER_DWD_HOURLY = ProviderSpec(
 
 PROVIDER_DWD_POI = ProviderSpec(
     id=Provider.DWD_POI,
+    name="DWD POI",
     granularity=Granularity.HOURLY,
     priority=Priority.MEDIUM,
     grade=Grade.OBSERVATION,
@@ -179,6 +186,7 @@ PROVIDER_DWD_POI = ProviderSpec(
 
 PROVIDER_DWD_MOSMIX = ProviderSpec(
     id=Provider.DWD_MOSMIX,
+    name="DWD MOSMIX",
     granularity=Granularity.HOURLY,
     priority=Priority.LOWEST,
     grade=Grade.FORECAST,
@@ -207,6 +215,7 @@ PROVIDER_DWD_MOSMIX = ProviderSpec(
 
 PROVIDER_DWD_DAILY = ProviderSpec(
     id=Provider.DWD_DAILY,
+    name="DWD Daily",
     granularity=Granularity.DAILY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -237,6 +246,7 @@ PROVIDER_DWD_DAILY = ProviderSpec(
 
 PROVIDER_DWD_MONTHLY = ProviderSpec(
     id=Provider.DWD_MONTHLY,
+    name="DWD Monthly",
     granularity=Granularity.MONTHLY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -255,6 +265,7 @@ PROVIDER_DWD_MONTHLY = ProviderSpec(
 
 PROVIDER_ECCC_HOURLY = ProviderSpec(
     id=Provider.ECCC_HOURLY,
+    name="ECCC Hourly",
     granularity=Granularity.HOURLY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -280,6 +291,7 @@ PROVIDER_ECCC_HOURLY = ProviderSpec(
 
 PROVIDER_ECCC_DAILY = ProviderSpec(
     id=Provider.ECCC_DAILY,
+    name="ECCC Daily",
     granularity=Granularity.DAILY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -306,6 +318,7 @@ PROVIDER_ECCC_DAILY = ProviderSpec(
 
 PROVIDER_ECCC_MONTHLY = ProviderSpec(
     id=Provider.ECCC_MONTHLY,
+    name="ECCC Monthly",
     granularity=Granularity.MONTHLY,
     priority=Priority.HIGHEST,
     grade=Grade.RECORD,
@@ -331,6 +344,7 @@ PROVIDER_ECCC_MONTHLY = ProviderSpec(
 
 PROVIDER_ISD_LITE = ProviderSpec(
     id=Provider.ISD_LITE,
+    name="NOAA ISD Lite",
     granularity=Granularity.HOURLY,
     priority=Priority.HIGH,
     grade=Grade.OBSERVATION,
@@ -356,6 +370,7 @@ PROVIDER_ISD_LITE = ProviderSpec(
 
 PROVIDER_GHCND = ProviderSpec(
     id=Provider.GHCND,
+    name="NOAA GHCN-Daily",
     granularity=Granularity.DAILY,
     priority=Priority.HIGH,
     grade=Grade.OBSERVATION,
@@ -383,6 +398,7 @@ PROVIDER_GHCND = ProviderSpec(
 
 PROVIDER_CLIMAT = ProviderSpec(
     id=Provider.CLIMAT,
+    name="DWD CLIMAT",
     granularity=Granularity.MONTHLY,
     priority=Priority.HIGH,
     grade=Grade.RECORD,
@@ -409,6 +425,7 @@ PROVIDER_CLIMAT = ProviderSpec(
 
 PROVIDER_METAR = ProviderSpec(
     id=Provider.METAR,
+    name="METAR",
     granularity=Granularity.HOURLY,
     priority=Priority.LOW,
     grade=Grade.OBSERVATION,
@@ -430,6 +447,7 @@ PROVIDER_METAR = ProviderSpec(
 
 PROVIDER_METNO_FORECAST = ProviderSpec(
     id=Provider.METNO_FORECAST,
+    name="MET Norway Forecast",
     granularity=Granularity.HOURLY,
     priority=Priority.LOWEST - 1,  # MOSMIX is more specific, therefore higher prio
     grade=Grade.FORECAST,
@@ -457,6 +475,7 @@ PROVIDER_METNO_FORECAST = ProviderSpec(
 
 PROVIDER_SYNOP = ProviderSpec(
     id=Provider.SYNOP,
+    name="SYNOP Legacy",
     granularity=Granularity.HOURLY,
     priority=Priority.MEDIUM,
     grade=Grade.OBSERVATION,
@@ -488,6 +507,7 @@ PROVIDER_SYNOP = ProviderSpec(
 
 PROVIDER_METAR_LEGACY = ProviderSpec(
     id=Provider.METAR_LEGACY,
+    name="METAR Legacy",
     granularity=Granularity.HOURLY,
     priority=Priority.LOW - 1,
     grade=Grade.OBSERVATION,
@@ -509,6 +529,7 @@ PROVIDER_METAR_LEGACY = ProviderSpec(
 
 PROVIDER_MODEL = ProviderSpec(
     id=Provider.MODEL,
+    name="Legacy Model",
     granularity=Granularity.HOURLY,
     priority=Priority.LOWEST - 2,
     grade=Grade.FORECAST,
