@@ -8,7 +8,7 @@ loaded from environment variables with the MS_ prefix.
 
 import os
 import json
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 from meteostat.core.logger import logger
 from meteostat.enumerations import TTL, Parameter
@@ -115,13 +115,15 @@ class ConfigService(Config):
     # Station meta data settings
     stations_db_prefer: bool = False
     stations_db_ttl: int = TTL.WEEK
-    stations_db_url: str = (
+    stations_db_urls: List[str] = [
+        "https://data.meteostat.net/stations.db",
         "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations.db"
-    )
+    ]
     stations_db_file: str = (
         os.path.expanduser("~") + os.sep + ".meteostat" + os.sep + "stations.db"
     )
     stations_meta_mirrors: list = [
+        "https://data.meteostat.net/stations/{id}.json",
         "https://cdn.jsdelivr.net/gh/meteostat/weather-stations/stations/{id}.json",
         "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations/{id}.json",
     ]
@@ -142,9 +144,9 @@ class ConfigService(Config):
 
     # [Provider] DWD settings
     dwd_ftp_host: str = "opendata.dwd.de"
-    dwd_hourly_modes: Optional[list] = None
-    dwd_daily_modes: Optional[list] = None
-    dwd_climat_modes: Optional[list] = None
+    dwd_hourly_modes: Optional[List[str]] = None
+    dwd_daily_modes: Optional[List[str]] = None
+    dwd_climat_modes: Optional[List[str]] = None
 
     # [Provider] NOAA settings
     aviationweather_endpoint: str = (

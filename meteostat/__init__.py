@@ -14,6 +14,7 @@ The code is licensed under the MIT license.
 __appname__ = "meteostat"
 __version__ = "2.0.0"
 
+from meteostat.core.cache import purge
 from meteostat.core.config import config
 from meteostat.enumerations import Parameter, Provider
 from meteostat.api.station import station
@@ -32,6 +33,7 @@ from meteostat import units
 __all__ = [
     "config",
     "Parameter",
+    "purge",
     "Provider",
     "stations",
     "station",

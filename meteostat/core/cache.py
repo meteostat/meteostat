@@ -221,3 +221,4 @@ class CacheService:
 
 
 cache_service = CacheService()
+purge = cache_service.purge

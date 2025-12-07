@@ -31,11 +31,14 @@ class Stations:
         """
         Download the SQLite database file from the configured URL
         """
-        url = config.stations_db_url
+        urls = config.stations_db_urls
 
-        response = network_service.get(url, stream=stream)
+        if not urls:
+            raise Exception("No stations database URLs configured")
 
-        if response.status_code != 200:
+        response = network_service.get_from_mirrors(urls, stream=stream)
+
+        if response is None:
             raise Exception("Failed to download the database file")
 
         return response
