@@ -92,11 +92,29 @@ class TimeSeries:
         return self._df.columns.to_list() if self._df is not None else []
 
     @property
-    def freq(self) -> str:
+    def freq(self) -> Optional[str]:
         """
-        The time series frequency
+        The time series frequency.
+
+        Returns a Pandas offset alias string (e.g. "1h", "1D", "1M") or
+        `None` for granularities where a regular frequency does not apply
+        (e.g. normals).
         """
-        return "1h" if self.granularity is Granularity.HOURLY else "1D"
+        if self.granularity is Granularity.HOURLY:
+            return "1h"
+
+        if self.granularity is Granularity.DAILY:
+            return "1D"
+
+        if self.granularity is Granularity.MONTHLY:
+            return "1M"
+
+        # Normals (climatological normals) do not have a regular time
+        # frequency in the same sense as timeseries data.
+        if self.granularity is Granularity.NORMALS:
+            return None
+
+        return None
 
     @property
     def empty(self) -> bool:
