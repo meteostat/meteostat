@@ -25,6 +25,7 @@ def normals(
     end: int = 1990,
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
+    model: bool = True,
     max_missing: int = 3,
 ):
     """
@@ -43,6 +44,8 @@ def normals(
         List of parameters to include in the data query. Defaults to a set of common parameters.
     providers : List[Provider], optional
         List of data providers to use for the query. Defaults to the monthly provider.
+    model : bool, optional
+        Whether to include model data in the query. Defaults to True.
     max_missing : int, optional
         Maximum number of missing values allowed in a month to calculate the mean. Defaults to 3.
 
@@ -67,7 +70,7 @@ def normals(
 
     # Fetch monthly data for the specified stations and parameters
     ts = monthly(
-        station, parse_year(start), parse_year(end, True), parameters, providers
+        station, parse_year(start), parse_year(end, True), parameters=parameters, providers=providers, model=model
     )
     df = ts.fetch(sources=True)
 
