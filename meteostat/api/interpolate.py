@@ -17,6 +17,7 @@ from meteostat.interpolation.idw import inverse_distance_weighting
 from meteostat.utils.geo import get_distance
 
 
+# TODO: Make interpolate return TimeSeries instead of DataFrame
 def interpolate(
     ts: TimeSeries,
     point: Point,

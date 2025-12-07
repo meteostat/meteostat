@@ -28,7 +28,6 @@ from meteostat.api.concat import concat
 from meteostat.api.interpolate import interpolate
 from meteostat.interpolation.lapserate import lapse_rate
 from meteostat.typing import Station
-from meteostat import units
 
 # Export public API
 __all__ = [
@@ -44,7 +43,6 @@ __all__ = [
     "daily",
     "monthly",
     "normals",
-    "units",
     "interpolate",
     "concat",
     "lapse_rate",

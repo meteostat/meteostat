@@ -15,7 +15,7 @@ from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service
 from meteostat.core.validator import Validator
 from meteostat.enumerations import Granularity, Parameter, UnitSystem
-from meteostat.utils.conversions import CONVERSION_MAPPINGS
+from meteostat.utils.conversions import CONVERSION_MAPPINGS, to_condition, to_direction
 
 
 class SchemaService:
@@ -111,6 +111,20 @@ class SchemaService:
             for validator in parameter.validators:
                 test = cls._apply_validator(validator, temp, col)
                 temp.loc[~test, col] = fill
+
+        return temp
+
+    def humanize(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Convert wind direction and condition codes to human-readable values
+        """
+        temp = copy(df)
+
+        if Parameter.WDIR in temp.columns:
+            temp[Parameter.WDIR] = temp[Parameter.WDIR].apply(to_direction)
+
+        if Parameter.COCO in temp.columns:
+            temp[Parameter.COCO] = temp[Parameter.COCO].apply(to_condition)
 
         return temp
 

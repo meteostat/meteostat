@@ -222,6 +222,7 @@ class TimeSeries:
         sources=False,
         location=False,
         clean=True,
+        humanize=False,
         units: UnitSystem = UnitSystem.METRIC,
     ) -> Optional[pd.DataFrame]:
         """
@@ -240,6 +241,8 @@ class TimeSeries:
             in the DataFrame. Defaults to False.
         clean : bool, optional
             Whether to clean the DataFrame according to the schema. Defaults to True.
+        humanize : bool, optional
+            Whether to convert wind direction and condition codes to human-readable values. Defaults to False.
         units : UnitSystem, optional
             The unit system to use for the DataFrame. Defaults to metric units.
 
@@ -269,6 +272,9 @@ class TimeSeries:
             df = df.join(
                 self.stations[["latitude", "longitude", "elevation"]], on="station"
             )
+
+        if humanize:
+            df = schema_service.humanize(df)
 
         if units != UnitSystem.METRIC:
             df = schema_service.convert(df, self.granularity, units)
