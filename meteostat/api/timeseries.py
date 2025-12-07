@@ -17,7 +17,6 @@ from meteostat.core.parameters import parameter_service
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Granularity, Provider
-from meteostat.interpolation.lapserate import calculate_lapse_rate
 from meteostat.typing import License
 from meteostat.utils.data import fill_df, localize, squash_df
 
@@ -166,8 +165,7 @@ class TimeSeries:
         """
         return all(license.commercial for license in self.licenses)
 
-    @property
-    def is_valid(self) -> bool:
+    def validate(self) -> bool:
         """
         Does the time series pass all validations?
         """
@@ -184,15 +182,7 @@ class TimeSeries:
 
         return True
 
-    @property
-    def lapse_rate(self) -> Optional[float]:
-        """
-        Actual lapse rate (degrees Celsius per 1000 meters)
-        """
-        df = self.fetch(location=True)
-
-        return calculate_lapse_rate(df)
-
+    # TODO: Investigate if still required
     def filter_stations(self, station: str | List[str], exclude=False) -> "TimeSeries":
         """
         Filter data by weather station(s)
@@ -204,6 +194,7 @@ class TimeSeries:
         temp._df = temp._df[mask if not exclude else ~mask]
         return temp
 
+    # TODO: Investigate if still required
     def filter_providers(
         self, provider: Provider | List[Provider], exclude=False
     ) -> "TimeSeries":

@@ -36,9 +36,9 @@ df_idw = ms.interpolate(ts, point, distance_threshold=0, elevation_threshold=0)
 print(df_idw.head())
 
 print("\n=== IDW Method (Dynamic) ===")
-print("Using dynamic lapse rate from time series data: ", ts.lapse_rate)
+print("Using dynamic lapse rate from time series data: ", ms.lapse_rate(ts))
 df_idw_dynamic = ms.interpolate(
-    ts, point, distance_threshold=0, elevation_threshold=0, lapse_rate=ts.lapse_rate
+    ts, point, distance_threshold=0, elevation_threshold=0, lapse_rate=ms.lapse_rate(ts)
 )
 print(df_idw_dynamic.head())
 

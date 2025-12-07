@@ -4,11 +4,12 @@ from statistics import mean
 import numpy as np
 import pandas as pd
 
+from meteostat.api.timeseries import TimeSeries
 from meteostat.core.config import config
 from meteostat.enumerations import Parameter
 
 
-def calculate_lapse_rate(df: pd.DataFrame) -> float:
+def lapse_rate(ts: TimeSeries) -> float:
     """
     Calculate the lapse rate (temperature gradient) in degrees Celsius per kilometer
     based on temperature and elevation data from multiple stations.
@@ -23,6 +24,8 @@ def calculate_lapse_rate(df: pd.DataFrame) -> float:
     float
         Calculated lapse rate in degrees Celsius per kilometer.
     """
+    df = ts.fetch(location=True)
+
     if df is None or "elevation" not in df.columns or Parameter.TEMP not in df.columns:
         return None
 
