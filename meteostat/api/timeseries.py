@@ -257,7 +257,7 @@ class TimeSeries:
 
         return df.sort_index()
 
-    def count(self, parameter: Parameter | str) -> int:
+    def count(self, parameter: Optional[Parameter | str] = None) -> int:
         """
         Get number of non-NaN values for a specific parameter.
         If no parameter is specified, it returns the count for the entire DataFrame.
@@ -274,12 +274,15 @@ class TimeSeries:
         """
         if self._df is None:
             return 0
-
+        
+        if parameter is None:
+            return self._df.count().max()
+        
         return self._df[
             parameter if isinstance(parameter, Parameter) else parameter
         ].count()
 
-    def completeness(self, parameter: Parameter | str | None = None) -> float:
+    def completeness(self, parameter: Optional[Parameter | str] = None) -> float:
         """
         Get completeness for a specific parameter or the entire DataFrame.
 
