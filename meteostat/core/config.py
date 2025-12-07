@@ -117,7 +117,7 @@ class ConfigService(Config):
     stations_db_ttl: int = TTL.WEEK
     stations_db_urls: List[str] = [
         "https://data.meteostat.net/stations.db",
-        "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations.db"
+        "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations.db",
     ]
     stations_db_file: str = (
         os.path.expanduser("~") + os.sep + ".meteostat" + os.sep + "stations.db"

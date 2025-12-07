@@ -12,9 +12,9 @@ class Point:
     A geographical point
     """
 
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
-    elevation: Optional[int] = None
+    latitude: float
+    longitude: float
+    elevation: Optional[int]
 
     def __init__(
         self, latitude: float, longitude: float, elevation: Optional[int] = None

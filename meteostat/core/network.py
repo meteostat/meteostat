@@ -52,7 +52,7 @@ class NetworkService:
             proxies=config.network_proxies,
             timeout=30,
         )
-    
+
     def get_from_mirrors(
         self,
         mirrors: list[str],

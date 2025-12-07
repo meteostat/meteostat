@@ -70,7 +70,12 @@ def normals(
 
     # Fetch monthly data for the specified stations and parameters
     ts = monthly(
-        station, parse_year(start), parse_year(end, True), parameters=parameters, providers=providers, model=model
+        station,
+        parse_year(start),
+        parse_year(end, True),
+        parameters=parameters,
+        providers=providers,
+        model=model,
     )
     df = ts.fetch(sources=True)
 

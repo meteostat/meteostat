@@ -16,7 +16,7 @@ import pandas as pd
 from meteostat.core.parameters import parameter_service
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
-from meteostat.enumerations import Parameter, Granularity, Provider
+from meteostat.enumerations import Parameter, Granularity, Provider, UnitSystem
 from meteostat.typing import License
 from meteostat.utils.data import fill_df, localize, squash_df
 
@@ -121,14 +121,18 @@ class TimeSeries:
         Is the time series empty?
         """
         return True if self._df is None else self._df.empty
-    
+
     @property
     def providers(self) -> List[Provider]:
         """
         Get included providers
         """
-        providers: List[str] = self._df.index.get_level_values("source").unique().to_list()
-        return list(set(chain.from_iterable([provider.split(' ') for provider in providers])))
+        providers: List[str] = (
+            self._df.index.get_level_values("source").unique().to_list()
+        )
+        return list(
+            set(chain.from_iterable([provider.split(" ") for provider in providers]))
+        )
 
     @property
     def licenses(self) -> List[License]:
@@ -136,12 +140,13 @@ class TimeSeries:
         Get licenses
         """
         providers = [
-            provider_service.get_provider(provider_id)
-            for provider_id in self.providers
+            provider_service.get_provider(provider_id) for provider_id in self.providers
         ]
 
-        return [provider.license for provider in providers if provider.license is not None]
-    
+        return [
+            provider.license for provider in providers if provider.license is not None
+        ]
+
     @property
     def attribution(self) -> str:
         """
@@ -149,11 +154,13 @@ class TimeSeries:
         """
         attributions = [
             "Meteostat",
-            *set([
-                license.attribution
-                for license in self.licenses
-                if license.attribution
-            ]),
+            *set(
+                [
+                    license.attribution
+                    for license in self.licenses
+                    if license.attribution
+                ]
+            ),
         ]
 
         return ", ".join(attributions)
@@ -215,6 +222,7 @@ class TimeSeries:
         sources=False,
         location=False,
         clean=True,
+        units: UnitSystem = UnitSystem.METRIC,
     ) -> Optional[pd.DataFrame]:
         """
         Fetch the time series data as a DataFrame.
@@ -232,6 +240,8 @@ class TimeSeries:
             in the DataFrame. Defaults to False.
         clean : bool, optional
             Whether to clean the DataFrame according to the schema. Defaults to True.
+        units : UnitSystem, optional
+            The unit system to use for the DataFrame. Defaults to metric units.
 
         Returns
         -------
@@ -260,6 +270,9 @@ class TimeSeries:
                 self.stations[["latitude", "longitude", "elevation"]], on="station"
             )
 
+        if units != UnitSystem.METRIC:
+            df = schema_service.convert(df, self.granularity, units)
+
         # Remove station index level if not a multi-station query
         if not self._multi_station and "station" in df.index.names:
             df = df.droplevel("station")
@@ -283,10 +296,10 @@ class TimeSeries:
         """
         if self._df is None:
             return 0
-        
+
         if parameter is None:
             return self._df.count().max()
-        
+
         return self._df[
             parameter if isinstance(parameter, Parameter) else parameter
         ].count()

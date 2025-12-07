@@ -16,7 +16,7 @@ __version__ = "2.0.0"
 
 from meteostat.core.cache import purge
 from meteostat.core.config import config
-from meteostat.enumerations import Parameter, Provider
+from meteostat.enumerations import Parameter, Provider, UnitSystem
 from meteostat.api.station import station
 from meteostat.api.stations import stations
 from meteostat.api.point import Point
@@ -36,6 +36,7 @@ __all__ = [
     "Parameter",
     "purge",
     "Provider",
+    "UnitSystem",
     "stations",
     "station",
     "Point",

@@ -65,13 +65,23 @@ class Unit(StrEnum):
     KELVIN = "K"
     PERCENTAGE = "%"
     HPA = "hPa"
-    MILIMETERS = "mm"
+    MILLIMETERS = "mm"
     CENTIMETERS = "cm"
     METERS = "m"
     KMH = "km/h"
     DEGREES = "°"
     MINUTES = "min"
     OKTAS = "okta"
+
+
+class UnitSystem(StrEnum):
+    """
+    Unit Systems
+    """
+
+    SI = "si"
+    METRIC = "metric"
+    IMPERIAL = "imperial"
 
 
 class Provider(StrEnum):

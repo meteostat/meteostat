@@ -43,7 +43,7 @@ def _fetch_station(station_id: str) -> Optional[dict]:
         station_data.pop("active", None)
         # Return station dictionary
         return station_data
-    
+
     return None
 
 

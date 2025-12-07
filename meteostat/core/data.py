@@ -175,6 +175,7 @@ class DataService:
                 )
             )
 
+        # TODO: check if filter_providers can be removed from ts
         # Return filtered time series
         if excluded_providers:
             return ts.filter_providers(excluded_providers, exclude=True)

@@ -5,54 +5,6 @@ Convert a Pandas Series to any meteorological data unit.
 """
 
 
-def to_fahrenheit(value):
-    """
-    Convert Celsius to Fahrenheit
-    """
-
-    return round((value * 9 / 5) + 32, 1)
-
-
-def to_kelvin(value):
-    """
-    Convert Celsius to Kelvin
-    """
-
-    return round(value + 273.15, 1)
-
-
-def to_inches(value):
-    """
-    Convert millimeters to inches
-    """
-
-    return round(value / 25.4, 3)
-
-
-def to_feet(value):
-    """
-    Convert meters to feet
-    """
-
-    return round(value / 0.3048, 1)
-
-
-def to_meters_per_second(value):
-    """
-    Convert kilometers per hour to meters per second
-    """
-
-    return round(value / 3.6, 1)
-
-
-def to_miles_per_hour(value):
-    """
-    Convert kilometers per hour to miles per hour
-    """
-
-    return round(value * 0.6214, 1)
-
-
 def to_direction(value):
     """
     Convert degrees to wind direction

@@ -14,7 +14,8 @@ import pandas as pd
 from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service
 from meteostat.core.validator import Validator
-from meteostat.enumerations import Granularity, Parameter
+from meteostat.enumerations import Granularity, Parameter, UnitSystem
+from meteostat.utils.conversions import CONVERSION_MAPPINGS
 
 
 class SchemaService:
@@ -110,6 +111,32 @@ class SchemaService:
             for validator in parameter.validators:
                 test = cls._apply_validator(validator, temp, col)
                 temp.loc[~test, col] = fill
+
+        return temp
+
+    @classmethod
+    def convert(cls, df, granularity: Granularity, units: UnitSystem) -> pd.DataFrame:
+        """
+        Convert units in a DataFrame
+        """
+        temp = copy(df)
+
+        for col in temp.columns:
+            if "_source" in col:
+                continue
+
+            parameter = parameter_service.get_parameter(col, granularity)
+
+            if not parameter:
+                logger.warning(
+                    "Column %s is not a valid column name and won't be converted", col
+                )
+                continue
+
+            if parameter.unit in CONVERSION_MAPPINGS:
+                if units in CONVERSION_MAPPINGS[parameter.unit]:
+                    conversion_func = CONVERSION_MAPPINGS[parameter.unit][units]
+                    temp[col] = temp[col].apply(conversion_func)
 
         return temp
 
