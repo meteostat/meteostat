@@ -14,10 +14,48 @@ from meteostat.api.timeseries import TimeSeries
 from meteostat.interpolation.lapserate import apply_lapse_rate
 from meteostat.interpolation.nearest import nearest_neighbor
 from meteostat.interpolation.idw import inverse_distance_weighting
+from meteostat.utils.data import aggregate_sources, reshape_by_source
 from meteostat.utils.geo import get_distance
+from meteostat.utils.parsers import parse_station
 
+def _create_timeseries(ts: TimeSeries, point: Point, df: Optional[pd.DataFrame] = None) -> TimeSeries:
+    """
+    Create a TimeSeries object from interpolated DataFrame
+    """
+    return TimeSeries(
+        ts.granularity,
+        parse_station(point),
+        df=df,
+        start=ts.start,
+        end=ts.end,
+        timezone=ts.timezone,
+    )
 
-# TODO: Make interpolate return TimeSeries instead of DataFrame
+def _add_source_columns(
+    result: pd.DataFrame,
+    df: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Add source columns to the result DataFrame
+    """
+    source_cols = [c for c in df.columns if c.endswith("_source")]
+    if source_cols:
+        grouped = df.groupby("time")[source_cols].agg(
+            aggregate_sources
+        )
+        if isinstance(grouped, pd.Series):
+            grouped = grouped.to_frame(name=source_cols[0])
+        grouped.index.name = "time"
+
+        # Join the aggregated source columns into the result, aligning on time
+        if "time" in result.columns:
+            result = result.set_index("time")
+            result = result.join(grouped)
+            result = result.reset_index()
+        else:
+            result = result.join(grouped, how="left")
+    return result
+
 def interpolate(
     ts: TimeSeries,
     point: Point,
@@ -27,7 +65,7 @@ def interpolate(
     power: float = 2.0,
     lapse_rate: Union[float, None] = 6.5,
     lapse_rate_threshold: int = 50,
-) -> Optional[pd.DataFrame]:
+) -> TimeSeries:
     """
     Interpolate time series data spatially to a specific point.
 
@@ -64,11 +102,11 @@ def interpolate(
         or None if no data is available.
     """
     # Fetch DataFrame, filling missing values and adding location data
-    df = ts.fetch(fill=True, location=True)
+    df = ts.fetch(fill=True, location=True, sources=True)
 
     # If no data is returned, return None
     if df is None:
-        return None
+        return _create_timeseries(ts, point)
 
     # Add distance column
     df["distance"] = get_distance(
@@ -151,10 +189,10 @@ def interpolate(
 
     # If no data is returned, return None
     if result is None or result.empty:
-        return None
+        return _create_timeseries(ts, point)
 
     # Drop location-related columns & return
-    return result.drop(
+    result = result.drop(
         [
             "latitude",
             "longitude",
@@ -165,3 +203,15 @@ def interpolate(
         ],
         axis=1,
     )
+
+    # Add source columns: aggregate all columns that end with "_source"
+    result = _add_source_columns(result, df)
+
+    # Reshape by source
+    result = reshape_by_source(result)
+
+    # Add station index
+    result["station"] = "$0001"
+    result = result.set_index("station", append=True).reorder_levels(["station", "time", "source"])
+
+    return _create_timeseries(ts, point, result)
