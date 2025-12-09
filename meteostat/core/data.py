@@ -15,7 +15,7 @@ from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
-from meteostat.enumerations import Grade, Parameter, Provider
+from meteostat.enumerations import Parameter, Provider
 from meteostat.typing import Station, Request
 
 
@@ -158,29 +158,6 @@ class DataService:
 
         return fragments
 
-    def _filter_data(self, req: Request, ts: TimeSeries) -> TimeSeries:
-        """
-        Filter time series data
-        """
-        excluded_providers = []
-
-        if req.model is False:
-            excluded_providers.extend(
-                provider.id
-                for provider in provider_service.providers
-                if provider.grade
-                in (
-                    Grade.FORECAST,
-                    Grade.ANALYSIS,
-                )
-            )
-
-        # TODO: check if filter_providers can be removed from ts
-        # Return filtered time series
-        if excluded_providers:
-            return ts.filter_providers(excluded_providers, exclude=True)
-        return ts
-
     def fetch(
         self,
         req: Request,
@@ -231,8 +208,8 @@ class DataService:
             multi_station=isinstance(req.station, list),
         )
 
-        # Filter data & return
-        return self._filter_data(req, ts)
+        # Return time series
+        return ts
 
 
 data_service = DataService()

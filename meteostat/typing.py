@@ -99,7 +99,6 @@ class Request:
     start: Optional[datetime] = None  # Start date of the query
     end: Optional[datetime] = None  # End date of the query
     timezone: Optional[str] = None  # Time zone of the query's data
-    model: bool = True  # Include model data?
 
 
 @dataclass

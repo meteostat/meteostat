@@ -2,7 +2,12 @@ import functools
 from urllib.error import HTTPError
 from typing import Optional, Callable, TypeVar
 
+import pandas as pd
+
+from meteostat.core.config import config
 from meteostat.core.logger import logger
+from meteostat.core.providers import provider_service
+from meteostat.enumerations import Grade
 
 T = TypeVar("T")
 
@@ -25,6 +30,9 @@ def _get_station_year_info(args: tuple) -> str:
 
 
 def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optional[T]]:
+    """
+    Decorator to handle exceptions during data fetching
+    """
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Optional[T]:
         try:
@@ -45,5 +53,37 @@ def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
                 exc_info=True,
             )
         return None
+
+    return wrapper
+
+
+def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optional[T]]:
+    """
+    Decorator to filter out model/forecast data based on configuration
+    """
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs) -> Optional[T]:
+        df: pd.DataFrame | None = func(*args, **kwargs)
+
+        if not config.include_model_data and df is not None:
+            logger.debug("Filtering out model/forecast data")
+            
+            excluded_providers = [
+                provider.id
+                for provider in provider_service.providers
+                if provider.grade
+                in (
+                    Grade.FORECAST,
+                    Grade.ANALYSIS,
+                )
+            ]
+
+            mask = df.index.get_level_values("source").isin(
+                excluded_providers
+            )
+
+            df = df[~mask]
+
+        return df
 
     return wrapper

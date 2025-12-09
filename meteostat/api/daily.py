@@ -36,7 +36,6 @@ def daily(
     end: Optional[datetime | date],
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
-    model: bool = True,
 ):
     """
     Access daily time series data.
@@ -54,8 +53,6 @@ def daily(
         List of parameters to include in the data query. Defaults to a set of common parameters.
     providers : List[Provider], optional
         List of data providers to use for the query. Defaults to the daily provider.
-    model : bool, optional
-        Whether to include model data in the query. Defaults to True.
 
     Returns
     -------
@@ -74,7 +71,6 @@ def daily(
         station=parse_station(station),
         start=parse_time(start),
         end=parse_time(end, is_end=True),
-        model=model,
     )
 
     return data_service.fetch(req)

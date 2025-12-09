@@ -37,7 +37,6 @@ def hourly(
     timezone: Optional[str] = None,
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
-    model: bool = True,
 ):
     """
     Access hourly time series data.
@@ -57,8 +56,6 @@ def hourly(
         List of parameters to include in the data query. Defaults to a set of common parameters.
     providers : List[Provider], optional
         List of data providers to use for the query. Defaults to the hourly provider.
-    model : bool, optional
-        Whether to include model data in the query. Defaults to True.
 
     Returns
     -------
@@ -78,7 +75,6 @@ def hourly(
         start=parse_time(start, timezone),
         end=parse_time(end, timezone, is_end=True),
         timezone=timezone,
-        model=model,
     )
 
     return data_service.fetch(req)

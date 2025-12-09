@@ -20,7 +20,7 @@ def _fetch_station(station_id: str) -> Optional[dict]:
     """
     Fetch meta data for a specific weather station from static JSON file
     """
-    mirrors = config.stations_meta_mirrors
+    mirrors = config.stations_meta_endpoints
 
     if not mirrors:
         logger.error("No station meta data mirrors configured")

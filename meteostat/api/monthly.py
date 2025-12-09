@@ -33,7 +33,6 @@ def monthly(
     end: Optional[datetime | date],
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
-    model: bool = True,
 ):
     """
     Access monthly time series data.
@@ -51,8 +50,6 @@ def monthly(
         List of parameters to include in the data query. Defaults to a set of common parameters.
     providers : List[Provider], optional
         List of data providers to use for the query. Defaults to the monthly provider.
-    model : bool, optional
-        Whether to include model data in the query. Defaults to True.
 
     Returns
     -------
@@ -71,7 +68,6 @@ def monthly(
         station=parse_station(station),
         start=parse_time(start),
         end=parse_time(end, is_end=True),
-        model=model,
     )
 
     return data_service.fetch(req)

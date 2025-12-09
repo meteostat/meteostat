@@ -114,17 +114,6 @@ class ProviderService:
                 )
                 return False
 
-            # Filter out providers with modeled data if non-model data has been requested
-            if query.model is False and provider.grade in (
-                Grade.FORECAST,
-                Grade.ANALYSIS,
-            ):
-                logger.info(
-                    "Skipping provider '%s' as it only provides modeled data",
-                    provider_id,
-                )
-                return False
-
             # Filter out providers which do not serve the station's country
             if provider.countries and station.country not in provider.countries:
                 logger.info(

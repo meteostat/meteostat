@@ -7,13 +7,13 @@ from typing import Optional
 
 import pandas as pd
 
-from meteostat.providers.meteostat.shared import handle_exceptions
+from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
 from meteostat.typing import Query
 from meteostat.core.cache import cache_service
 from meteostat.core.config import config
 from meteostat.utils.data import reshape_by_source
 
-ENDPOINT = config.meteostat_daily_endpoint
+ENDPOINT = config.daily_endpoint
 
 
 def get_ttl(_station: str, year: int) -> int:
@@ -44,6 +44,7 @@ def get_df(station: str, year: int) -> Optional[pd.DataFrame]:
     return reshape_by_source(df)
 
 
+@filter_model_data
 def fetch(query: Query) -> Optional[pd.DataFrame]:
     """
     Fetch daily weather data from Meteostat's central data repository

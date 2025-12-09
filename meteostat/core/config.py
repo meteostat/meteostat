@@ -115,14 +115,14 @@ class ConfigService(Config):
     # Station meta data settings
     stations_db_prefer: bool = False
     stations_db_ttl: int = TTL.WEEK
-    stations_db_urls: List[str] = [
+    stations_db_endpoints: List[str] = [
         "https://data.meteostat.net/stations.db",
         "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations.db",
     ]
     stations_db_file: str = (
         os.path.expanduser("~") + os.sep + ".meteostat" + os.sep + "stations.db"
     )
-    stations_meta_mirrors: list = [
+    stations_meta_endpoints: list = [
         "https://data.meteostat.net/stations/{id}.json",
         "https://cdn.jsdelivr.net/gh/meteostat/weather-stations/stations/{id}.json",
         "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations/{id}.json",
@@ -132,13 +132,14 @@ class ConfigService(Config):
     lapse_rate_parameters = [Parameter.TEMP, Parameter.TMIN, Parameter.TMAX]
 
     # [Provider] Meteostat settings
-    meteostat_hourly_endpoint: str = (
+    include_model_data: bool = True
+    hourly_endpoint: str = (
         "https://data.meteostat.net/hourly/{year}/{station}.csv.gz"
     )
-    meteostat_daily_endpoint: str = (
+    daily_endpoint: str = (
         "https://data.meteostat.net/daily/{year}/{station}.csv.gz"
     )
-    meteostat_monthly_endpoint: str = (
+    monthly_endpoint: str = (
         "https://data.meteostat.net/monthly/{year}/{station}.csv.gz"
     )
 

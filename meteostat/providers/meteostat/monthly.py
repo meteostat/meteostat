@@ -8,12 +8,12 @@ import pandas as pd
 
 from meteostat.core.config import config
 from meteostat.enumerations import TTL
-from meteostat.providers.meteostat.shared import handle_exceptions
+from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
 from meteostat.typing import Query
 from meteostat.core.cache import cache_service
 from meteostat.utils.data import reshape_by_source
 
-ENDPOINT = config.meteostat_monthly_endpoint
+ENDPOINT = config.monthly_endpoint
 
 
 @cache_service.cache(TTL.MONTH, "pickle")
@@ -36,6 +36,7 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     return reshape_by_source(df)
 
 
+@filter_model_data
 def fetch(query: Query) -> Optional[pd.DataFrame]:
     """
     Fetch monthly weather data from Meteostat's central data repository

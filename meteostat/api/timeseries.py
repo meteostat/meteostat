@@ -172,49 +172,6 @@ class TimeSeries:
         """
         return all(license.commercial for license in self.licenses)
 
-    def validate(self) -> bool:
-        """
-        Does the time series pass all validations?
-        """
-        df = self.fetch(fill=True, clean=False)
-
-        for col in df:
-            parameter = parameter_service.get_parameter(col, self.granularity)
-
-            for validator in parameter.validators:
-                test = validator(df[col])
-
-                if not test.all():
-                    return False
-
-        return True
-
-    # TODO: Investigate if still required
-    def filter_stations(self, station: str | List[str], exclude=False) -> "TimeSeries":
-        """
-        Filter data by weather station(s)
-        """
-        temp = copy(self)
-        mask = self._df.index.get_level_values("station").isin(
-            station if isinstance(station, list) else [station]
-        )
-        temp._df = temp._df[mask if not exclude else ~mask]
-        return temp
-
-    # TODO: Investigate if still required
-    def filter_providers(
-        self, provider: Provider | List[Provider], exclude=False
-    ) -> "TimeSeries":
-        """
-        Filter data by provider(s)
-        """
-        temp = copy(self)
-        mask = self._df.index.get_level_values("source").isin(
-            provider if isinstance(provider, list) else [provider]
-        )
-        temp._df = temp._df[mask if not exclude else ~mask]
-        return temp
-
     def fetch(
         self,
         squash=True,
@@ -338,3 +295,20 @@ class TimeSeries:
             )
 
         return round(mean([self.completeness(p) for p in df.columns]), 2)
+
+    def validate(self) -> bool:
+        """
+        Does the time series pass all validations?
+        """
+        df = self.fetch(fill=True, clean=False)
+
+        for col in df:
+            parameter = parameter_service.get_parameter(col, self.granularity)
+
+            for validator in parameter.validators:
+                test = validator(df[col])
+
+                if not test.all():
+                    return False
+
+        return True

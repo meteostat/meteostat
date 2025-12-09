@@ -31,7 +31,7 @@ class Stations:
         """
         Download the SQLite database file from the configured URL
         """
-        urls = config.stations_db_urls
+        urls = config.stations_db_endpoints
 
         if not urls:
             raise Exception("No stations database URLs configured")
