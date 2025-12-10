@@ -33,6 +33,7 @@ def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
     """
     Decorator to handle exceptions during data fetching
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Optional[T]:
         try:
@@ -61,13 +62,14 @@ def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
     """
     Decorator to filter out model/forecast data based on configuration
     """
+
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Optional[T]:
         df: pd.DataFrame | None = func(*args, **kwargs)
 
         if not config.include_model_data and df is not None:
             logger.debug("Filtering out model/forecast data")
-            
+
             excluded_providers = [
                 provider.id
                 for provider in provider_service.providers
@@ -78,9 +80,7 @@ def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
                 )
             ]
 
-            mask = df.index.get_level_values("source").isin(
-                excluded_providers
-            )
+            mask = df.index.get_level_values("source").isin(excluded_providers)
 
             df = df[~mask]
 

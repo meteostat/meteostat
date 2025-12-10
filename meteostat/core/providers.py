@@ -12,7 +12,7 @@ from typing import List, Optional, TypeGuard
 import pandas as pd
 
 from meteostat.core.logger import logger
-from meteostat.enumerations import Granularity, Priority, Provider, Grade
+from meteostat.enumerations import Granularity, Priority, Provider
 from meteostat.providers.index import DEFAULT_PROVIDERS
 from meteostat.typing import (
     Query,

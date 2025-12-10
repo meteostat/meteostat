@@ -76,7 +76,7 @@ def get_df(climate_id: str, year: int, tz: str) -> Optional[pd.DataFrame]:
 
 
 def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if not "national" in query.station.identifiers:
+    if "national" not in query.station.identifiers:
         return None
 
     meta_data = get_meta_data(query.station.identifiers["national"])

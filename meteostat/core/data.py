@@ -52,7 +52,7 @@ class DataService:
         """
         Add source column to DataFrame
         """
-        if not "source" in df.index.names:
+        if "source" not in df.index.names:
             df["source"] = provider_id
             df = df.set_index(["source"], append=True)
 

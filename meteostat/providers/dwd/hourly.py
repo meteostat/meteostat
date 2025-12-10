@@ -120,7 +120,7 @@ def get_df(parameter_dir: str, mode: str, station_id: str) -> Optional[pd.DataFr
     parameter = next(param for param in PARAMETERS if param["dir"] == parameter_dir)
 
     ftp = get_ftp_connection()
-    remote_file = find_file(ftp, f'{parameter["dir"]}/{mode}', station_id)
+    remote_file = find_file(ftp, f"{parameter['dir']}/{mode}", station_id)
 
     if remote_file is None:
         return None
@@ -189,7 +189,7 @@ def get_parameter(
 
 
 def fetch(query: Query):
-    if not "national" in query.station.identifiers:
+    if "national" not in query.station.identifiers:
         return None
 
     # Check which modes to consider for data fetching

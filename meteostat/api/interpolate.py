@@ -18,7 +18,10 @@ from meteostat.utils.data import aggregate_sources, reshape_by_source
 from meteostat.utils.geo import get_distance
 from meteostat.utils.parsers import parse_station
 
-def _create_timeseries(ts: TimeSeries, point: Point, df: Optional[pd.DataFrame] = None) -> TimeSeries:
+
+def _create_timeseries(
+    ts: TimeSeries, point: Point, df: Optional[pd.DataFrame] = None
+) -> TimeSeries:
     """
     Create a TimeSeries object from interpolated DataFrame
     """
@@ -31,6 +34,7 @@ def _create_timeseries(ts: TimeSeries, point: Point, df: Optional[pd.DataFrame] 
         timezone=ts.timezone,
     )
 
+
 def _add_source_columns(
     result: pd.DataFrame,
     df: pd.DataFrame,
@@ -40,9 +44,7 @@ def _add_source_columns(
     """
     source_cols = [c for c in df.columns if c.endswith("_source")]
     if source_cols:
-        grouped = df.groupby("time")[source_cols].agg(
-            aggregate_sources
-        )
+        grouped = df.groupby("time")[source_cols].agg(aggregate_sources)
         if isinstance(grouped, pd.Series):
             grouped = grouped.to_frame(name=source_cols[0])
         grouped.index.name = "time"
@@ -55,6 +57,7 @@ def _add_source_columns(
         else:
             result = result.join(grouped, how="left")
     return result
+
 
 def interpolate(
     ts: TimeSeries,
@@ -212,6 +215,8 @@ def interpolate(
 
     # Add station index
     result["station"] = "$0001"
-    result = result.set_index("station", append=True).reorder_levels(["station", "time", "source"])
+    result = result.set_index("station", append=True).reorder_levels(
+        ["station", "time", "source"]
+    )
 
     return _create_timeseries(ts, point, result)

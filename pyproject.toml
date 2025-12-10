@@ -13,11 +13,11 @@ pytz = "^2023.3.post1"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.3.0"
-black = "^23.11.0"
 pytest = "^8.2.1"
 types-requests = "^2.31.0.20240106"
 types-pytz = "^2023.3.1.1"
 pytest-mock = "^3.14.0"
+ruff = "^0.14.8"
 
 [tool.poetry.group.extras.dependencies]
 matplotlib = "^3.9.2"

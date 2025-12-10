@@ -54,7 +54,7 @@ PARAMETER_CONFIGS = {
         "stubnames": {
             "jahr": "year",
             **{
-                month: f"{param}{i+1}"
+                month: f"{param}{i + 1}"
                 for i, (month, _) in enumerate(MONTHS_MAP.items())
             },
         },

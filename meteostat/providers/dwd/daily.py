@@ -113,7 +113,7 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
 
 
 def fetch(query: Query):
-    if not "national" in query.station.identifiers:
+    if "national" not in query.station.identifiers:
         return pd.DataFrame()
 
     # Check which modes to consider for data fetching
