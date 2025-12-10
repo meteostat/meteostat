@@ -9,7 +9,7 @@ from io import BytesIO
 from typing import Optional
 from datetime import datetime
 from zipfile import ZipFile
-from lxml import etree
+from lxml import etree  # type: ignore
 
 import pandas as pd
 

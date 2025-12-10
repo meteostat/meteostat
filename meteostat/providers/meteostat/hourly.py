@@ -50,6 +50,9 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
     """
     Fetch hourly weather data from Meteostat's central data repository
     """
+    if query.start is None or query.end is None:
+        return None
+    
     # Get a list of relevant years
     years = range(query.start.year, query.end.year + 1)
     # Get list of annual DataFrames

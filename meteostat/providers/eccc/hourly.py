@@ -76,7 +76,7 @@ def get_df(climate_id: str, year: int, tz: str) -> Optional[pd.DataFrame]:
 
 
 def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "national" not in query.station.identifiers:
+    if "national" not in query.station.identifiers or query.start is None or query.end is None:
         return None
 
     meta_data = get_meta_data(query.station.identifiers["national"])
@@ -87,7 +87,7 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
 
     if not (climate_id and archive_first and archive_last and timezone):
         return None
-
+    
     archive_start = datetime.strptime(archive_first, "%Y-%m-%d %H:%M:%S")
     archive_end = datetime.strptime(archive_last, "%Y-%m-%d %H:%M:%S")
 

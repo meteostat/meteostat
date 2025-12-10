@@ -27,7 +27,6 @@ from meteostat.providers.dwd.shared import get_ftp_connection
 class ParameterDefinition(TypedDict):
     dir: str
     usecols: List[int]
-    parse_dates: Dict[str, List[int]]
     names: Dict[str, str]
     convert: NotRequired[Dict[str, Callable]]
     encoding: NotRequired[str]

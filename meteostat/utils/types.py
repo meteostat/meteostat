@@ -48,7 +48,10 @@ def extract_property_type(cls: type, property_name: str) -> tuple[Any, Any]:
         args = getattr(original_type, "__args__", ())
         if len(args) == 2 and type(None) in args:
             # This is Optional[Type], extract the non-None type
-            expected_type = args[0] if args[1] is type(None) else args[1]
+            # Type narrowing: we know len(args) == 2, so both indices are valid
+            arg0 = args[0]  # type: ignore
+            arg1 = args[1]  # type: ignore
+            expected_type = arg0 if arg1 is type(None) else arg1
 
     return expected_type, original_type
 

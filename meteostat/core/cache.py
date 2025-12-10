@@ -182,7 +182,7 @@ class CacheService:
 
     def cache(
         self,
-        ttl: int | Callable[[Any], int] = 60 * 60 * 24,
+        ttl: int | Callable[..., int] = 60 * 60 * 24,
         data_format: str = "json",
     ):
         """

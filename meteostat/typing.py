@@ -3,7 +3,7 @@ Meteostat Typing
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import Callable, List, Literal, Optional
 
 from meteostat.core.validator import Validator
@@ -57,14 +57,14 @@ class ProviderSpec:
     id: Provider | str  # The provider ID
     name: str  # A descriptive provider name
     granularity: Granularity  # The provider's time series granularity
-    priority: Priority  # The priority of the provider
+    priority: Priority | int  # The priority of the provider
     grade: Optional[Grade]  # The provider's data quality grade
     license: Optional[License]  # The provider's license
     requires: List[
         Literal["id", "identifiers", "location"]
     ]  # Required station properties for the provider
     parameters: List[Parameter]  # List of supported meteorological parameters
-    start: datetime  # The start date of the provider's data
+    start: date  # The start date of the provider's data
     end: Optional[datetime] = None  # The end date of the provider's data
     countries: Optional[list[str]] = None  # List of supported countries
     module: Optional[str] = None  # Module path to the provider's API

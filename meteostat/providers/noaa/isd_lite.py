@@ -113,6 +113,9 @@ def get_df(usaf: str, wban: str, year: int) -> Optional[pd.DataFrame]:
 
 def fetch(query: Query) -> Optional[pd.DataFrame]:
     """ """
+    if query.start is None or query.end is None:
+        return None
+    
     years = range(query.start.year, query.end.year + 1)
     data = tuple(
         map(

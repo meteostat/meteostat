@@ -160,7 +160,7 @@ def aggregate_sources(series: pd.Series) -> str:
     source_counts = Counter(flat_sources)
 
     # Sort sources by count in descending order
-    sorted_sources = sorted(source_counts, key=source_counts.get, reverse=True)
+    sorted_sources = sorted(source_counts, key=lambda s: source_counts[s], reverse=True)
 
     # Concatenate sorted sources into a unique source string
     return " ".join(sorted_sources)
