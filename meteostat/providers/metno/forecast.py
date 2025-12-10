@@ -155,7 +155,7 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
         df = df.set_index(["time"])
 
         # Remove the UTC timezone from the time index
-        df.index = df.index.tz_localize(None)
+        df.index = df.index.tz_localize(None)  # type: ignore[union-attr]
 
         # Shift prcp and coco columns by 1 (as they refer to the next hour)
         df["prcp"] = df["prcp"].shift(1)

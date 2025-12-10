@@ -147,7 +147,7 @@ class ProviderService:
 
             return True
 
-        return filter(_filter, query.providers)
+        return list(filter(_filter, query.providers))
 
     def fetch_data(
         self, provider_id: Provider, req: Request, station: Station
@@ -162,8 +162,8 @@ class ProviderService:
 
         query = Query(
             station=station,
-            start=req.start if req.start else provider.start,
-            end=req.end if req.end else (provider.end or datetime.now()),
+            start=req.start or provider.start,
+            end=req.end or (provider.end or datetime.now()),
             parameters=req.parameters,
         )
 

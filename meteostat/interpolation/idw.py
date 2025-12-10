@@ -5,6 +5,8 @@ Implements IDW interpolation for spatial weather data with support for
 elevation-weighted distance calculations.
 """
 
+from typing import Callable
+
 import numpy as np
 import pandas as pd
 
@@ -14,7 +16,7 @@ from meteostat.api.timeseries import TimeSeries
 
 def inverse_distance_weighting(
     power: float = 2.0,
-) -> pd.DataFrame:
+) -> Callable:
     """
     Interpolate values using Inverse Distance Weighting (IDW).
 
@@ -102,7 +104,7 @@ def inverse_distance_weighting(
             interpolated_row["distance"] = 0  # Distance from point to itself
 
             # Create a DataFrame row with the time index
-            result_df = pd.DataFrame([interpolated_row], index=[time_idx])
+            result_df = pd.DataFrame([interpolated_row], index=pd.DatetimeIndex([time_idx]))
             result_df.index.name = "time"
             interpolated_results.append(result_df)
 

@@ -92,12 +92,14 @@ class DataService:
         Concatenate multiple fragments into a single DataFrame
         """
         try:
-            df = pd.concat(
-                [
-                    df.dropna(how="all", axis=1) if not df.empty else None
-                    for df in fragments
-                ]
-            )
+            cleaned = [
+                df.dropna(how="all", axis=1) if not df.empty else None
+                for df in fragments
+            ]
+            filtered = [df for df in cleaned if df is not None]
+            if not filtered:
+                return pd.DataFrame()
+            df = pd.concat(filtered)
             df = schema_service.fill(df, parameters)
             df = schema_service.purge(df, parameters)
             return df

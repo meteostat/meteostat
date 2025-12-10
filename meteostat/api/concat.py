@@ -82,7 +82,7 @@ def concat(objs: List[TimeSeries]) -> TimeSeries:
             multi_station = True
 
     df = data_service.concat_fragments(
-        [obj._df for obj in objs], list(dict.fromkeys(parameters))
+        [obj._df for obj in objs if obj._df is not None], list(dict.fromkeys(parameters))
     )
     df = schema_service.format(df, ts.granularity)
 

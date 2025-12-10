@@ -9,7 +9,7 @@ from meteostat.core.config import config
 from meteostat.enumerations import Parameter
 
 
-def lapse_rate(ts: TimeSeries) -> float:
+def lapse_rate(ts: TimeSeries) -> float | None:
     """
     Calculate the lapse rate (temperature gradient) in degrees Celsius per kilometer
     based on temperature and elevation data from multiple stations.

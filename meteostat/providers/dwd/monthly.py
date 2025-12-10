@@ -80,7 +80,7 @@ def get_df(station: str, mode: str) -> Optional[pd.DataFrame]:
                     raw = BytesIO(reader.read())
 
     # Convert raw data to DataFrame
-    df: pd.DataFrame = pd.read_csv(
+    df: pd.DataFrame = pd.read_csv(  # type: ignore
         raw,
         sep=r"\s*;\s*",
         date_format="%Y%m%d",

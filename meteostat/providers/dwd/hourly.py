@@ -137,7 +137,7 @@ def get_df(parameter_dir: str, mode: str, station_id: str) -> Optional[pd.DataFr
                     raw = BytesIO(reader.read())
 
     # Convert raw data to DataFrame
-    df: pd.DataFrame = pd.read_csv(
+    df: pd.DataFrame = pd.read_csv(  # type: ignore
         raw,
         sep=";",
         skipinitialspace=True,

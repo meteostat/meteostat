@@ -69,7 +69,7 @@ def get_coco(code: str | int) -> Union[int, None]:
 def get_df(station: str) -> Optional[pd.DataFrame]:
     try:
         # Read CSV data from DWD server
-        df = pd.read_csv(
+        df = pd.read_csv(  # type: ignore
             ENDPOINT.format(station=station),
             sep=";",
             skiprows=2,

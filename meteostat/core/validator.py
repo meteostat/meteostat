@@ -6,7 +6,7 @@ on a parameter specification.
 """
 
 from inspect import signature
-from typing import Callable, Optional
+from typing import Callable
 
 from pandas import DataFrame, Series
 
@@ -16,7 +16,7 @@ class Validator:
     Schema Column Validator
     """
 
-    func: Optional[Callable] = None
+    func: Callable
     ignore_na = False
     is_relational = False
 

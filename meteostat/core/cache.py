@@ -133,12 +133,12 @@ class CacheService:
         # Create cache directory if it doesn't exist
         self.create_cache_dir()
         # Save data locally
-        if data_type == "json":
+        if data_type == "json" and isinstance(data, (dict, list)):
             self._write_json(path, data)
-        else:
+        elif data_type == "pickle" and (isinstance(data, pd.DataFrame) or data is None):
             self._write_pickle(path, data)
 
-    def fetch(self, path, data_type: str) -> pd.DataFrame | dict | list:
+    def fetch(self, path, data_type: str) -> pd.DataFrame | dict | list | None:
         """
         Fetch data from a given path
         """

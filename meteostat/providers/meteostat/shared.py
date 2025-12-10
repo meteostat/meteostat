@@ -65,9 +65,9 @@ def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
 
     @functools.wraps(func)
     def wrapper(*args, **kwargs) -> Optional[T]:
-        df: pd.DataFrame | None = func(*args, **kwargs)
+        result = func(*args, **kwargs)
 
-        if not config.include_model_data and df is not None:
+        if not config.include_model_data and isinstance(result, pd.DataFrame) and result is not None:
             logger.debug("Filtering out model/forecast data")
 
             excluded_providers = [
@@ -80,10 +80,10 @@ def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
                 )
             ]
 
-            mask = df.index.get_level_values("source").isin(excluded_providers)
+            mask = result.index.get_level_values("source").isin(excluded_providers)
 
-            df = df[~mask]
+            result = result[~mask]
 
-        return df
+        return result
 
     return wrapper
