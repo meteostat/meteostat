@@ -24,7 +24,6 @@ jobs:
       - name: Create venv, install deps and run ty
         run: |
           python -m venv .venv
-          source .venv/bin/activate
-          python -m pip install --upgrade pip
-          pip install -e ".[dev,extras]"
-          ty check meteostat/
+          .venv/bin/pip install --upgrade pip
+          .venv/bin/pip install -e ".[dev,extras]"
+          .venv/bin/ty check meteostat/
