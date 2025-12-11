@@ -26,6 +26,5 @@ jobs:
           python -m venv .venv
           source .venv/bin/activate
           python -m pip install --upgrade pip
-          pip install ty
-          pip install -e .
+          pip install -e ".[dev,extras]"
           ty check meteostat/
