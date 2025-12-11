@@ -21,9 +21,10 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Create venv, install deps and run ty
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies and run ty
         run: |
-          python -m venv .venv
-          .venv/bin/pip install --upgrade pip
-          .venv/bin/pip install -e ".[dev,extras]"
-          .venv/bin/ty check meteostat/
+          poetry install --with dev --extras extras
+          poetry run ty check meteostat/
