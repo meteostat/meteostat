@@ -14,6 +14,7 @@ from typing import List, Optional
 import pandas as pd
 
 from meteostat.core.parameters import parameter_service
+from meteostat.core.validator import Validator
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Granularity, Provider, UnitSystem
@@ -28,7 +29,7 @@ class TimeSeries:
     """
 
     granularity: Granularity
-    stations: Optional[pd.DataFrame] = None
+    stations: pd.DataFrame
     start: Optional[datetime] = None
     end: Optional[datetime] = None
     timezone: Optional[str] = None
@@ -39,7 +40,7 @@ class TimeSeries:
     def __init__(
         self,
         granularity: Granularity,
-        stations: Optional[pd.DataFrame],
+        stations: pd.DataFrame,
         df: Optional[pd.DataFrame],
         start: Optional[datetime] = None,
         end: Optional[datetime] = None,
@@ -127,6 +128,8 @@ class TimeSeries:
         """
         Get included providers
         """
+        if self._df is None:
+            return []
         providers: List[str] = (
             self._df.index.get_level_values("source").unique().to_list()
         )
@@ -140,7 +143,8 @@ class TimeSeries:
         Get licenses
         """
         providers = [
-            provider_service.get_provider(provider_id) for provider_id in self.providers
+            provider for provider_id in self.providers
+            if (provider := provider_service.get_provider(provider_id)) is not None
         ]
 
         return [
@@ -219,7 +223,7 @@ class TimeSeries:
         if clean:
             df = schema_service.clean(df, self.granularity)
 
-        if fill:
+        if fill and self.start is not None and self.end is not None and self.freq is not None:
             df = fill_df(df, self.start, self.end, self.freq)
 
         if self.timezone:
@@ -301,14 +305,24 @@ class TimeSeries:
         Does the time series pass all validations?
         """
         df = self.fetch(fill=True, clean=False)
+        
+        if df is None:
+            return True
 
         for col in df:
             parameter = parameter_service.get_parameter(col, self.granularity)
-
+            if parameter is None or not hasattr(parameter, 'validators'):
+                continue
             for validator in parameter.validators:
-                test = validator(df[col])
+                if isinstance(validator, Validator):
+                    test = validator.test(df[col], df, col)
+                else:
+                    test = validator(df[col], df, col)
 
-                if not test.all():
+                if isinstance(test, bool):
+                    if not test:
+                        return False
+                elif not test.all():
                     return False
 
         return True

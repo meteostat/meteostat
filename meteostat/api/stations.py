@@ -111,7 +111,7 @@ class Stations:
         return self._connect_fs()
 
     def query(
-        self, sql: str, index_col: Optional[list] = None, params: Optional[tuple] = None
+        self, sql: str, index_col: Optional[str | list] = None, params: Optional[tuple | dict] = None
     ) -> pd.DataFrame:
         """
         Execute a SQL query and return the result as a DataFrame

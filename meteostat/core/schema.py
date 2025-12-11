@@ -30,18 +30,29 @@ class SchemaService:
         """
         Apply a validator
         """
-        validator: Validator = validator() if isfunction(validator) else validator
-        if validator.ignore_na:
+        if isfunction(validator):
+            v: Validator = validator()  # type: ignore
+        else:
+            v = validator
+        
+        if not isinstance(v, Validator):
+            return pd.Series(data=True, index=df.index, dtype=bool)
+        
+        if v.ignore_na:
             result = pd.Series(data=True, index=df.index, dtype=bool)
-            result.update(
-                validator.test(
-                    df.loc[df[col].notnull()][col],
-                    df.loc[df[col].notnull()],
-                    col,
-                )
+            test_result = v.test(
+                df.loc[df[col].notnull()][col],
+                df.loc[df[col].notnull()],
+                col,
             )
+            if isinstance(test_result, pd.Series):
+                result.update(test_result)
             return result.astype(bool)
-        return validator.test(df[col], df, col)
+        
+        test_result = v.test(df[col], df, col)
+        if isinstance(test_result, bool):
+            return pd.Series(data=test_result, index=df.index, dtype=bool)
+        return test_result
 
     @staticmethod
     def purge(df: pd.DataFrame, parameters: List[Parameter]) -> pd.DataFrame:
@@ -76,6 +87,7 @@ class SchemaService:
                 logger.warning(
                     "Column %s is not a valid column name and won't be formatted", col
                 )
+                continue
 
             if "int" in str(parameter.dtype).lower():
                 temp[col] = pd.to_numeric(temp[col]).round(0)

@@ -57,7 +57,9 @@ COCO_MAP = {
 
 def safe_get(obj: Optional[Any]) -> Optional[Any]:
     try:
-        return obj.value()
+        if obj is not None and hasattr(obj, 'value'):
+            return obj.value()
+        return None
     except AttributeError:
         return None
 

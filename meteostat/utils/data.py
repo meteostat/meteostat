@@ -11,7 +11,7 @@ The code is licensed under the MIT license.
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import List, Optional
+from typing import List
 
 import numpy as np
 import pandas as pd
@@ -21,10 +21,12 @@ from meteostat.enumerations import Frequency
 from meteostat.typing import Station
 
 
-def stations_to_df(stations: List[Station]) -> Optional[pd.DataFrame]:
+def stations_to_df(stations: List[Station]) -> pd.DataFrame:
     """
     Convert list of stations to DataFrame
     """
+    assert len(stations) > 0 and all(isinstance(station, Station) for station in stations)
+
     return (
         pd.DataFrame.from_records(
             [
@@ -41,8 +43,6 @@ def stations_to_df(stations: List[Station]) -> Optional[pd.DataFrame]:
             ],
             index="id",
         )
-        if len(stations)
-        else None
     )
 
 

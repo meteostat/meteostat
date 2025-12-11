@@ -11,10 +11,11 @@ import pandas as pd
 
 from meteostat.api.point import Point
 from meteostat.api.timeseries import TimeSeries
+from meteostat.typing import Station
 from meteostat.interpolation.lapserate import apply_lapse_rate
 from meteostat.interpolation.nearest import nearest_neighbor
 from meteostat.interpolation.idw import inverse_distance_weighting
-from meteostat.utils.data import aggregate_sources, reshape_by_source
+from meteostat.utils.data import aggregate_sources, reshape_by_source, stations_to_df
 from meteostat.utils.geo import get_distance
 from meteostat.utils.parsers import parse_station
 
@@ -25,9 +26,15 @@ def _create_timeseries(
     """
     Create a TimeSeries object from interpolated DataFrame
     """
+    parsed = parse_station(point)
+    stations_list = [parsed] if isinstance(parsed, Station) else parsed
+    
+    # Convert stations to DataFrame
+    stations_df = stations_to_df(stations_list)
+    
     return TimeSeries(
         ts.granularity,
-        parse_station(point),
+        stations_df,
         df=df,
         start=ts.start,
         end=ts.end,

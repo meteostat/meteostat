@@ -6,7 +6,7 @@ different providers and merging it into a single time series.
 """
 
 from datetime import datetime
-from typing import List, Optional, Union
+from typing import List, Optional, Union, cast
 
 import pandas as pd
 
@@ -17,6 +17,7 @@ from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Provider
 from meteostat.typing import Station, Request
+from meteostat.utils.data import stations_to_df
 
 
 class DataService:
@@ -57,31 +58,6 @@ class DataService:
             df = df.set_index(["source"], append=True)
 
         return df
-
-    @staticmethod
-    def _stations_to_df(stations: List[Station]) -> Optional[pd.DataFrame]:
-        """
-        Convert list of stations to DataFrame
-        """
-        return (
-            pd.DataFrame.from_records(
-                [
-                    {
-                        "id": station.id,
-                        "name": station.name,
-                        "country": station.country,
-                        "latitude": station.latitude,
-                        "longitude": station.longitude,
-                        "elevation": station.elevation,
-                        "timezone": station.timezone,
-                    }
-                    for station in stations
-                ],
-                index="id",
-            )
-            if len(stations)
-            else None
-        )
 
     @staticmethod
     def concat_fragments(
@@ -168,7 +144,11 @@ class DataService:
         Load meteorological time series data from different providers
         """
         # Convert stations to list if single Station
-        stations = req.station if isinstance(req.station, list) else [req.station]
+        stations: List[Station] = (
+            cast(List[Station], req.station)
+            if isinstance(req.station, list)
+            else [req.station]
+        )
 
         logger.debug(
             "%s time series requested for %s station(s)", req.granularity, len(stations)
@@ -200,9 +180,7 @@ class DataService:
         # Create time series
         ts = TimeSeries(
             req.granularity,
-            self._stations_to_df(
-                req.station if isinstance(req.station, list) else [req.station]
-            ),
+            stations_to_df(stations),
             df,
             req.start,
             req.end,

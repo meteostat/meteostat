@@ -7,7 +7,7 @@ The Provider Service provides methods to interact with data providers.
 from datetime import datetime
 from importlib import import_module
 from statistics import fmean
-from typing import List, Optional, TypeGuard
+from typing import List, Optional, TypeGuard, cast
 
 import pandas as pd
 
@@ -45,7 +45,7 @@ class ProviderService:
         """
         self._providers.append(provider)
 
-    def get_provider(self, provider_id: Provider) -> Optional[ProviderSpec]:
+    def get_provider(self, provider_id: Provider | str) -> Optional[ProviderSpec]:
         """
         Get provider by ID
         """
@@ -54,7 +54,7 @@ class ProviderService:
             None,
         )
 
-    def _get_provider_priority(self, provider_id: Provider) -> int:
+    def _get_provider_priority(self, provider_id: Provider | str) -> int:
         """
         Get priority of a provider by its ID
         """
@@ -96,6 +96,9 @@ class ProviderService:
 
         def _filter(provider_id: Provider) -> TypeGuard[Provider]:
             provider = self.get_provider(provider_id)
+            
+            if provider is None:
+                return False
 
             # Filter out providers with diverging granularities
             if provider.granularity is not query.granularity:
@@ -162,12 +165,12 @@ class ProviderService:
 
         query = Query(
             station=station,
-            start=req.start or provider.start,
+            start=req.start or (datetime.combine(provider.start, datetime.min.time()) if provider.start else None),
             end=req.end or (provider.end or datetime.now()),
             parameters=req.parameters,
         )
 
-        module = import_module(provider.module)
+        module = import_module(cast(str, provider.module))
         df = module.fetch(query)
 
         return df
