@@ -1,0 +1,197 @@
+"""
+Test types module
+
+The code is licensed under the MIT license.
+"""
+
+from typing import Optional, Union
+
+import pytest
+
+from meteostat.utils.types import extract_property_type, validate_parsed_value
+
+
+class SampleClass:
+    """Sample class for testing type extraction"""
+    
+    # Use default values to make hasattr work correctly
+    name: str = "default"
+    age: int = 0
+    optional_value: Optional[str] = None
+    score: float = 0.0
+
+
+class TestExtractPropertyType:
+    """Test extract_property_type function"""
+
+    def test_extract_property_type_string(self):
+        """Test extracting string type annotation"""
+        expected_type, original_type = extract_property_type(SampleClass, "name")
+        assert expected_type == str
+        assert original_type == str
+
+    def test_extract_property_type_int(self):
+        """Test extracting int type annotation"""
+        expected_type, original_type = extract_property_type(SampleClass, "age")
+        assert expected_type == int
+        assert original_type == int
+
+    def test_extract_property_type_float(self):
+        """Test extracting float type annotation"""
+        expected_type, original_type = extract_property_type(SampleClass, "score")
+        assert expected_type == float
+        assert original_type == float
+
+    def test_extract_property_type_optional(self):
+        """Test extracting Optional type annotation"""
+        expected_type, original_type = extract_property_type(SampleClass, "optional_value")
+        # For Optional[str], expected_type should be str
+        assert expected_type == str
+        # original_type should contain the Union origin
+        assert hasattr(original_type, "__origin__")
+        assert original_type.__origin__ is Union
+
+    def test_extract_property_type_nonexistent(self):
+        """Test extracting type for nonexistent property"""
+        with pytest.raises(ValueError) as excinfo:
+            extract_property_type(SampleClass, "nonexistent")
+        assert "does not exist" in str(excinfo.value)
+
+    def test_extract_property_type_with_no_annotations(self):
+        """Test extracting type from class with property not in annotations"""
+        # Create an instance and try to get a property that doesn't have annotations
+        class MinimalClass:
+            pass
+        
+        with pytest.raises(ValueError) as excinfo:
+            extract_property_type(MinimalClass, "any_prop")
+        assert "does not exist" in str(excinfo.value)
+
+
+class TestValidateParsedValue:
+    """Test validate_parsed_value function"""
+
+    def test_validate_parsed_value_matching_type(self):
+        """Test validation when value matches expected type"""
+        value = "test string"
+        expected_type = str
+        original_type = str
+        result = validate_parsed_value(value, expected_type, original_type, "name")
+        assert result == value
+
+    def test_validate_parsed_value_int_matching(self):
+        """Test validation with matching int type"""
+        value = 42
+        expected_type = int
+        original_type = int
+        result = validate_parsed_value(value, expected_type, original_type, "age")
+        assert result == value
+
+    def test_validate_parsed_value_float_matching(self):
+        """Test validation with matching float type"""
+        value = 3.14
+        expected_type = float
+        original_type = float
+        result = validate_parsed_value(value, expected_type, original_type, "score")
+        assert result == value
+
+    def test_validate_parsed_value_bool_from_zero(self):
+        """Test validation converting int 0 to bool False"""
+        value = 0
+        expected_type = bool
+        original_type = bool
+        result = validate_parsed_value(value, expected_type, original_type, "is_active")
+        assert result is False
+
+    def test_validate_parsed_value_bool_from_one(self):
+        """Test validation converting int 1 to bool True"""
+        value = 1
+        expected_type = bool
+        original_type = bool
+        result = validate_parsed_value(value, expected_type, original_type, "is_active")
+        assert result is True
+
+    def test_validate_parsed_value_bool_from_invalid_int(self):
+        """Test validation fails for invalid int to bool conversion"""
+        value = 2
+        expected_type = bool
+        original_type = bool
+        with pytest.raises(ValueError) as excinfo:
+            validate_parsed_value(value, expected_type, original_type, "is_active")
+        assert "boolean type only accepts" in str(excinfo.value)
+
+    def test_validate_parsed_value_optional_with_none(self):
+        """Test validation of None value for Optional type"""
+        original_type = Optional[str]
+        value = None
+        expected_type = str
+        result = validate_parsed_value(value, expected_type, original_type, "optional_field")
+        assert result is None
+
+    def test_validate_parsed_value_type_mismatch(self):
+        """Test validation fails for type mismatch"""
+        value = "string value"
+        expected_type = int
+        original_type = int
+        with pytest.raises(ValueError) as excinfo:
+            validate_parsed_value(value, expected_type, original_type, "age")
+        assert "has type" in str(excinfo.value)
+        assert "but expected" in str(excinfo.value)
+
+    def test_validate_parsed_value_optional_with_matching_value(self):
+        """Test validation of matching value for Optional type"""
+        original_type = Optional[str]
+        value = "valid string"
+        expected_type = str
+        result = validate_parsed_value(value, expected_type, original_type, "optional_field")
+        assert result == value
+
+    def test_validate_parsed_value_list_type(self):
+        """Test validation with list type"""
+        value = [1, 2, 3]
+        expected_type = list
+        original_type = list
+        result = validate_parsed_value(value, expected_type, original_type, "items")
+        assert result == value
+
+    def test_validate_parsed_value_dict_type(self):
+        """Test validation with dict type"""
+        value = {"key": "value"}
+        expected_type = dict
+        original_type = dict
+        result = validate_parsed_value(value, expected_type, original_type, "mapping")
+        assert result == value
+
+
+class TestTypeExtractionIntegration:
+    """Integration tests for type extraction and validation"""
+
+    def test_extract_and_validate_string_property(self):
+        """Test extracting and validating string property"""
+        expected_type, original_type = extract_property_type(SampleClass, "name")
+        value = "John Doe"
+        result = validate_parsed_value(value, expected_type, original_type, "name")
+        assert result == "John Doe"
+
+    def test_extract_and_validate_int_property(self):
+        """Test extracting and validating int property"""
+        expected_type, original_type = extract_property_type(SampleClass, "age")
+        value = 30
+        result = validate_parsed_value(value, expected_type, original_type, "age")
+        assert result == 30
+
+    def test_validate_string_type(self):
+        """Test simple string validation"""
+        expected_type = str
+        original_type = str
+        value = "test"
+        result = validate_parsed_value(value, expected_type, original_type, "test_prop")
+        assert result == "test"
+
+    def test_validate_int_type(self):
+        """Test simple int validation"""
+        expected_type = int
+        original_type = int
+        value = 42
+        result = validate_parsed_value(value, expected_type, original_type, "test_prop")
+        assert result == 42
