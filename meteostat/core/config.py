@@ -135,7 +135,7 @@ class ConfigService(Config):
     include_model_data: bool = True
     hourly_endpoint: str = "https://data.meteostat.net/hourly/{year}/{station}.csv.gz"
     daily_endpoint: str = "https://data.meteostat.net/daily/{year}/{station}.csv.gz"
-    monthly_endpoint: str = "https://data.meteostat.net/monthly/{year}/{station}.csv.gz"
+    monthly_endpoint: str = "https://data.meteostat.net/monthly/{station}.csv.gz"
 
     # [Provider] DWD settings
     dwd_ftp_host: str = "opendata.dwd.de"

@@ -9,7 +9,7 @@ def test_daily(mocker):
     """
     It returns a filtered DataFrame
     """
-    mock_fetch = mocker.patch("meteostat.providers.data.daily.fetch")
+    mock_fetch = mocker.patch("meteostat.providers.meteostat.daily.fetch")
 
     mock_fetch.return_value = pd.read_pickle(
         os.path.join(
@@ -19,18 +19,18 @@ def test_daily(mocker):
             "df_daily.pickle",
         )
     )
-    ts = ms.daily("01001", datetime(2020, 1, 5), datetime(2020, 1, 10))
+    ts = ms.daily("10637", datetime(2024, 1, 5), datetime(2024, 1, 10))
     df = ts.fetch()
 
     assert len(df) == 6
-    assert df.iloc[0]["temp"] == 1.3
+    assert df.iloc[0]["temp"] == 6.6
 
 
 def test_daily_none(mocker):
     """
     It returns None if provider returns an empty DataFrame
     """
-    mock_fetch = mocker.patch("meteostat.providers.data.daily.fetch")
+    mock_fetch = mocker.patch("meteostat.providers.meteostat.daily.fetch")
     mock_fetch.return_value = pd.DataFrame()
     ts = ms.daily("10637", datetime(2024, 1, 1), datetime(2024, 1, 5))
     assert ts.fetch() is None

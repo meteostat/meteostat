@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  test:
+  tests:
     name: Tests
     runs-on: ubuntu-latest
     strategy:
@@ -34,3 +34,7 @@ jobs:
       - name: Run unit tests
         run: |
           poetry run pytest tests/unit -v
+
+      - name: Run integration tests
+        run: |
+          poetry run pytest tests/integration -v
