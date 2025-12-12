@@ -140,7 +140,12 @@ def parse_time(
 
     if timezone:
         tz = pytz.timezone(timezone)
-        parsed = parsed.astimezone(tz).astimezone(pytz.utc).replace(tzinfo=None)
+        # If the datetime is already aware, convert it directly
+        # If it's naive, treat it as being in the target timezone
+        if parsed.tzinfo is not None:
+            parsed = parsed.astimezone(pytz.utc).replace(tzinfo=None)
+        else:
+            parsed = tz.localize(parsed).astimezone(pytz.utc).replace(tzinfo=None)
 
     return parsed
 
