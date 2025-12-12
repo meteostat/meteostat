@@ -53,6 +53,7 @@ class TestTemperatureConversions:
     def test_kelvin_to_celsius_with_nan(self):
         """Test Kelvin to Celsius conversion with NaN"""
         import numpy as np
+
         assert kelvin_to_celsius(np.nan) is None
 
 
@@ -109,6 +110,7 @@ class TestSpeedConversions:
     def test_ms_to_kmh_with_nan(self):
         """Test meters per second to kilometers per hour with NaN"""
         import numpy as np
+
         assert ms_to_kmh(np.nan) is None
 
 
@@ -202,6 +204,7 @@ class TestCloudCoverConversions:
     def test_percentage_to_okta_with_nan(self):
         """Test percentage to okta conversion with NaN"""
         import numpy as np
+
         assert percentage_to_okta(np.nan) is None
 
 
@@ -224,6 +227,7 @@ class TestRadiationConversions:
     def test_jcm2_to_wm2_with_nan(self):
         """Test joule per cm² to watt per m² conversion with NaN"""
         import numpy as np
+
         assert jcm2_to_wm2(np.nan) is None
 
 

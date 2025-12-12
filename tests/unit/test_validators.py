@@ -67,15 +67,15 @@ class TestMinimumValidator:
         series = pd.Series([5, None, 15, np.nan])
         result = validator.func(series)
         # None and NaN should evaluate to False
-        assert result.tolist()[1] == False or pd.isna(result.tolist()[1])
-        assert result.tolist()[3] == False or pd.isna(result.tolist()[3])
+        assert not result.tolist()[1] or pd.isna(result.tolist()[1])
+        assert not result.tolist()[3] or pd.isna(result.tolist()[3])
 
     def test_minimum_with_nan(self):
         """Test minimum validator with NaN values"""
         validator = minimum(10)
         series = pd.Series([15, np.nan])
         result = validator.func(series)
-        assert pd.isna(result.tolist()[1]) or result.tolist()[1] == False
+        assert pd.isna(result.tolist()[1]) or not result.tolist()[1]
 
 
 class TestMaximumValidator:
@@ -134,15 +134,15 @@ class TestMaximumValidator:
         series = pd.Series([10, None, 25, np.nan])
         result = validator.func(series)
         # None and NaN should evaluate to False
-        assert result.tolist()[1] == False or pd.isna(result.tolist()[1])
-        assert result.tolist()[3] == False or pd.isna(result.tolist()[3])
+        assert not result.tolist()[1] or pd.isna(result.tolist()[1])
+        assert not result.tolist()[3] or pd.isna(result.tolist()[3])
 
     def test_maximum_with_nan(self):
         """Test maximum validator with NaN values"""
         validator = maximum(20)
         series = pd.Series([15, np.nan])
         result = validator.func(series)
-        assert pd.isna(result.tolist()[1]) or result.tolist()[1] == False
+        assert pd.isna(result.tolist()[1]) or not result.tolist()[1]
 
 
 class TestValidatorChaining:
@@ -153,11 +153,11 @@ class TestValidatorChaining:
         min_validator = minimum(10)
         max_validator = maximum(20)
         series = pd.Series([5, 10, 15, 20, 25])
-        
+
         min_result = min_validator.func(series)
         max_result = max_validator.func(series)
         combined = min_result & max_result
-        
+
         assert combined.tolist() == [False, True, True, True, False]
 
     def test_validators_with_large_dataset(self):
@@ -165,7 +165,7 @@ class TestValidatorChaining:
         validator = minimum(0)
         series = pd.Series(range(-50, 51))
         result = validator.func(series)
-        
+
         # First 50 values should be False (< 0)
         # Last 51 values should be True (>= 0)
         assert sum(result) == 51
@@ -175,9 +175,9 @@ class TestValidatorChaining:
         min_val = minimum(5)
         max_val = maximum(15)
         series = pd.Series([3, 5, 10, 15, 20])
-        
+
         min_result = min_val.func(series)
         max_result = max_val.func(series)
         result = min_result & max_result
-        
+
         assert result.tolist() == [False, True, True, True, False]

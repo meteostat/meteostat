@@ -13,7 +13,7 @@ from meteostat.utils.types import extract_property_type, validate_parsed_value
 
 class SampleClass:
     """Sample class for testing type extraction"""
-    
+
     # Use default values to make hasattr work correctly
     name: str = "default"
     age: int = 0
@@ -27,26 +27,28 @@ class TestExtractPropertyType:
     def test_extract_property_type_string(self):
         """Test extracting string type annotation"""
         expected_type, original_type = extract_property_type(SampleClass, "name")
-        assert expected_type == str
-        assert original_type == str
+        assert expected_type is str
+        assert original_type is str
 
     def test_extract_property_type_int(self):
         """Test extracting int type annotation"""
         expected_type, original_type = extract_property_type(SampleClass, "age")
-        assert expected_type == int
-        assert original_type == int
+        assert expected_type is int
+        assert original_type is int
 
     def test_extract_property_type_float(self):
         """Test extracting float type annotation"""
         expected_type, original_type = extract_property_type(SampleClass, "score")
-        assert expected_type == float
-        assert original_type == float
+        assert expected_type is float
+        assert original_type is float
 
     def test_extract_property_type_optional(self):
         """Test extracting Optional type annotation"""
-        expected_type, original_type = extract_property_type(SampleClass, "optional_value")
+        expected_type, original_type = extract_property_type(
+            SampleClass, "optional_value"
+        )
         # For Optional[str], expected_type should be str
-        assert expected_type == str
+        assert expected_type is str
         # original_type should contain the Union origin
         assert hasattr(original_type, "__origin__")
         assert original_type.__origin__ is Union
@@ -59,10 +61,11 @@ class TestExtractPropertyType:
 
     def test_extract_property_type_with_no_annotations(self):
         """Test extracting type from class with property not in annotations"""
+
         # Create an instance and try to get a property that doesn't have annotations
         class MinimalClass:
             pass
-        
+
         with pytest.raises(ValueError) as excinfo:
             extract_property_type(MinimalClass, "any_prop")
         assert "does not exist" in str(excinfo.value)
@@ -125,7 +128,9 @@ class TestValidateParsedValue:
         original_type = Optional[str]
         value = None
         expected_type = str
-        result = validate_parsed_value(value, expected_type, original_type, "optional_field")
+        result = validate_parsed_value(
+            value, expected_type, original_type, "optional_field"
+        )
         assert result is None
 
     def test_validate_parsed_value_type_mismatch(self):
@@ -143,7 +148,9 @@ class TestValidateParsedValue:
         original_type = Optional[str]
         value = "valid string"
         expected_type = str
-        result = validate_parsed_value(value, expected_type, original_type, "optional_field")
+        result = validate_parsed_value(
+            value, expected_type, original_type, "optional_field"
+        )
         assert result == value
 
     def test_validate_parsed_value_list_type(self):

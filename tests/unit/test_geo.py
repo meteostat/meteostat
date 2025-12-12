@@ -4,8 +4,6 @@ Test geo module
 The code is licensed under the MIT license.
 """
 
-import pytest
-
 from meteostat.utils.geo import get_distance
 
 
