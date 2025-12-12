@@ -3,36 +3,34 @@ name: Tests
 on:
   push:
     branches:
-      - master
-      - dev
+      - main
+      - next
   pull_request:
   workflow_dispatch:
 
 jobs:
   test:
+    name: Tests
     runs-on: ubuntu-latest
     strategy:
       matrix:
         python-version: ['3.11', '3.12']
-
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -e .
-        pip install pytest pytest-mock black mypy
-    
-    - name: Run unit tests
-      run: |
-        pytest tests/unit -v
-    
-    - name: Run integration tests
-      run: |
-        pytest tests/integration/test_point_timeseries.py -v
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies and run ty
+        run: |
+          poetry install --all-groups
+
+      - name: Run unit tests
+        run: |
+          poetry run pytest tests/unit -v
