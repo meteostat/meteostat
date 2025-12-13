@@ -3,13 +3,15 @@ from urllib.error import HTTPError
 
 import pandas as pd
 
+from meteostat.core.cache import cache_service
 from meteostat.core.logger import logger
-from meteostat.enumerations import Parameter
+from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import Query
 from meteostat.utils.conversions import percentage_to_okta
 
 ENDPOINT = "https://opendata.dwd.de/weather/weather_reports/poi/{station}-BEOB.csv"
-USECOLS = [0, 1, 2, 9, 11, 14, 21, 22, 23, 33, 35, 36, 37, 40, 41]
+# TODO: add col 11 for solar radiation support (Globalstrahlung)
+USECOLS = [0, 1, 2, 9, 14, 21, 22, 23, 33, 35, 36, 37, 40, 41]
 NAMES = {
     "Wolkenbedeckung": Parameter.CLDC,
     "Temperatur (2m)": Parameter.TEMP,
@@ -66,6 +68,7 @@ def get_coco(code: str | int) -> Union[int, None]:
     return COCO_MAP.get(str(code))
 
 
+@cache_service.cache(TTL.HOUR, "pickle")
 def get_df(station: str) -> Optional[pd.DataFrame]:
     try:
         # Read CSV data from DWD server

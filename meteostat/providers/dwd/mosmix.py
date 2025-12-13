@@ -13,7 +13,8 @@ from lxml import etree  # type: ignore
 
 import pandas as pd
 
-from meteostat.enumerations import Parameter
+from meteostat.core.cache import cache_service
+from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import Query
 from meteostat.utils.conversions import (
     kelvin_to_celsius,
@@ -64,6 +65,7 @@ def get_coco(code: str | int) -> Optional[int]:
     return COCO_MAP.get(str(code))
 
 
+@cache_service.cache(TTL.HOUR, "pickle")
 def get_df(station: str) -> Optional[pd.DataFrame]:
     # Fetch the KMZ file data in memory
     response = network_service.get(ENDPOINT.format(station=station))

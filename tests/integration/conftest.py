@@ -46,6 +46,42 @@ def df_monthly():
 
 
 @pytest.fixture
+def df_dwd_hourly():
+    """Load hourly fixture data from DWD provider"""
+    fixture_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "fixtures",
+        "df_dwd_hourly.pickle",
+    )
+    return pd.read_pickle(fixture_path)
+
+
+@pytest.fixture
+def df_dwd_poi():
+    """Load hourly POI fixture data from DWD provider"""
+    fixture_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "fixtures",
+        "df_dwd_poi.pickle",
+    )
+    return pd.read_pickle(fixture_path)
+
+
+@pytest.fixture
+def df_dwd_mosmix():
+    """Load hourly MOSMIX fixture data from DWD provider"""
+    fixture_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "fixtures",
+        "df_dwd_mosmix.pickle",
+    )
+    return pd.read_pickle(fixture_path)
+
+
+@pytest.fixture
 def json_station():
     """Load station fixture data"""
     fixture_path = os.path.join(
@@ -90,6 +126,28 @@ def mock_monthly_fetch(mocker, df_monthly):
     """Mock the monthly fetch function"""
     return mocker.patch(
         "meteostat.providers.meteostat.monthly.fetch", return_value=df_monthly
+    )
+
+
+@pytest.fixture
+def mock_dwd_hourly_fetch(mocker, df_dwd_hourly):
+    """Mock the DWD hourly fetch function"""
+    return mocker.patch(
+        "meteostat.providers.dwd.hourly.fetch", return_value=df_dwd_hourly
+    )
+
+
+@pytest.fixture
+def mock_dwd_poi_fetch(mocker, df_dwd_poi):
+    """Mock the DWD POI fetch function"""
+    return mocker.patch("meteostat.providers.dwd.poi.fetch", return_value=df_dwd_poi)
+
+
+@pytest.fixture
+def mock_dwd_mosmix_fetch(mocker, df_dwd_mosmix):
+    """Mock the DWD MOSMIX fetch function"""
+    return mocker.patch(
+        "meteostat.providers.dwd.mosmix.fetch", return_value=df_dwd_mosmix
     )
 
 

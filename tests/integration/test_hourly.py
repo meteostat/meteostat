@@ -173,3 +173,17 @@ def test_hourly_empty_property(
     )
     ts_empty = ms.hourly("10637", datetime(2024, 1, 1, 0), datetime(2024, 1, 1, 1))
     assert ts_empty.empty is True
+
+
+def test_hourly_multiple_providers(
+    mock_station, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+):
+    ts = ms.hourly(
+        "10637",
+        datetime(2025, 12, 1, 0, 0),
+        datetime(2025, 12, 15, 23, 59),
+        providers=[ms.Provider.DWD_HOURLY, ms.Provider.DWD_POI, ms.Provider.DWD_MOSMIX],
+    )
+    df = ts.fetch()
+    assert df is not None
+    assert len(df) == 360

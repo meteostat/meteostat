@@ -27,4 +27,4 @@ jobs:
       - name: Install dependencies and run ty
         run: |
           poetry install --all-groups
-          poetry run ty check meteostat/ tests/integration/ tests/utils/
+          poetry run ty check meteostat/ tests/unit/ tests/integration/ tests/fixtures.py
