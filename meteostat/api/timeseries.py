@@ -107,7 +107,7 @@ class TimeSeries:
             return "1D"
 
         if self.granularity is Granularity.MONTHLY:
-            return "1M"
+            return "1MS"
 
         # Normals (climatological normals) do not have a regular time
         # frequency in the same sense as timeseries data.

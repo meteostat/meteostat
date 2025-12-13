@@ -1,17 +1,26 @@
 from datetime import datetime
 from functools import wraps
+import json
 from pathlib import Path
 import pickle
 
 from meteostat.api.hourly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_HOURLY
 from meteostat.api.daily import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_DAILY
 from meteostat.api.monthly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_MONTHLY
+from meteostat.api.station import _fetch_station
+from meteostat.api.stations import stations
+from meteostat.core.config import config
 from meteostat.enumerations import Granularity, Provider
 from meteostat.providers.meteostat.hourly import fetch as fetch_hourly
 from meteostat.providers.meteostat.daily import fetch as fetch_daily
 from meteostat.providers.meteostat.monthly import fetch as fetch_monthly
 from meteostat.typing import Request, Station
 
+
+FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
+
+# Ensure the fixtures directory exists
+FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
 
 def fixture(filename):
     """
@@ -25,9 +34,7 @@ def fixture(filename):
         @wraps(func)
         def wrapper(*args, **kwargs):
             df = func(*args, **kwargs)
-            fixtures_dir = Path(__file__).parent.parent / "fixtures"
-            fixtures_dir.mkdir(parents=True, exist_ok=True)
-            filepath = fixtures_dir / f"df_{filename}.pickle"
+            filepath = FIXTURES_DIR / f"df_{filename}.pickle"
             with open(filepath, "wb") as f:
                 pickle.dump(df, f)
             return df
@@ -88,6 +95,26 @@ def generate_monthly_fixture():
     return df
 
 
+def generate_station_fixture(station_id: str):
+    """
+    Generates a fixture DataFrame for station data tests
+    """
+    station_data = _fetch_station(station_id)
+    filepath = FIXTURES_DIR / f"station_{station_id}.json"
+    with open(filepath, "w") as f:
+        json.dump(station_data, f)
+
+def generate_stations_db_fixture():
+    """
+    Generates a fixture JSON file for stations database
+    """
+    config.stations_db_file = FIXTURES_DIR / f"stations.db"
+
+    stations._get_file_path()
+
+
 generate_hourly_fixture()
 generate_daily_fixture()
 generate_monthly_fixture()
+generate_station_fixture("10637")
+generate_stations_db_fixture()
