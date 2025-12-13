@@ -35,6 +35,10 @@ class DataService:
         Filter time series data based on start and end date
         """
 
+        # Return empty DataFrame if input is empty
+        if df.empty:
+            return df
+
         # Get time index
         time = df.index.get_level_values("time")
 

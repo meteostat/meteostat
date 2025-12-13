@@ -75,61 +75,67 @@ def normals(
     )
     df = ts.fetch(sources=True)
 
-    # Add station level if only a single station is provided
-    if not ts._multi_station:
-        df = pd.concat(
-            [df], keys=[ts.stations.index.get_level_values("id")[0]], names=["station"]
-        )
+    # Process data if available
+    if df is not None and not df.empty:
+        # Add station level if only a single station is provided
+        if not ts._multi_station:
+            df = pd.concat(
+                [df], keys=[ts.stations.index.get_level_values("id")[0]], names=["station"]
+            )
 
-    # Extract month from time index
-    df["month"] = df.index.get_level_values("time").month
+        # Extract month from time index
+        df["month"] = df.index.get_level_values("time").month
 
-    # Create aggregation functions for different column types
-    agg_funcs = {}
-    for col in df.columns:
-        if col.endswith("_source"):
-            # For source columns, concatenate unique values
-            agg_funcs[col] = lambda x: ", ".join(x.dropna().unique())
-        elif col == "txmx":
-            # For temperature maximum, use max function
-            agg_funcs[col] = lambda x: x.max() if not x.isna().all() else np.nan
-        elif col == "txmn":
-            # For temperature minimum, use min function
-            agg_funcs[col] = lambda x: x.min() if not x.isna().all() else np.nan
-        else:
-            # For data columns, use the mean function
-            agg_funcs[col] = _mean
+        # Create aggregation functions for different column types
+        agg_funcs = {}
+        for col in df.columns:
+            if col.endswith("_source"):
+                # For source columns, concatenate unique values
+                agg_funcs[col] = lambda x: ", ".join(x.dropna().unique())
+            elif col == "txmx":
+                # For temperature maximum, use max function
+                agg_funcs[col] = lambda x: x.max() if not x.isna().all() else np.nan
+            elif col == "txmn":
+                # For temperature minimum, use min function
+                agg_funcs[col] = lambda x: x.min() if not x.isna().all() else np.nan
+            else:
+                # For data columns, use the mean function
+                agg_funcs[col] = _mean
 
-    # Apply aggregation functions
-    df = df.groupby(["station", "month"]).agg(agg_funcs)
-    df = df.rename_axis(index={"month": "time"})
+        # Apply aggregation functions
+        df = df.groupby(["station", "month"]).agg(agg_funcs)
+        df = df.rename_axis(index={"month": "time"})
 
-    # Separate parameter columns from source columns for formatting
-    param_cols = [str(param) for param in parameters if str(param) in df.columns]
-    source_cols = [col for col in df.columns if col.endswith("_source")]
+        # Separate parameter columns from source columns for formatting
+        param_cols = [str(param) for param in parameters if str(param) in df.columns]
+        source_cols = [col for col in df.columns if col.endswith("_source")]
 
-    # Format only the parameter columns
-    if param_cols:
-        df_data = schema_service.format(df[param_cols], Granularity.NORMALS)
-        # Combine formatted parameter columns with unformatted source columns
-        if source_cols:
-            df = pd.concat([df_data, df[source_cols]], axis=1)
-        else:
-            df = df_data
+        # Format only the parameter columns
+        if param_cols:
+            df_data = schema_service.format(df[param_cols], Granularity.NORMALS)
+            # Combine formatted parameter columns with unformatted source columns
+            if source_cols:
+                df = pd.concat([df_data, df[source_cols]], axis=1)
+            else:
+                df = df_data
 
-    # Reshape data by source for each station
-    df_fragments = []
-    for s in df.index.get_level_values("station").unique():
-        station_df = df.loc[s]
-        fragment = reshape_by_source(station_df)
-        fragment = pd.concat([fragment], keys=[s], names=["station"])
-        df_fragments.append(fragment)
+        # Reshape data by source for each station
+        df_fragments = []
+        for s in df.index.get_level_values("station").unique():
+            station_df = df.loc[s]
+            fragment = reshape_by_source(station_df)
+            fragment = pd.concat([fragment], keys=[s], names=["station"])
+            df_fragments.append(fragment)
+
+        df = pd.concat(df_fragments)
+    else:
+        df = None
 
     # Return the final TimeSeries object
     return TimeSeries(
         granularity=Granularity.NORMALS,
         stations=ts.stations,
-        df=pd.concat(df_fragments),
+        df=df,
         start=ts.start,
         end=ts.end,
         multi_station=ts._multi_station,
