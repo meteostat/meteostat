@@ -28,4 +28,4 @@ jobs:
 
       - name: Run ruff
         run: |
-          ruff check meteostat/ tests/unit/
+          ruff check meteostat/ tests/

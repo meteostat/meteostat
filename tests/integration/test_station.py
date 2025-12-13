@@ -1,5 +1,6 @@
 from meteostat import station
 
+
 def test_station(mock_station):
     """
     It fetches station data correctly

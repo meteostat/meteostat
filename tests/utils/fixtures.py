@@ -22,6 +22,7 @@ FIXTURES_DIR = Path(__file__).parent.parent / "fixtures"
 # Ensure the fixtures directory exists
 FIXTURES_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def fixture(filename):
     """
     Decorator that persists the returned DataFrame as a pickle file.
@@ -104,11 +105,12 @@ def generate_station_fixture(station_id: str):
     with open(filepath, "w") as f:
         json.dump(station_data, f)
 
+
 def generate_stations_db_fixture():
     """
     Generates a fixture JSON file for stations database
     """
-    config.stations_db_file = FIXTURES_DIR / f"stations.db"
+    config.stations_db_file = str(FIXTURES_DIR / "stations.db")
 
     stations._get_file_path()
 

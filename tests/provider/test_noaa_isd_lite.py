@@ -1,5 +1,5 @@
 from datetime import datetime
-from meteostat import settings, Parameter
+from meteostat import settings
 from meteostat.providers.noaa.isd_lite import fetch
 from meteostat.typing import QueryDict
 

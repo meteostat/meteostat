@@ -44,6 +44,7 @@ def df_monthly():
     )
     return pd.read_pickle(fixture_path)
 
+
 @pytest.fixture
 def json_station():
     """Load station fixture data"""
@@ -54,6 +55,7 @@ def json_station():
         "station_10637.json",
     )
     return json.load(open(fixture_path, "r"))
+
 
 @pytest.fixture
 def str_stations_database_file_path():
@@ -70,29 +72,43 @@ def str_stations_database_file_path():
 @pytest.fixture
 def mock_daily_fetch(mocker, df_daily):
     """Mock the daily fetch function"""
-    return mocker.patch("meteostat.providers.meteostat.daily.fetch", return_value=df_daily)
+    return mocker.patch(
+        "meteostat.providers.meteostat.daily.fetch", return_value=df_daily
+    )
 
 
 @pytest.fixture
 def mock_hourly_fetch(mocker, df_hourly):
     """Mock the hourly fetch function"""
-    return mocker.patch("meteostat.providers.meteostat.hourly.fetch", return_value=df_hourly)
+    return mocker.patch(
+        "meteostat.providers.meteostat.hourly.fetch", return_value=df_hourly
+    )
 
 
 @pytest.fixture
 def mock_monthly_fetch(mocker, df_monthly):
     """Mock the monthly fetch function"""
-    return mocker.patch("meteostat.providers.meteostat.monthly.fetch", return_value=df_monthly)
+    return mocker.patch(
+        "meteostat.providers.meteostat.monthly.fetch", return_value=df_monthly
+    )
+
 
 @pytest.fixture
 def mock_station(mocker, json_station):
     """Mock the station fetch function"""
-    return mocker.patch("meteostat.api.station._fetch_station", return_value=json_station)
+    return mocker.patch(
+        "meteostat.api.station._fetch_station", return_value=json_station
+    )
+
 
 @pytest.fixture
 def mock_stations_database(mocker, str_stations_database_file_path):
     """Mock the stations database _get_file_path function"""
-    return mocker.patch("meteostat.api.stations.stations._get_file_path", return_value=str_stations_database_file_path)
+    return mocker.patch(
+        "meteostat.api.stations.stations._get_file_path",
+        return_value=str_stations_database_file_path,
+    )
+
 
 @pytest.fixture
 def empty_dataframe():
