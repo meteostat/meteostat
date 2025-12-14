@@ -5,7 +5,7 @@ import pandas as pd
 
 from meteostat.enumerations import Parameter, Provider
 from meteostat.api.hourly import hourly
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.data import aggregate_sources, reshape_by_source
 
 
@@ -62,22 +62,22 @@ PARAMETER_AGGS = {
 }
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch hourly weather data from Meteostat's central data
     repository and aggregate to daily granularity
     """
     # Get all source columns
-    source_cols = list(dict.fromkeys([PARAMETER_AGGS[p][0] for p in query.parameters]))
+    source_cols = list(dict.fromkeys([PARAMETER_AGGS[p][0] for p in req.parameters]))
 
     # Get hourly DataFrame
     ts_hourly = hourly(
-        query.station.id,
-        query.start,
-        query.end,
+        req.station.id,
+        req.start,
+        req.end,
         parameters=source_cols,
         providers=[Provider.HOURLY],
-        timezone=query.station.timezone,
+        timezone=req.station.timezone,
     )
 
     df_hourly = ts_hourly.fetch(fill=True, sources=True)
@@ -88,7 +88,7 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
 
     # Create daily aggregations
     df = pd.DataFrame()
-    for parameter in query.parameters:
+    for parameter in req.parameters:
         [hourly_param_name, agg_func] = PARAMETER_AGGS[parameter]
         df[parameter] = (
             df_hourly[hourly_param_name]

@@ -6,7 +6,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.cache import cache_service
 from meteostat.core.network import network_service
 from meteostat.providers.eccc.shared import ENDPOINT, get_meta_data
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 
 BATCH_LIMIT = 9000
 PROPERTIES = {
@@ -53,11 +53,11 @@ def get_df(
     return df
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "national" not in query.station.identifiers:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if "national" not in req.station.identifiers:
         return None
 
-    meta_data = get_meta_data(query.station.identifiers["national"])
+    meta_data = get_meta_data(req.station.identifiers["national"])
     climate_id = meta_data.get("CLIMATE_IDENTIFIER")
 
     if not climate_id:

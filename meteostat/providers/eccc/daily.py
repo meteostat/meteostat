@@ -7,7 +7,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.cache import cache_service
 from meteostat.core.network import network_service
 from meteostat.providers.eccc.shared import ENDPOINT, get_meta_data
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 
 BATCH_LIMIT = 9000
 PROPERTIES = {
@@ -59,11 +59,11 @@ def get_df(climate_id: str, year: int) -> Optional[pd.DataFrame]:
     return df
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "national" not in query.station.identifiers or query.start is None or query.end is None:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if "national" not in req.station.identifiers or req.start is None or req.end is None:
         return None
 
-    meta_data = get_meta_data(query.station.identifiers["national"])
+    meta_data = get_meta_data(req.station.identifiers["national"])
     climate_id = meta_data.get("CLIMATE_IDENTIFIER")
     archive_first = meta_data.get("DLY_FIRST_DATE")
     archive_last = meta_data.get("DLY_LAST_DATE")
@@ -75,8 +75,8 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
     archive_end = datetime.strptime(archive_last, "%Y-%m-%d %H:%M:%S")
 
     years = range(
-        max(query.start.year, archive_start.year),
-        min(query.end.year, archive_end.year) + 1,
+        max(req.start.year, archive_start.year),
+        min(req.end.year, archive_end.year) + 1,
     )
     data = [get_df(climate_id, year) for year in years]
 

@@ -15,7 +15,7 @@ from zipfile import ZipFile
 import pandas as pd
 
 from meteostat.enumerations import TTL, Parameter
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.utils.conversions import ms_to_kmh
 from meteostat.providers.dwd.shared import get_ftp_connection
@@ -109,8 +109,8 @@ def get_df(station: str, mode: str) -> Optional[pd.DataFrame]:
     return df
 
 
-def fetch(query: Query):
-    if "national" not in query.station.identifiers:
+def fetch(req: ProviderRequest):
+    if "national" not in req.station.identifiers:
         return pd.DataFrame()
 
     # Check which modes to consider for data fetching
@@ -122,12 +122,12 @@ def fetch(query: Query):
     # period of 3 years here. If the end date of the query is within this period, we will also
     # consider the "recent" mode.
     modes = ["historical"]
-    if abs((query.end - datetime.now()).days) < 3 * 365:
+    if abs((req.end - datetime.now()).days) < 3 * 365:
         modes.append("recent")
 
     data = [
         get_df(
-            query.station.identifiers["national"],
+            req.station.identifiers["national"],
             mode,
         )
         for mode in modes

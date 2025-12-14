@@ -8,7 +8,7 @@ from typing import Optional
 import pandas as pd
 
 from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.core.config import config
 from meteostat.utils.data import reshape_by_source
@@ -45,17 +45,17 @@ def get_df(station: str, year: int) -> Optional[pd.DataFrame]:
 
 
 @filter_model_data
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch daily weather data from Meteostat's central data repository
     """
-    if query.start is None or query.end is None:
+    if req.start is None or req.end is None:
         return None
     
     # Get a list of relevant years
-    years = range(query.start.year, query.end.year + 1)
+    years = range(req.start.year, req.end.year + 1)
     # Get list of annual DataFrames
-    df_yearly = [get_df(query.station.id, year) for year in years]
+    df_yearly = [get_df(req.station.id, year) for year in years]
     # Concatenate into a single DataFrame
     df = (
         pd.concat(df_yearly)

@@ -16,7 +16,7 @@ import pandas as pd
 
 from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
-from meteostat.typing import Query, Station
+from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service
 from meteostat.core.config import config
 from meteostat.utils.conversions import ms_to_kmh
@@ -187,8 +187,8 @@ def get_parameter(
         return None
 
 
-def fetch(query: Query):
-    if "national" not in query.station.identifiers:
+def fetch(req: ProviderRequest):
+    if "national" not in req.station.identifiers:
         return None
 
     # Check which modes to consider for data fetching
@@ -200,17 +200,17 @@ def fetch(query: Query):
     # period of 3 years here. If the end date of the query is within this period, we will also
     # consider the "recent" mode.
     modes = ["historical"]
-    if abs((query.end - datetime.now()).days) < 3 * 365:
+    if abs((req.end - datetime.now()).days) < 3 * 365:
         modes.append("recent")
 
     columns = map(
         lambda args: get_parameter(*args),
         (
-            (parameter["dir"], config.dwd_hourly_modes or modes, query.station)
+            (parameter["dir"], config.dwd_hourly_modes or modes, req.station)
             for parameter in [
                 param
                 for param in PARAMETERS
-                if not set(query.parameters).isdisjoint(param["names"].values())
+                if not set(req.parameters).isdisjoint(param["names"].values())
             ]
         ),
     )

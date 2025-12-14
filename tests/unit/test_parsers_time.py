@@ -73,12 +73,12 @@ class TestParseTime:
 
     def test_parse_time_empty_string(self):
         """Test parse_time with empty string"""
-        result = parse_time("")
+        result = parse_time("")  # type: ignore[arg-type]
         assert result is None
 
     def test_parse_time_zero(self):
         """Test parse_time with zero (falsy value)"""
-        result = parse_time(0)
+        result = parse_time(0)  # type: ignore[arg-type]
         assert result is None
 
 
@@ -115,6 +115,7 @@ class TestParseMonth:
         input_date = date(2021, 2, 15)
         result = parse_month(input_date, is_end=True)
 
+        assert isinstance(result, date)
         assert result.month == 2
         assert result.day == 28
 
@@ -123,6 +124,7 @@ class TestParseMonth:
         input_date = date(2020, 2, 15)
         result = parse_month(input_date, is_end=True)
 
+        assert isinstance(result, date)
         assert result.month == 2
         assert result.day == 29
 
@@ -131,6 +133,7 @@ class TestParseMonth:
         input_date = date(2020, 12, 15)
         result = parse_month(input_date, is_end=True)
 
+        assert isinstance(result, date)
         assert result.month == 12
         assert result.day == 31
 
@@ -149,6 +152,7 @@ class TestParseMonth:
         for month in range(1, 13):
             input_date = date(2020, month, 15)
             result = parse_month(input_date)
+            assert isinstance(result, date)
             assert result.year == 2020
             assert result.month == month
 

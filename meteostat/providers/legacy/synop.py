@@ -11,7 +11,7 @@ import pandas as pd
 from meteostat.enumerations import TTL
 from meteostat.core.cache import cache_service
 from meteostat.core.logger import logger
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 
 
 ENDPOINT = "https://bulk.meteostat.net/v2/raw/synop/{year}/{station}.csv.gz"
@@ -50,14 +50,14 @@ def get_df(station: str, year: int) -> Optional[pd.DataFrame]:
         return None
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if query.start is None or query.end is None:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if req.start is None or req.end is None:
         return None
     
-    years = range(query.start.year, query.end.year + 1)
-    data = [get_df(query.station.id, year) for year in years]
+    years = range(req.start.year, req.end.year + 1)
+    data = [get_df(req.station.id, year) for year in years]
     df = pd.concat(data) if len(data) and not all(d is None for d in data) else None
     if df is not None:
-        df["source"] = "zamg_hourly" if query.station.country == "AT" else "dwd_poi"
+        df["source"] = "zamg_hourly" if req.station.country == "AT" else "dwd_poi"
         df.set_index(["source"], append=True, inplace=True)
     return df

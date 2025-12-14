@@ -10,14 +10,13 @@ from meteostat.api.monthly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_MONTH
 from meteostat.api.station import _fetch_station
 from meteostat.api.stations import stations
 from meteostat.core.config import config
-from meteostat.enumerations import Granularity, Provider
 from meteostat.providers.meteostat.hourly import fetch as fetch_hourly
 from meteostat.providers.meteostat.daily import fetch as fetch_daily
 from meteostat.providers.meteostat.monthly import fetch as fetch_monthly
 from meteostat.providers.dwd.hourly import fetch as fetch_dwd_hourly
 from meteostat.providers.dwd.poi import fetch as fetch_dwd_poi
 from meteostat.providers.dwd.mosmix import fetch as fetch_dwd_mosmix
-from meteostat.typing import Request, Station
+from meteostat.typing import ProviderRequest, Station
 
 
 FIXTURES_DIR = Path(__file__).parent / "fixtures"
@@ -72,11 +71,9 @@ def generate_hourly_fixture():
     """
     Generates a fixture DataFrame for hourly data tests
     """
-    req = Request(
-        granularity=Granularity.HOURLY,
-        providers=[Provider.HOURLY],
-        parameters=DEFAULT_PARAMETERS_HOURLY,
+    req = ProviderRequest(
         station=Station(id="10637"),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
         start=datetime(2024, 1, 1, 0, 0),
         end=datetime(2024, 12, 31, 23, 59),
     )
@@ -89,11 +86,9 @@ def generate_daily_fixture():
     """
     Generates a fixture DataFrame for daily data tests
     """
-    req = Request(
-        granularity=Granularity.DAILY,
-        providers=[Provider.DAILY],
-        parameters=DEFAULT_PARAMETERS_DAILY,
+    req = ProviderRequest(
         station=Station(id="10637"),
+        parameters=DEFAULT_PARAMETERS_DAILY,
         start=datetime(2024, 1, 1, 0, 0),
         end=datetime(2024, 12, 31, 23, 59),
     )
@@ -106,11 +101,9 @@ def generate_monthly_fixture():
     """
     Generates a fixture DataFrame for monthly data tests
     """
-    req = Request(
-        granularity=Granularity.MONTHLY,
-        providers=[Provider.MONTHLY],
-        parameters=DEFAULT_PARAMETERS_MONTHLY,
+    req = ProviderRequest(
         station=Station(id="10637"),
+        parameters=DEFAULT_PARAMETERS_MONTHLY,
         start=datetime(2000, 1, 1, 0, 0),
         end=datetime(2020, 12, 31, 23, 59),
     )
@@ -123,11 +116,9 @@ def generate_dwd_hourly_fixture():
     """
     Generates a fixture DataFrame for DWD HOURLY data tests
     """
-    req = Request(
-        granularity=Granularity.HOURLY,
-        providers=[Provider.DWD_HOURLY],
-        parameters=DEFAULT_PARAMETERS_HOURLY,
+    req = ProviderRequest(
         station=Station(id="10637", identifiers={"national": "01420"}),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
         start=datetime(2025, 12, 1, 0, 0),
         end=datetime(2025, 12, 15, 23, 59),
     )
@@ -140,11 +131,9 @@ def generate_dwd_poi_fixture():
     """
     Generates a fixture DataFrame for DWD POI data tests
     """
-    req = Request(
-        granularity=Granularity.HOURLY,
-        providers=[Provider.DWD_POI],
-        parameters=DEFAULT_PARAMETERS_HOURLY,
+    req = ProviderRequest(
         station=Station(id="10637", identifiers={"wmo": "10637"}),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
         start=datetime(2025, 12, 1, 0, 0),
         end=datetime(2025, 12, 15, 23, 59),
     )
@@ -157,11 +146,9 @@ def generate_dwd_mosmix_fixture():
     """
     Generates a fixture DataFrame for DWD MOSMIX data tests
     """
-    req = Request(
-        granularity=Granularity.HOURLY,
-        providers=[Provider.DWD_MOSMIX],
-        parameters=DEFAULT_PARAMETERS_HOURLY,
+    req = ProviderRequest(
         station=Station(id="10637", identifiers={"mosmix": "10637"}),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
         start=datetime(2025, 12, 1, 0, 0),
         end=datetime(2025, 12, 15, 23, 59),
     )

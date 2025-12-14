@@ -7,7 +7,7 @@ from meteostat.core.config import config
 from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.core.network import network_service
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import percentage_to_okta
 from meteostat.core.cache import cache_service
 
@@ -172,7 +172,7 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
         logger.error(error, exc_info=True)
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if not USER_AGENT:
         logger.warning(
             "MET Norway requires a unique user agent as per their terms of service. Please use config to specify your user agent. For now, this provider is skipped."
@@ -180,7 +180,7 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
         return None
 
     return get_df(
-        query.station.latitude,
-        query.station.longitude,
-        query.station.elevation,
+        req.station.latitude,
+        req.station.longitude,
+        req.station.elevation,
     )

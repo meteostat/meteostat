@@ -15,7 +15,7 @@ import pandas as pd
 
 from meteostat.core.cache import cache_service
 from meteostat.enumerations import TTL, Parameter
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import (
     kelvin_to_celsius,
     ms_to_kmh,
@@ -346,6 +346,6 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     return df
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "mosmix" in query.station.identifiers:
-        return get_df(query.station.identifiers["mosmix"])
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if "mosmix" in req.station.identifiers:
+        return get_df(req.station.identifiers["mosmix"])

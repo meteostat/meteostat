@@ -9,7 +9,7 @@ import pandas as pd
 from meteostat.core.config import config
 from meteostat.enumerations import TTL
 from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.utils.data import reshape_by_source
 
@@ -37,9 +37,9 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
 
 
 @filter_model_data
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch monthly weather data from Meteostat's central data repository
     """
-    df = get_df(query.station.id)
+    df = get_df(req.station.id)
     return df

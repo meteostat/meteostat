@@ -102,7 +102,7 @@ class Request:
 
 
 @dataclass
-class Query:
+class ProviderRequest:
     """
     A query to fetch meteorological data from a provider
     """

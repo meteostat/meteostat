@@ -5,7 +5,7 @@ import pandas as pd
 
 from meteostat.enumerations import Parameter, Provider
 from meteostat.api.daily import daily
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.data import aggregate_sources, reshape_by_source
 from meteostat.utils.parsers import parse_month
 
@@ -59,19 +59,19 @@ PARAMETER_AGGS = {
 }
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch daily weather data from Meteostat's central data
     repository and aggregate to monthly granularity
     """
     # Get all source columns
-    source_cols = list(dict.fromkeys([PARAMETER_AGGS[p][0] for p in query.parameters]))
+    source_cols = list(dict.fromkeys([PARAMETER_AGGS[p][0] for p in req.parameters]))
 
     # Get daily DataFrame
     ts_daily = daily(
-        query.station.id,
-        parse_month(query.start),
-        parse_month(query.end, is_end=True),
+        req.station.id,
+        parse_month(req.start),
+        parse_month(req.end, is_end=True),
         parameters=source_cols,
         providers=[Provider.DAILY],
     )
@@ -84,7 +84,7 @@ def fetch(query: Query) -> Optional[pd.DataFrame]:
 
     # Create monthly aggregations
     df = pd.DataFrame()
-    for parameter in query.parameters:
+    for parameter in req.parameters:
         [daily_param_name, agg_func] = PARAMETER_AGGS[parameter]
         df[parameter] = (
             df_daily[daily_param_name]

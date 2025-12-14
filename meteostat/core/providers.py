@@ -15,7 +15,7 @@ from meteostat.core.logger import logger
 from meteostat.enumerations import Granularity, Priority, Provider
 from meteostat.providers.index import DEFAULT_PROVIDERS
 from meteostat.typing import (
-    Query,
+    ProviderRequest,
     ProviderSpec,
     Station,
     Request,
@@ -163,7 +163,7 @@ class ProviderService:
         if not provider:
             return None
 
-        query = Query(
+        query = ProviderRequest(
             station=station,
             start=req.start or (datetime.combine(provider.start, datetime.min.time()) if provider.start else None),
             end=req.end or (provider.end or datetime.now()),

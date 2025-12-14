@@ -8,7 +8,7 @@ import pandas as pd
 from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.core.cache import cache_service
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import ms_to_kmh, temp_dwpt_to_rhum
 
 ISD_LITE_ENDPOINT = "https://www.ncei.noaa.gov/pub/data/noaa/isd-lite/"
@@ -111,25 +111,25 @@ def get_df(usaf: str, wban: str, year: int) -> Optional[pd.DataFrame]:
         return None
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """ """
-    if query.start is None or query.end is None:
+    if req.start is None or req.end is None:
         return None
     
-    years = range(query.start.year, query.end.year + 1)
+    years = range(req.start.year, req.end.year + 1)
     data = tuple(
         map(
             lambda i: get_df(*i),
             (
                 (
                     (
-                        query.station.identifiers["usaf"]
-                        if "usaf" in query.station.identifiers
+                        req.station.identifiers["usaf"]
+                        if "usaf" in req.station.identifiers
                         else None
                     ),
                     (
-                        query.station.identifiers["wban"]
-                        if "wban" in query.station.identifiers
+                        req.station.identifiers["wban"]
+                        if "wban" in req.station.identifiers
                         else None
                     ),
                     year,

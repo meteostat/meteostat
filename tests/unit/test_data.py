@@ -122,7 +122,7 @@ class TestStationsToDf:
     def test_stations_to_df_invalid_type_assertion(self):
         """Test that non-Station objects raise assertion"""
         with pytest.raises(AssertionError):
-            stations_to_df(["not a station"])
+            stations_to_df(["not a station"])  # type: ignore[arg-type]
 
 
 class TestSquashDf:

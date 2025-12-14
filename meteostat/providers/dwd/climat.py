@@ -12,7 +12,7 @@ import pandas as pd
 from meteostat.core.logger import logger
 from meteostat.core.config import config
 from meteostat.enumerations import TTL, Parameter
-from meteostat.typing import Query, Station
+from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service
 from meteostat.providers.dwd.shared import get_ftp_connection
 
@@ -145,21 +145,21 @@ def get_parameter(
         return None
 
 
-def fetch(query: Query) -> pd.DataFrame:
+def fetch(req: ProviderRequest) -> pd.DataFrame:
     """
     Entry point to fetch all requested parameters for a station query.
     """
-    station_code = query.station.identifiers.get("wmo")
+    station_code = req.station.identifiers.get("wmo")
     if not station_code:
         return pd.DataFrame()
 
     modes = ["historical"]
-    if (datetime.now() - query.end).days < 5 * 365:
+    if (datetime.now() - req.end).days < 5 * 365:
         modes.append("recent")
 
     data_frames = [
-        get_parameter(param.value, config.dwd_climat_modes or modes, query.station)
-        for param in query.parameters
+        get_parameter(param.value, config.dwd_climat_modes or modes, req.station)
+        for param in req.parameters
         if param in PARAMETER_CONFIGS
     ]
 

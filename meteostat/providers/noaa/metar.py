@@ -10,7 +10,7 @@ from metar import Metar
 from meteostat.core.logger import logger
 from meteostat.core.config import config
 from meteostat.enumerations import TTL, Frequency, Parameter
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import temp_dwpt_to_rhum
 from meteostat.core.cache import cache_service
 from meteostat.utils.data import enforce_freq
@@ -158,6 +158,6 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     return enforce_freq(df, Frequency.HOURLY)
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "icao" in query.station.identifiers:
-        return get_df(query.station.identifiers["icao"])
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if "icao" in req.station.identifiers:
+        return get_df(req.station.identifiers["icao"])

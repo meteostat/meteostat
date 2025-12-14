@@ -6,7 +6,7 @@ import pandas as pd
 from meteostat.core.cache import cache_service
 from meteostat.core.logger import logger
 from meteostat.enumerations import TTL, Parameter
-from meteostat.typing import Query
+from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import percentage_to_okta
 
 ENDPOINT = "https://opendata.dwd.de/weather/weather_reports/poi/{station}-BEOB.csv"
@@ -112,6 +112,6 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         return None
 
 
-def fetch(query: Query) -> Optional[pd.DataFrame]:
-    if "wmo" in query.station.identifiers:
-        return get_df(query.station.identifiers["wmo"])
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
+    if "wmo" in req.station.identifiers:
+        return get_df(req.station.identifiers["wmo"])
