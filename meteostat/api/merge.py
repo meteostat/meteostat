@@ -31,7 +31,7 @@ def _get_dt(
     return min(dt_a, dt_b) if start else max(dt_a, dt_b)
 
 
-def concat(objs: List[TimeSeries]) -> TimeSeries:
+def merge(objs: List[TimeSeries]) -> TimeSeries:
     """
     Merge one or multiple Meteostat time series into a common one
 
