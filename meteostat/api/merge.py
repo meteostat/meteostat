@@ -70,7 +70,12 @@ def merge(objs: List[TimeSeries]) -> TimeSeries:
     multi_station = ts._multi_station
 
     for obj in objs[1:]:
-        stations = pd.concat([stations, obj.stations]).drop_duplicates(subset=["id"])
+        stations = (
+            pd.concat([stations, obj.stations])
+            .reset_index()
+            .drop_duplicates(subset=["id"])
+            .set_index("id")
+        )
         start = _get_dt(start, obj.start)
         end = _get_dt(end, obj.end, False)
         parameters.extend(obj.parameters)

@@ -24,7 +24,7 @@ from meteostat.api.hourly import hourly
 from meteostat.api.daily import daily
 from meteostat.api.monthly import monthly
 from meteostat.api.normals import normals
-from meteostat.api.concat import merge
+from meteostat.api.merge import merge
 from meteostat.api.interpolate import interpolate
 from meteostat.interpolation.lapserate import lapse_rate
 from meteostat.typing import Station
