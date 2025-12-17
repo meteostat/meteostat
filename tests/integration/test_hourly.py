@@ -1,7 +1,7 @@
 from datetime import datetime
 
 import meteostat as ms
-from meteostat.enumerations import UnitSystem
+from meteostat.enumerations import Provider, UnitSystem
 
 
 def test_hourly(mock_hourly_fetch, mock_station):
@@ -184,6 +184,9 @@ def test_hourly_multiple_providers(
         datetime(2025, 12, 18, 23, 59),
         providers=[ms.Provider.DWD_HOURLY, ms.Provider.DWD_POI, ms.Provider.DWD_MOSMIX],
     )
-    df = ts.fetch()
+    df = ts.fetch(sources=True)
     assert df is not None
     assert len(df) == 432
+    assert df.iloc[0]["temp_source"] == Provider.DWD_HOURLY
+    assert df.iloc[380]["temp_source"] == Provider.DWD_POI
+    assert df.iloc[431]["temp_source"] == Provider.DWD_MOSMIX
