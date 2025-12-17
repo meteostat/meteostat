@@ -10,6 +10,7 @@ from meteostat.api.monthly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_MONTH
 from meteostat.api.station import _fetch_station
 from meteostat.api.stations import stations
 from meteostat.core.config import config
+from meteostat.core.data import data_service
 from meteostat.providers.meteostat.hourly import fetch as fetch_hourly
 from meteostat.providers.meteostat.daily import fetch as fetch_daily
 from meteostat.providers.meteostat.monthly import fetch as fetch_monthly
@@ -116,13 +117,16 @@ def generate_dwd_hourly_fixture():
     """
     Generates a fixture DataFrame for DWD HOURLY data tests
     """
+    start = datetime(2025, 12, 1, 0, 0)
+    end = datetime(2025, 12, 15, 23, 59)
     req = ProviderRequest(
         station=Station(id="10637", identifiers={"national": "01420"}),
         parameters=DEFAULT_PARAMETERS_HOURLY,
-        start=datetime(2025, 12, 1, 0, 0),
-        end=datetime(2025, 12, 15, 23, 59),
+        start=start,
+        end=end,
     )
     df = fetch_dwd_hourly(req)
+    df = data_service._filter_time(df, start, end)
     return df
 
 
