@@ -4,6 +4,7 @@ Shared fixtures for integration tests
 
 import json
 import os
+from datetime import date
 
 import pandas as pd
 import pytest
@@ -172,3 +173,40 @@ def mock_stations_database(mocker, str_stations_database_file_path):
 def empty_dataframe():
     """Return an empty DataFrame for testing None cases"""
     return pd.DataFrame()
+
+
+@pytest.fixture(autouse=True)
+def patch_mosmix_provider_start_date(mocker):
+    """Patch the MOSMIX provider's start date to allow test data to be picked up"""
+    from meteostat.core.providers import provider_service
+    from meteostat.enumerations import Provider
+    
+    # Get the original MOSMIX provider
+    original_provider = provider_service.get_provider(Provider.DWD_MOSMIX)
+    
+    if original_provider:
+        # Create a modified provider spec with an earlier start date
+        modified_provider = original_provider.__class__(
+            id=original_provider.id,
+            name=original_provider.name,
+            granularity=original_provider.granularity,
+            priority=original_provider.priority,
+            grade=original_provider.grade,
+            license=original_provider.license,
+            requires=original_provider.requires,
+            parameters=original_provider.parameters,
+            start=date(2025, 1, 1),  # Set to an earlier date to allow test data
+            end=original_provider.end,
+            countries=original_provider.countries,
+            module=original_provider.module,
+        )
+        
+        # Patch the provider_service.get_provider method
+        original_get_provider = provider_service.get_provider
+        
+        def patched_get_provider(provider_id):
+            if provider_id == Provider.DWD_MOSMIX:
+                return modified_provider
+            return original_get_provider(provider_id)
+        
+        mocker.patch.object(provider_service, "get_provider", side_effect=patched_get_provider)

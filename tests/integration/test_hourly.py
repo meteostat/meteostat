@@ -181,9 +181,9 @@ def test_hourly_multiple_providers(
     ts = ms.hourly(
         "10637",
         datetime(2025, 12, 1, 0, 0),
-        datetime(2025, 12, 15, 23, 59),
+        datetime(2025, 12, 18, 23, 59),
         providers=[ms.Provider.DWD_HOURLY, ms.Provider.DWD_POI, ms.Provider.DWD_MOSMIX],
     )
     df = ts.fetch()
     assert df is not None
-    assert len(df) == 360
+    assert len(df) == 432

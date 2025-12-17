@@ -59,6 +59,6 @@ def test_stations_inventory(mock_stations_database):
     assert inventory.end.year == 2025
 
 
-def test_stations_query():
+def test_stations_query(mock_stations_database):
     df = stations.query("SELECT id FROM stations WHERE country = 'US'")
     assert len(df) == 2701

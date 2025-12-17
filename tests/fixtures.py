@@ -118,7 +118,7 @@ def generate_dwd_hourly_fixture():
     Generates a fixture DataFrame for DWD HOURLY data tests
     """
     start = datetime(2025, 12, 1, 0, 0)
-    end = datetime(2025, 12, 15, 23, 59)
+    end = datetime(2025, 12, 17, 23, 59)
     req = ProviderRequest(
         station=Station(id="10637", identifiers={"national": "01420"}),
         parameters=DEFAULT_PARAMETERS_HOURLY,
@@ -139,7 +139,7 @@ def generate_dwd_poi_fixture():
         station=Station(id="10637", identifiers={"wmo": "10637"}),
         parameters=DEFAULT_PARAMETERS_HOURLY,
         start=datetime(2025, 12, 1, 0, 0),
-        end=datetime(2025, 12, 15, 23, 59),
+        end=datetime(2025, 12, 23, 23, 59),
     )
     df = fetch_dwd_poi(req)
     return df
