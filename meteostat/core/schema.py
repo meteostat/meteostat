@@ -34,10 +34,10 @@ class SchemaService:
             v: Validator = validator()  # type: ignore
         else:
             v = validator
-        
+
         if not isinstance(v, Validator):
             return pd.Series(data=True, index=df.index, dtype=bool)
-        
+
         if v.ignore_na:
             result = pd.Series(data=True, index=df.index, dtype=bool)
             test_result = v.test(
@@ -48,7 +48,7 @@ class SchemaService:
             if isinstance(test_result, pd.Series):
                 result.update(test_result)
             return result.astype(bool)
-        
+
         test_result = v.test(df[col], df, col)
         if isinstance(test_result, bool):
             return pd.Series(data=test_result, index=df.index, dtype=bool)

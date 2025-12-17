@@ -51,7 +51,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     if req.start is None or req.end is None:
         return None
-    
+
     # Get a list of relevant years
     years = range(req.start.year, req.end.year + 1)
     # Get list of annual DataFrames

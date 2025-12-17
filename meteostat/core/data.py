@@ -26,7 +26,18 @@ class DataService:
     """
 
     @staticmethod
-    def _filter_time(
+    def _add_source(df: pd.DataFrame, provider_id: str) -> pd.DataFrame:
+        """
+        Add source column to DataFrame
+        """
+        if "source" not in df.index.names:
+            df["source"] = provider_id
+            df = df.set_index(["source"], append=True)
+
+        return df
+
+    @staticmethod
+    def filter_time(
         df: pd.DataFrame,
         start: Union[datetime, None] = None,
         end: Union[datetime, None] = None,
@@ -51,17 +62,6 @@ class DataService:
                 if start and end
                 else df
             )
-
-    @staticmethod
-    def _add_source(df: pd.DataFrame, provider_id: str) -> pd.DataFrame:
-        """
-        Add source column to DataFrame
-        """
-        if "source" not in df.index.names:
-            df["source"] = provider_id
-            df = df.set_index(["source"], append=True)
-
-        return df
 
     @staticmethod
     def concat_fragments(
@@ -107,7 +107,7 @@ class DataService:
             df = self._add_source(df, provider)
 
             # Filter DataFrame for requested parameters and time range
-            df = self._filter_time(df, req.start, req.end)
+            df = self.filter_time(df, req.start, req.end)
 
             # Drop empty rows
             df = df.dropna(how="all")

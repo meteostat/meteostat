@@ -28,10 +28,10 @@ def _create_timeseries(
     """
     parsed = parse_station(point)
     stations_list = [parsed] if isinstance(parsed, Station) else parsed
-    
+
     # Convert stations to DataFrame
     stations_df = stations_to_df(stations_list)
-    
+
     return TimeSeries(
         ts.granularity,
         stations_df,

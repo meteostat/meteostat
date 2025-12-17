@@ -115,7 +115,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """ """
     if req.start is None or req.end is None:
         return None
-    
+
     years = range(req.start.year, req.end.year + 1)
     data = tuple(
         map(

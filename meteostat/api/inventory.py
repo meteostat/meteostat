@@ -52,7 +52,7 @@ class Inventory:
         """
         if self.df is None:
             return []
-        
+
         return [
             Parameter[parameter.upper()]
             for parameter in self.df.index.get_level_values("parameter").unique()

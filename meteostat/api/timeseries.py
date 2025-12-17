@@ -143,7 +143,8 @@ class TimeSeries:
         Get licenses
         """
         providers = [
-            provider for provider_id in self.providers
+            provider
+            for provider_id in self.providers
             if (provider := provider_service.get_provider(provider_id)) is not None
         ]
 
@@ -223,7 +224,12 @@ class TimeSeries:
         if clean:
             df = schema_service.clean(df, self.granularity)
 
-        if fill and self.start is not None and self.end is not None and self.freq is not None:
+        if (
+            fill
+            and self.start is not None
+            and self.end is not None
+            and self.freq is not None
+        ):
             df = fill_df(df, self.start, self.end, self.freq)
 
         if self.timezone:
@@ -305,13 +311,13 @@ class TimeSeries:
         Does the time series pass all validations?
         """
         df = self.fetch(fill=True, clean=False)
-        
+
         if df is None:
             return True
 
         for col in df:
             parameter = parameter_service.get_parameter(col, self.granularity)
-            if parameter is None or not hasattr(parameter, 'validators'):
+            if parameter is None or not hasattr(parameter, "validators"):
                 continue
             for validator in parameter.validators:
                 if isinstance(validator, Validator):

@@ -25,24 +25,24 @@ def stations_to_df(stations: List[Station]) -> pd.DataFrame:
     """
     Convert list of stations to DataFrame
     """
-    assert len(stations) > 0 and all(isinstance(station, Station) for station in stations)
+    assert len(stations) > 0 and all(
+        isinstance(station, Station) for station in stations
+    )
 
-    return (
-        pd.DataFrame.from_records(
-            [
-                {
-                    "id": station.id,
-                    "name": station.name,
-                    "country": station.country,
-                    "latitude": station.latitude,
-                    "longitude": station.longitude,
-                    "elevation": station.elevation,
-                    "timezone": station.timezone,
-                }
-                for station in stations
-            ],
-            index="id",
-        )
+    return pd.DataFrame.from_records(
+        [
+            {
+                "id": station.id,
+                "name": station.name,
+                "country": station.country,
+                "latitude": station.latitude,
+                "longitude": station.longitude,
+                "elevation": station.elevation,
+                "timezone": station.timezone,
+            }
+            for station in stations
+        ],
+        index="id",
     )
 
 

@@ -53,7 +53,7 @@ def get_df(station: str, year: int) -> Optional[pd.DataFrame]:
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if req.start is None or req.end is None:
         return None
-    
+
     years = range(req.start.year, req.end.year + 1)
     data = [get_df(req.station.id, year) for year in years]
     df = pd.concat(data) if len(data) and not all(d is None for d in data) else None

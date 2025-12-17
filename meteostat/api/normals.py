@@ -80,7 +80,9 @@ def normals(
         # Add station level if only a single station is provided
         if not ts._multi_station:
             df = pd.concat(
-                [df], keys=[ts.stations.index.get_level_values("id")[0]], names=["station"]
+                [df],
+                keys=[ts.stations.index.get_level_values("id")[0]],
+                names=["station"],
             )
 
         # Extract month from time index

@@ -96,7 +96,7 @@ class ProviderService:
 
         def _filter(provider_id: Provider) -> TypeGuard[Provider]:
             provider = self.get_provider(provider_id)
-            
+
             if provider is None:
                 return False
 
@@ -165,7 +165,12 @@ class ProviderService:
 
         query = ProviderRequest(
             station=station,
-            start=req.start or (datetime.combine(provider.start, datetime.min.time()) if provider.start else None),
+            start=req.start
+            or (
+                datetime.combine(provider.start, datetime.min.time())
+                if provider.start
+                else None
+            ),
             end=req.end or (provider.end or datetime.now()),
             parameters=req.parameters,
         )

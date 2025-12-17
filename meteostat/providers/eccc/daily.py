@@ -60,7 +60,11 @@ def get_df(climate_id: str, year: int) -> Optional[pd.DataFrame]:
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
-    if "national" not in req.station.identifiers or req.start is None or req.end is None:
+    if (
+        "national" not in req.station.identifiers
+        or req.start is None
+        or req.end is None
+    ):
         return None
 
     meta_data = get_meta_data(req.station.identifiers["national"])
@@ -70,7 +74,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     if not (climate_id and archive_first and archive_last):
         return None
-    
+
     archive_start = datetime.strptime(archive_first, "%Y-%m-%d %H:%M:%S")
     archive_end = datetime.strptime(archive_last, "%Y-%m-%d %H:%M:%S")
 

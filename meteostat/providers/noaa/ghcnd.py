@@ -221,9 +221,7 @@ def get_df(station: str) -> pd.DataFrame:
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     ghcn_id = (
-        req.station.identifiers["ghcn"]
-        if "ghcn" in req.station.identifiers
-        else None
+        req.station.identifiers["ghcn"] if "ghcn" in req.station.identifiers else None
     )
     if not ghcn_id:
         return None

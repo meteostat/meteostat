@@ -99,7 +99,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     # Adjust DataFrame and add index
     df = df.round(1)
-    df.index = pd.to_datetime(df.index.astype('datetime64').dt.date)  # type: ignore[union-attr]
+    df.index = pd.to_datetime(df.index.astype("datetime64").dt.date)  # type: ignore[union-attr]
     df.index.name = "time"
 
     # Return final DataFrame

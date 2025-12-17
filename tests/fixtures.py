@@ -126,7 +126,7 @@ def generate_dwd_hourly_fixture():
         end=end,
     )
     df = fetch_dwd_hourly(req)
-    df = data_service._filter_time(df, start, end)
+    df = data_service.filter_time(df, start, end)
     return df
 
 
