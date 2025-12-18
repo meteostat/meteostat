@@ -82,6 +82,36 @@ def generate_hourly_fixture():
     return df
 
 
+@fixture("hourly_10635")
+def generate_hourly_fixture_second_station():
+    """
+    Generates a fixture DataFrame for hourly data tests
+    """
+    req = ProviderRequest(
+        station=Station(id="10635"),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
+        start=datetime(2024, 1, 1, 0, 0),
+        end=datetime(2024, 12, 31, 23, 59),
+    )
+    df = fetch_hourly(req)
+    return df
+
+
+@fixture("hourly_10532")
+def generate_hourly_fixture_third_station():
+    """
+    Generates a fixture DataFrame for hourly data tests
+    """
+    req = ProviderRequest(
+        station=Station(id="10532"),
+        parameters=DEFAULT_PARAMETERS_HOURLY,
+        start=datetime(2024, 1, 1, 0, 0),
+        end=datetime(2024, 12, 31, 23, 59),
+    )
+    df = fetch_hourly(req)
+    return df
+
+
 @fixture("daily")
 def generate_daily_fixture():
     """
@@ -163,6 +193,8 @@ def generate_dwd_mosmix_fixture():
 generate_station_fixture("10637")
 generate_stations_db_fixture()
 generate_hourly_fixture()
+generate_hourly_fixture_second_station()
+generate_hourly_fixture_third_station()
 generate_daily_fixture()
 generate_monthly_fixture()
 generate_dwd_hourly_fixture()

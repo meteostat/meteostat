@@ -9,6 +9,8 @@ from datetime import date
 import pandas as pd
 import pytest
 
+from meteostat.typing import ProviderRequest
+
 
 @pytest.fixture
 def df_daily():
@@ -30,6 +32,30 @@ def df_hourly():
         "..",
         "fixtures",
         "df_hourly.pickle",
+    )
+    return pd.read_pickle(fixture_path)
+
+
+@pytest.fixture
+def df_hourly_second_station():
+    """Load hourly fixture data"""
+    fixture_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "fixtures",
+        "df_hourly_10635.pickle",
+    )
+    return pd.read_pickle(fixture_path)
+
+
+@pytest.fixture
+def df_hourly_third_station():
+    """Load hourly fixture data"""
+    fixture_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "..",
+        "fixtures",
+        "df_hourly_10532.pickle",
     )
     return pd.read_pickle(fixture_path)
 
@@ -115,10 +141,22 @@ def mock_daily_fetch(mocker, df_daily):
 
 
 @pytest.fixture
-def mock_hourly_fetch(mocker, df_hourly):
-    """Mock the hourly fetch function"""
+def mock_hourly_fetch(
+    mocker, df_hourly, df_hourly_second_station, df_hourly_third_station
+):
+    """Mock the hourly fetch function with station-specific data"""
+
+    def side_effect(req: ProviderRequest):
+        # Return different DataFrames based on station ID
+        if req.station.id == "10635":
+            return df_hourly_second_station
+        elif req.station.id == "10532":
+            return df_hourly_third_station
+        else:
+            return df_hourly
+
     return mocker.patch(
-        "meteostat.providers.meteostat.hourly.fetch", return_value=df_hourly
+        "meteostat.providers.meteostat.hourly.fetch", side_effect=side_effect
     )
 
 
@@ -180,10 +218,10 @@ def patch_mosmix_provider_start_date(mocker):
     """Patch the MOSMIX provider's start date to allow test data to be picked up"""
     from meteostat.core.providers import provider_service
     from meteostat.enumerations import Provider
-    
+
     # Get the original MOSMIX provider
     original_provider = provider_service.get_provider(Provider.DWD_MOSMIX)
-    
+
     if original_provider:
         # Create a modified provider spec with an earlier start date
         modified_provider = original_provider.__class__(
@@ -200,13 +238,15 @@ def patch_mosmix_provider_start_date(mocker):
             countries=original_provider.countries,
             module=original_provider.module,
         )
-        
+
         # Patch the provider_service.get_provider method
         original_get_provider = provider_service.get_provider
-        
+
         def patched_get_provider(provider_id):
             if provider_id == Provider.DWD_MOSMIX:
                 return modified_provider
             return original_get_provider(provider_id)
-        
-        mocker.patch.object(provider_service, "get_provider", side_effect=patched_get_provider)
+
+        mocker.patch.object(
+            provider_service, "get_provider", side_effect=patched_get_provider
+        )

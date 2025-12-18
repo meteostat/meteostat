@@ -203,17 +203,35 @@ def test_hourly_multiple_providers_no_squash(
         providers=[ms.Provider.DWD_HOURLY, ms.Provider.DWD_POI, ms.Provider.DWD_MOSMIX],
     )
     df = ts.fetch(sources=True, squash=False)
-    df_1 = data_service.filter_time(df, datetime(2025, 12, 1, 0, 0), datetime(2025, 12, 1, 0, 59))
-    df_2 = data_service.filter_time(df, datetime(2025, 12, 16, 16, 0), datetime(2025, 12, 16, 16, 59))
-    df_3 = data_service.filter_time(df, datetime(2025, 12, 17, 6, 0), datetime(2025, 12, 17, 6, 59))
-    df_4 = data_service.filter_time(df, datetime(2025, 12, 18, 6, 0), datetime(2025, 12, 18, 6, 59))
+    df_1 = data_service.filter_time(
+        df, datetime(2025, 12, 1, 0, 0), datetime(2025, 12, 1, 0, 59)
+    )
+    df_2 = data_service.filter_time(
+        df, datetime(2025, 12, 16, 16, 0), datetime(2025, 12, 16, 16, 59)
+    )
+    df_3 = data_service.filter_time(
+        df, datetime(2025, 12, 17, 6, 0), datetime(2025, 12, 17, 6, 59)
+    )
+    df_4 = data_service.filter_time(
+        df, datetime(2025, 12, 18, 6, 0), datetime(2025, 12, 18, 6, 59)
+    )
     assert df is not None
     assert len(df) == 519
     assert len(df_1) == 1
-    assert df_1.index.get_level_values("source").unique().tolist() == [Provider.DWD_HOURLY]
+    assert df_1.index.get_level_values("source").unique().tolist() == [
+        Provider.DWD_HOURLY
+    ]
     assert len(df_2) == 2
-    assert df_2.index.get_level_values("source").unique().tolist() == [Provider.DWD_MOSMIX, Provider.DWD_POI]
+    assert df_2.index.get_level_values("source").unique().tolist() == [
+        Provider.DWD_MOSMIX,
+        Provider.DWD_POI,
+    ]
     assert len(df_3) == 2
-    assert df_3.index.get_level_values("source").unique().tolist() == [Provider.DWD_MOSMIX, Provider.DWD_POI]
+    assert df_3.index.get_level_values("source").unique().tolist() == [
+        Provider.DWD_MOSMIX,
+        Provider.DWD_POI,
+    ]
     assert len(df_4) == 1
-    assert df_4.index.get_level_values("source").unique().tolist() == [Provider.DWD_MOSMIX]
+    assert df_4.index.get_level_values("source").unique().tolist() == [
+        Provider.DWD_MOSMIX
+    ]
