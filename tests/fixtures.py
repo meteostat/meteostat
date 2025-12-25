@@ -7,7 +7,6 @@ import pickle
 from meteostat.api.hourly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_HOURLY
 from meteostat.api.daily import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_DAILY
 from meteostat.api.monthly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_MONTHLY
-from meteostat.api.station import _fetch_station
 from meteostat.api.stations import stations
 from meteostat.core.config import config
 from meteostat.core.data import data_service
@@ -46,16 +45,6 @@ def fixture(filename):
         return wrapper
 
     return decorator
-
-
-def generate_station_fixture(station_id: str):
-    """
-    Generates a fixture DataFrame for station data tests
-    """
-    station_data = _fetch_station(station_id)
-    filepath = FIXTURES_DIR / f"station_{station_id}.json"
-    with open(filepath, "w") as f:
-        json.dump(station_data, f)
 
 
 def generate_stations_db_fixture():
@@ -190,7 +179,6 @@ def generate_dwd_mosmix_fixture():
     return df
 
 
-generate_station_fixture("10637")
 generate_stations_db_fixture()
 generate_hourly_fixture()
 generate_hourly_fixture_second_station()

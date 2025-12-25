@@ -2,7 +2,7 @@ import meteostat as ms
 from meteostat.enumerations import UnitSystem
 
 
-def test_normals(mock_monthly_fetch, mock_station):
+def test_normals(mock_monthly_fetch, mock_stations_database):
     """
     It returns a filtered DataFrame
     """
@@ -13,7 +13,7 @@ def test_normals(mock_monthly_fetch, mock_station):
     assert df.iloc[0]["temp"] == 2.3
 
 
-def test_normals_none(mocker, empty_dataframe, mock_station):
+def test_normals_none(mocker, empty_dataframe, mock_stations_database):
     """
     It returns None if provider returns an empty DataFrame
     """
@@ -24,7 +24,7 @@ def test_normals_none(mocker, empty_dataframe, mock_station):
     assert ts.fetch() is None
 
 
-def test_normals_count(mock_monthly_fetch, mock_station):
+def test_normals_count(mock_monthly_fetch, mock_stations_database):
     """
     It counts the non-NaN values for a parameter
     """
@@ -39,7 +39,7 @@ def test_normals_count(mock_monthly_fetch, mock_station):
     assert total_count >= temp_count
 
 
-def test_normals_completeness(mock_monthly_fetch, mock_station):
+def test_normals_completeness(mock_monthly_fetch, mock_stations_database):
     """
     It calculates completeness for parameters
     """
@@ -56,7 +56,7 @@ def test_normals_completeness(mock_monthly_fetch, mock_station):
     assert 0 <= overall_completeness <= 1
 
 
-def test_normals_validate(mock_monthly_fetch, mock_station):
+def test_normals_validate(mock_monthly_fetch, mock_stations_database):
     """
     It validates the time series data
     """
@@ -67,7 +67,7 @@ def test_normals_validate(mock_monthly_fetch, mock_station):
     assert isinstance(is_valid, bool)
 
 
-def test_normals_fetch_with_sources(mock_monthly_fetch, mock_station):
+def test_normals_fetch_with_sources(mock_monthly_fetch, mock_stations_database):
     """
     It includes source information in the DataFrame
     """
@@ -80,7 +80,7 @@ def test_normals_fetch_with_sources(mock_monthly_fetch, mock_station):
     assert len(source_cols) > 0
 
 
-def test_normals_fetch_with_units(mock_monthly_fetch, mock_station):
+def test_normals_fetch_with_units(mock_monthly_fetch, mock_stations_database):
     """
     It converts units when requested
     """
@@ -103,7 +103,7 @@ def test_normals_fetch_with_units(mock_monthly_fetch, mock_station):
         assert abs(imperial_temp - expected_imperial) < 1  # Allow for rounding
 
 
-def test_normals_length(mock_monthly_fetch, mock_station):
+def test_normals_length(mock_monthly_fetch, mock_stations_database):
     """
     It has a length property
     """
@@ -113,7 +113,7 @@ def test_normals_length(mock_monthly_fetch, mock_station):
     assert len(ts) > 0
 
 
-def test_normals_parameters_property(mock_monthly_fetch, mock_station):
+def test_normals_parameters_property(mock_monthly_fetch, mock_stations_database):
     """
     It provides access to available parameters
     """
@@ -127,7 +127,7 @@ def test_normals_parameters_property(mock_monthly_fetch, mock_station):
 
 
 def test_normals_empty_property(
-    mock_monthly_fetch, empty_dataframe, mocker, mock_station
+    mock_monthly_fetch, empty_dataframe, mocker, mock_stations_database
 ):
     """
     It has an empty property that reflects data availability

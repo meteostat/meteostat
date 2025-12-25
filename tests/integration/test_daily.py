@@ -4,7 +4,7 @@ import meteostat as ms
 from meteostat.enumerations import UnitSystem
 
 
-def test_daily(mock_daily_fetch, mock_station):
+def test_daily(mock_daily_fetch, mock_stations_databases_database):
     """
     It returns a filtered DataFrame
     """
@@ -15,7 +15,7 @@ def test_daily(mock_daily_fetch, mock_station):
     assert df.iloc[0]["temp"] == 6.6
 
 
-def test_daily_none(mocker, empty_dataframe, mock_station):
+def test_daily_none(mocker, empty_dataframe, mock_stations_database):
     """
     It returns None if provider returns an empty DataFrame
     """
@@ -26,7 +26,7 @@ def test_daily_none(mocker, empty_dataframe, mock_station):
     assert ts.fetch() is None
 
 
-def test_daily_count(mock_daily_fetch, mock_station):
+def test_daily_count(mock_daily_fetch, mock_stations_database):
     """
     It counts the non-NaN values for a parameter
     """
@@ -41,7 +41,7 @@ def test_daily_count(mock_daily_fetch, mock_station):
     assert total_count >= temp_count
 
 
-def test_daily_completeness(mock_daily_fetch, mock_station):
+def test_daily_completeness(mock_daily_fetch, mock_stations_database):
     """
     It calculates completeness for parameters
     """
@@ -58,7 +58,7 @@ def test_daily_completeness(mock_daily_fetch, mock_station):
     assert 0 <= overall_completeness <= 1
 
 
-def test_daily_validate(mock_daily_fetch, mock_station):
+def test_daily_validate(mock_daily_fetch, mock_stations_database):
     """
     It validates the time series data
     """
@@ -69,7 +69,7 @@ def test_daily_validate(mock_daily_fetch, mock_station):
     assert isinstance(is_valid, bool)
 
 
-def test_daily_fetch_with_sources(mock_daily_fetch, mock_station):
+def test_daily_fetch_with_sources(mock_daily_fetch, mock_stations_database):
     """
     It includes source information in the DataFrame
     """
@@ -82,7 +82,7 @@ def test_daily_fetch_with_sources(mock_daily_fetch, mock_station):
     assert len(source_cols) > 0
 
 
-def test_daily_fetch_with_fill(mock_daily_fetch, mock_station):
+def test_daily_fetch_with_fill(mock_daily_fetch, mock_stations_database):
     """
     It fills missing rows when requested
     """
@@ -95,7 +95,7 @@ def test_daily_fetch_with_fill(mock_daily_fetch, mock_station):
     assert len(df_filled) >= len(df_unfilled)
 
 
-def test_daily_fetch_with_units(mock_daily_fetch, mock_station):
+def test_daily_fetch_with_units(mock_daily_fetch, mock_stations_database):
     """
     It converts units when requested
     """
@@ -120,7 +120,7 @@ def test_daily_fetch_with_units(mock_daily_fetch, mock_station):
         assert abs(imperial_temp - expected_imperial) < 1  # Allow for rounding
 
 
-def test_daily_length(mock_daily_fetch, mock_station):
+def test_daily_length(mock_daily_fetch, mock_stations_database):
     """
     It has a length property
     """
@@ -130,7 +130,7 @@ def test_daily_length(mock_daily_fetch, mock_station):
     assert len(ts) > 0
 
 
-def test_daily_parameters_property(mock_daily_fetch, mock_station):
+def test_daily_parameters_property(mock_daily_fetch, mock_stations_database):
     """
     It provides access to available parameters
     """
@@ -143,7 +143,7 @@ def test_daily_parameters_property(mock_daily_fetch, mock_station):
     assert "temp" in params
 
 
-def test_daily_empty_property(mock_daily_fetch, empty_dataframe, mocker, mock_station):
+def test_daily_empty_property(mock_daily_fetch, empty_dataframe, mocker, mock_stations_database):
     """
     It has an empty property that reflects data availability
     """

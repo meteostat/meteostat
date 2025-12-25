@@ -109,18 +109,6 @@ def df_dwd_mosmix():
 
 
 @pytest.fixture
-def json_station():
-    """Load station fixture data"""
-    fixture_path = os.path.join(
-        os.path.dirname(os.path.abspath(__file__)),
-        "..",
-        "fixtures",
-        "station_10637.json",
-    )
-    return json.load(open(fixture_path, "r"))
-
-
-@pytest.fixture
 def str_stations_database_file_path():
     """Return the stations.db fixture path"""
     fixture_path = os.path.join(
@@ -191,15 +179,7 @@ def mock_dwd_mosmix_fetch(mocker, df_dwd_mosmix):
 
 
 @pytest.fixture
-def mock_station(mocker, json_station):
-    """Mock the station fetch function"""
-    return mocker.patch(
-        "meteostat.api.station._fetch_station", return_value=json_station
-    )
-
-
-@pytest.fixture
-def mock_stations_database(mocker, str_stations_database_file_path):
+def mock_stations_databases_database(mocker, str_stations_database_file_path):
     """Mock the stations database _get_file_path function"""
     return mocker.patch(
         "meteostat.api.stations.stations._get_file_path",

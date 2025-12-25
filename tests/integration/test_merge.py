@@ -5,7 +5,7 @@ from meteostat.enumerations import Provider
 
 
 def test_merge_providers(
-    mock_station, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
 ):
     """
     It merges data from multiple providers correctly
@@ -39,7 +39,7 @@ def test_merge_providers(
     assert df.iloc[431]["temp_source"] == Provider.DWD_MOSMIX
 
 
-def test_merge_stations(mock_stations_database, mock_hourly_fetch):
+def test_merge_stations(mock_stations_databases_database, mock_hourly_fetch):
     """
     It merges data from multiple weather stations correctly
     """
@@ -74,7 +74,7 @@ def test_merge_stations(mock_stations_database, mock_hourly_fetch):
     assert ts_merged.end == end
 
 
-def test_merge_time(mock_stations_database, mock_hourly_fetch):
+def test_merge_time(mock_stations_databases_database, mock_hourly_fetch):
     """
     It merges data from multiple time ranges correctly
     """

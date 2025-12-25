@@ -5,7 +5,7 @@ from meteostat.core.data import data_service
 from meteostat.enumerations import Provider, UnitSystem
 
 
-def test_hourly(mock_hourly_fetch, mock_station):
+def test_hourly(mock_hourly_fetch, mock_stations_database):
     """
     It returns a filtered DataFrame
     """
@@ -16,7 +16,7 @@ def test_hourly(mock_hourly_fetch, mock_station):
     assert df.iloc[0]["temp"] == 8.3
 
 
-def test_hourly_timezone(mock_hourly_fetch, mock_station):
+def test_hourly_timezone(mock_hourly_fetch, mock_stations_database):
     """
     It should consider the timezone when filtering the DataFrame
     """
@@ -32,7 +32,7 @@ def test_hourly_timezone(mock_hourly_fetch, mock_station):
     assert df.iloc[0]["temp"] == 8.5
 
 
-def test_hourly_none(mocker, empty_dataframe, mock_station):
+def test_hourly_none(mocker, empty_dataframe, mock_stations_database):
     """
     It returns None if provider returns an empty DataFrame
     """
@@ -43,7 +43,7 @@ def test_hourly_none(mocker, empty_dataframe, mock_station):
     assert ts.fetch() is None
 
 
-def test_hourly_count(mock_hourly_fetch, mock_station):
+def test_hourly_count(mock_hourly_fetch, mock_stations_database):
     """
     It counts the non-NaN values for a parameter
     """
@@ -58,7 +58,7 @@ def test_hourly_count(mock_hourly_fetch, mock_station):
     assert total_count >= temp_count
 
 
-def test_hourly_completeness(mock_hourly_fetch, mock_station):
+def test_hourly_completeness(mock_hourly_fetch, mock_stations_database):
     """
     It calculates completeness for parameters
     """
@@ -75,7 +75,7 @@ def test_hourly_completeness(mock_hourly_fetch, mock_station):
     assert 0 <= overall_completeness <= 1
 
 
-def test_hourly_validate(mock_hourly_fetch, mock_station):
+def test_hourly_validate(mock_hourly_fetch, mock_stations_database):
     """
     It validates the time series data
     """
@@ -86,7 +86,7 @@ def test_hourly_validate(mock_hourly_fetch, mock_station):
     assert isinstance(is_valid, bool)
 
 
-def test_hourly_fetch_with_sources(mock_hourly_fetch, mock_station):
+def test_hourly_fetch_with_sources(mock_hourly_fetch, mock_stations_database):
     """
     It includes source information in the DataFrame
     """
@@ -99,7 +99,7 @@ def test_hourly_fetch_with_sources(mock_hourly_fetch, mock_station):
     assert len(source_cols) > 0
 
 
-def test_hourly_fetch_with_fill(mock_hourly_fetch, mock_station):
+def test_hourly_fetch_with_fill(mock_hourly_fetch, mock_stations_database):
     """
     It fills missing rows when requested
     """
@@ -112,7 +112,7 @@ def test_hourly_fetch_with_fill(mock_hourly_fetch, mock_station):
     assert len(df_filled) >= len(df_unfilled)
 
 
-def test_hourly_fetch_with_units(mock_hourly_fetch, mock_station):
+def test_hourly_fetch_with_units(mock_hourly_fetch, mock_stations_database):
     """
     It converts units when requested
     """
@@ -135,7 +135,7 @@ def test_hourly_fetch_with_units(mock_hourly_fetch, mock_station):
         assert abs(imperial_temp - expected_imperial) < 1  # Allow for rounding
 
 
-def test_hourly_length(mock_hourly_fetch, mock_station):
+def test_hourly_length(mock_hourly_fetch, mock_stations_database):
     """
     It has a length property
     """
@@ -145,7 +145,7 @@ def test_hourly_length(mock_hourly_fetch, mock_station):
     assert len(ts) > 0
 
 
-def test_hourly_parameters_property(mock_hourly_fetch, mock_station):
+def test_hourly_parameters_property(mock_hourly_fetch, mock_stations_database):
     """
     It provides access to available parameters
     """
@@ -159,7 +159,7 @@ def test_hourly_parameters_property(mock_hourly_fetch, mock_station):
 
 
 def test_hourly_empty_property(
-    mock_hourly_fetch, empty_dataframe, mocker, mock_station
+    mock_hourly_fetch, empty_dataframe, mocker, mock_stations_database
 ):
     """
     It has an empty property that reflects data availability
@@ -177,7 +177,7 @@ def test_hourly_empty_property(
 
 
 def test_hourly_multiple_providers(
-    mock_station, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
 ):
     ts = ms.hourly(
         "10637",
@@ -194,7 +194,7 @@ def test_hourly_multiple_providers(
 
 
 def test_hourly_multiple_providers_no_squash(
-    mock_station, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
 ):
     ts = ms.hourly(
         "10637",
