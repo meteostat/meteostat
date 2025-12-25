@@ -18,13 +18,7 @@ from meteostat.typing import Station
 
 
 def parse_station(
-    station: (
-        str
-        | Station
-        | Point
-        | List[str | Station | Point]
-        | pd.DataFrame
-    ),
+    station: (str | Station | Point | List[str | Station | Point] | pd.DataFrame),
 ) -> Station | List[Station]:
     """
     Parse one or multiple station(s) or geo point(s)
@@ -51,7 +45,7 @@ def parse_station(
             )
 
         return station
-    
+
     # Return data if it contains station meta data (single station)
     if isinstance(station, Station):
         return station

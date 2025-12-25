@@ -5,7 +5,10 @@ from meteostat.enumerations import Provider
 
 
 def test_merge_providers(
-    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database,
+    mock_dwd_hourly_fetch,
+    mock_dwd_poi_fetch,
+    mock_dwd_mosmix_fetch,
 ):
     """
     It merges data from multiple providers correctly

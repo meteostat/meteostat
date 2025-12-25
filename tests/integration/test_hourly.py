@@ -177,7 +177,10 @@ def test_hourly_empty_property(
 
 
 def test_hourly_multiple_providers(
-    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database,
+    mock_dwd_hourly_fetch,
+    mock_dwd_poi_fetch,
+    mock_dwd_mosmix_fetch,
 ):
     ts = ms.hourly(
         "10637",
@@ -194,7 +197,10 @@ def test_hourly_multiple_providers(
 
 
 def test_hourly_multiple_providers_no_squash(
-    mock_stations_database, mock_dwd_hourly_fetch, mock_dwd_poi_fetch, mock_dwd_mosmix_fetch
+    mock_stations_database,
+    mock_dwd_hourly_fetch,
+    mock_dwd_poi_fetch,
+    mock_dwd_mosmix_fetch,
 ):
     ts = ms.hourly(
         "10637",

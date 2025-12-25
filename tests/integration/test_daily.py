@@ -143,7 +143,9 @@ def test_daily_parameters_property(mock_daily_fetch, mock_stations_database):
     assert "temp" in params
 
 
-def test_daily_empty_property(mock_daily_fetch, empty_dataframe, mocker, mock_stations_database):
+def test_daily_empty_property(
+    mock_daily_fetch, empty_dataframe, mocker, mock_stations_database
+):
     """
     It has an empty property that reflects data availability
     """
