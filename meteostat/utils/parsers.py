@@ -11,8 +11,9 @@ import datetime
 import pandas as pd
 import pytz
 
-from meteostat.api.station import station as get_station
+from meteostat.api.stations import stations as stations_service
 from meteostat.api.point import Point
+from meteostat.core.config import config
 from meteostat.typing import Station
 
 
@@ -22,8 +23,6 @@ def parse_station(
         | Station
         | Point
         | List[str | Station | Point]
-        | pd.Index
-        | pd.Series
         | pd.DataFrame
     ),
 ) -> Station | List[Station]:
@@ -39,6 +38,20 @@ def parse_station(
         - Returns a single Station object for single-station input (str, Station, Point)
         - Returns a list of Station objects for multi-station input (list, pd.Index, etc.)
     """
+    # Return data if a DataFrame is given
+    if isinstance(station, pd.DataFrame):
+        # Validate required columns for station metadata
+        required_columns = {"latitude", "longitude", "elevation"}
+        missing = required_columns.difference(station.columns)
+        if missing:
+            missing_str = ", ".join(sorted(missing))
+            required_str = ", ".join(sorted(required_columns))
+            raise ValueError(
+                f"DataFrame must contain at least the columns: {required_str}. Missing: {missing_str}."
+            )
+
+        return station
+    
     # Return data if it contains station meta data (single station)
     if isinstance(station, Station):
         return station
@@ -49,7 +62,7 @@ def parse_station(
 
     # Handle string (single station ID)
     if isinstance(station, str):
-        meta = get_station(station)
+        meta = stations_service.meta(station)
         if meta is None:
             raise ValueError(f'Weather station with ID "{station}" could not be found')
         return meta
@@ -62,6 +75,12 @@ def parse_station(
     else:
         # It's a list
         stations = station
+
+    if config.block_large_requests and len(stations) > 10:
+        raise ValueError(
+            "Requests with more than 10 stations are blocked by default. "
+            "To enable large requests, set `config.block_large_requests = False`."
+        )
 
     # Get station meta data
     data = []
@@ -77,7 +96,7 @@ def parse_station(
             data.append(_point_to_station(s, point_counter))
             continue
         # Get station meta data
-        meta = get_station(s)
+        meta = stations_service.meta(s)
         # Raise exception if station could not be found
         if meta is None:
             raise ValueError(f'Weather station with ID "{s}" could not be found')

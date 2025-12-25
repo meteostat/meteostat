@@ -101,6 +101,9 @@ class ConfigService(Config):
     from environment variables.
     """
 
+    # General settings
+    block_large_requests: bool = True  # Block requests that include too many stations
+
     # Cache settings
     cache_enable: bool = True
     cache_directory: str = (
@@ -113,7 +116,6 @@ class ConfigService(Config):
     network_proxies: Optional[dict] = None
 
     # Station meta data settings
-    stations_db_prefer: bool = False
     stations_db_ttl: int = TTL.WEEK
     stations_db_endpoints: List[str] = [
         "https://data.meteostat.net/stations.db",
@@ -122,11 +124,6 @@ class ConfigService(Config):
     stations_db_file: str = (
         os.path.expanduser("~") + os.sep + ".meteostat" + os.sep + "stations.db"
     )
-    stations_meta_endpoints: list = [
-        "https://data.meteostat.net/stations/{id}.json",
-        "https://cdn.jsdelivr.net/gh/meteostat/weather-stations/stations/{id}.json",
-        "https://raw.githubusercontent.com/meteostat/weather-stations/master/stations/{id}.json",
-    ]
 
     # Interpolation settings
     lapse_rate_parameters = [Parameter.TEMP, Parameter.TMIN, Parameter.TMAX]

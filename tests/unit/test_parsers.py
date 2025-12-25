@@ -4,6 +4,8 @@ Test parsers module
 The code is licensed under the MIT license.
 """
 
+import pandas as pd
+import pytest
 from meteostat import Point
 from meteostat.typing import Station
 from meteostat.utils.parsers import parse_station, _point_to_station
@@ -68,6 +70,38 @@ class TestParseStation:
         assert result.latitude == 50.110924
         assert result.longitude == 8.682127
         assert result.elevation == 112
+
+    def test_parse_station_with_dataframe_valid(self):
+        """
+        Test parse_station with a valid DataFrame containing required columns
+        """
+        df = pd.DataFrame(
+            {
+                "latitude": [50.0, 51.0],
+                "longitude": [8.0, 9.0],
+                "elevation": [100, 200],
+            }
+        )
+
+        result = parse_station(df)
+
+        assert isinstance(result, pd.DataFrame)
+        assert set(["latitude", "longitude", "elevation"]).issubset(result.columns)
+
+    def test_parse_station_with_dataframe_missing_columns(self):
+        """
+        Test parse_station with a DataFrame missing required columns raises ValueError
+        """
+        df_missing = pd.DataFrame({"latitude": [50.0], "longitude": [8.0]})
+
+        with pytest.raises(ValueError) as exc:
+            parse_station(df_missing)
+
+        # Error message should mention required columns and the missing ones
+        msg = str(exc.value)
+        assert "DataFrame must contain at least the columns" in msg
+        assert "Missing:" in msg
+        assert "elevation" in msg
 
     def test_parse_station_with_station(self):
         """
