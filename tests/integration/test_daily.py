@@ -4,7 +4,7 @@ import meteostat as ms
 from meteostat.enumerations import UnitSystem
 
 
-def test_daily(mock_daily_fetch, mock_stations_databases_database):
+def test_daily(mock_daily_fetch, mock_stations_database):
     """
     It returns a filtered DataFrame
     """

@@ -2,7 +2,6 @@
 Shared fixtures for integration tests
 """
 
-import json
 import os
 from datetime import date
 
