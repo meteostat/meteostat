@@ -4,8 +4,6 @@ Test parsers module
 The code is licensed under the MIT license.
 """
 
-import pandas as pd
-import pytest
 from meteostat import Point
 from meteostat.typing import Station
 from meteostat.utils.parsers import parse_station, _point_to_station
