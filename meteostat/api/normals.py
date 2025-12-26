@@ -20,7 +20,7 @@ from meteostat.utils.parsers import parse_year
 
 
 def normals(
-    station: str | Station | Point | List[str | Station | Point] | pd.Index | pd.Series,
+    station: str | Station | Point | List[str | Station | Point] | pd.DataFrame,
     start: int = 1961,
     end: int = 1990,
     parameters: Optional[List[Parameter]] = None,

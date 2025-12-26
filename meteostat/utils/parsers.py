@@ -32,20 +32,6 @@ def parse_station(
         - Returns a single Station object for single-station input (str, Station, Point)
         - Returns a list of Station objects for multi-station input (list, pd.Index, etc.)
     """
-    # Return data if a DataFrame is given
-    if isinstance(station, pd.DataFrame):
-        # Validate required columns for station metadata
-        required_columns = {"latitude", "longitude", "elevation"}
-        missing = required_columns.difference(station.columns)
-        if missing:
-            missing_str = ", ".join(sorted(missing))
-            required_str = ", ".join(sorted(required_columns))
-            raise ValueError(
-                f"DataFrame must contain at least the columns: {required_str}. Missing: {missing_str}."
-            )
-
-        return station
-
     # Return data if it contains station meta data (single station)
     if isinstance(station, Station):
         return station
@@ -62,10 +48,8 @@ def parse_station(
         return meta
 
     # Convert station identifier(s) to list (multi-station)
-    if isinstance(station, (pd.Series, pd.DataFrame)):
+    if isinstance(station, pd.DataFrame):
         stations = station.index.tolist()
-    elif isinstance(station, pd.Index):
-        stations = station.tolist()
     else:
         # It's a list
         stations = station

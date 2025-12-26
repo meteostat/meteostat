@@ -31,7 +31,7 @@ DEFAULT_PARAMETERS = [
 
 
 def daily(
-    station: str | Station | Point | List[str | Station | Point] | pd.Index | pd.Series,
+    station: str | Station | Point | List[str | Station | Point] | pd.DataFrame,
     start: Optional[datetime | date],
     end: Optional[datetime | date],
     parameters: Optional[List[Parameter]] = None,
