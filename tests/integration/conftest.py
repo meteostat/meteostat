@@ -201,7 +201,10 @@ def patch_provider_start_date(mocker):
     original_get_provider = provider_service.get_provider
 
     def patched_get_provider(provider_id):
-        if provider_id in (Provider.DWD_MOSMIX, Provider.DWD_POI,):
+        if provider_id in (
+            Provider.DWD_MOSMIX,
+            Provider.DWD_POI,
+        ):
             # Get the original provider using the unpatched method
             original_provider = original_get_provider(provider_id)
 
@@ -222,9 +225,9 @@ def patch_provider_start_date(mocker):
                     module=original_provider.module,
                 )
                 return modified_provider
-            
+
             raise ValueError(f"Provider {provider_id} not found")
-        
+
         return original_get_provider(provider_id)
 
     mocker.patch.object(
