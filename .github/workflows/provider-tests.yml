@@ -1,0 +1,69 @@
+name: Provider Tests
+
+on:
+  schedule:
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  provider-tests:
+    name: Provider tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
+        run: |
+          poetry install --all-groups
+
+      - name: Run provider tests
+        run: |
+          poetry run pytest tests/provider -v
+
+  create-issue:
+    name: Create issue on failure
+    needs: provider-tests
+    runs-on: ubuntu-latest
+    if: needs.provider-tests.result == 'failure'
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Open issue when provider tests fail
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const title = 'Provider tests failing';
+            const { owner, repo } = context.repo;
+            const runUrl = `https://github.com/${owner}/${repo}/actions/runs/${context.runId}`;
+
+            const search = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:issue is:open "${title}"`
+            });
+
+            if (search.data.total_count > 0) {
+              core.info('Open issue already exists, skipping creation.');
+              return;
+            }
+
+            const body = [
+              'Nightly provider test run failed.',
+              `- workflow: ${runUrl}`,
+              '- please review the logs and address the failures.'
+            ].join('\n');
+
+            await github.rest.issues.create({ owner, repo, title, body });
