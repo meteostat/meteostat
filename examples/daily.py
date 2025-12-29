@@ -14,7 +14,7 @@ start = date(2018, 1, 1)
 end = date(2018, 12, 31)
 
 # Get daily data
-ts = ms.daily(ms.Station(id='10637'), start, end)
+ts = ms.daily(ms.Station(id="10637"), start, end)
 df = ts.fetch()
 
 # Print DataFrame

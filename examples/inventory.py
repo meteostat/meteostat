@@ -7,7 +7,7 @@ for a specific weather station using the Meteostat library.
 
 import meteostat as ms
 
-STATION = '71624'  # Toronto Pearson International Airport
+STATION = "71624"  # Toronto Pearson International Airport
 
 # Get station inventory
 inventory = ms.stations.inventory(STATION)

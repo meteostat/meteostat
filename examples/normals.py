@@ -9,7 +9,7 @@ Meteostat library.
 import meteostat as ms
 
 # Get climate normals data
-ts = ms.normals(ms.Station(id='10637'), 1961, 1990)
+ts = ms.normals(ms.Station(id="10637"), 1961, 1990)
 df = ts.fetch()
 
 # Print DataFrame

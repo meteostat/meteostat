@@ -95,7 +95,7 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
     df = df.rename(columns=NAMES)
 
     # Parse date column (first column contains the date)
-    df['time'] = pd.to_datetime(df.iloc[:, 0], format="%Y%m%d")
+    df["time"] = pd.to_datetime(df.iloc[:, 0], format="%Y%m%d")
     df = df.drop(df.columns[0], axis=1)
 
     # Convert data

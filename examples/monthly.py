@@ -14,7 +14,7 @@ start = date(2000, 1, 1)
 end = date(2018, 12, 31)
 
 # Get monthly data
-ts = ms.monthly(ms.Station(id='10637'), start, end)
+ts = ms.monthly(ms.Station(id="10637"), start, end)
 df = ts.fetch()
 
 # Print DataFrame

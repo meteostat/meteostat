@@ -14,7 +14,7 @@ start = datetime(2018, 1, 1)
 end = datetime(2018, 12, 31, 23, 59)
 
 # Get hourly data
-ts = ms.hourly(ms.Station(id='72219'), start, end)
+ts = ms.hourly(ms.Station(id="72219"), start, end)
 df = ts.fetch()
 
 # Print DataFrame
