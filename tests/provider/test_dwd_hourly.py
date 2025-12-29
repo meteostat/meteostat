@@ -1,21 +1,21 @@
 from datetime import datetime
-from meteostat import settings, Parameter
+import meteostat as ms
 from meteostat.providers.dwd.hourly import fetch
-from meteostat.typing import QueryDict
+from meteostat.typing import ProviderRequest
 
 
 def test_dwd_hourly():
     """
     It should load data from DWD Open Data (hourly)
     """
-    settings["cache_enable"] = False
+    ms.config.cache_enable = False
 
-    query: QueryDict = {
-        "start": datetime(2000, 2, 1, 15),
-        "end": datetime(2000, 2, 1, 17),
-        "station": {"id": "10637", "identifiers": {"national": "01420"}},
-        "parameters": [Parameter.TEMP, Parameter.PRCP],
-    }
+    query = ProviderRequest(
+        start=datetime(2000, 2, 1, 15),
+        end=datetime(2000, 2, 1, 17),
+        station=ms.Station(id="10637", identifiers={"national": "01420"}),
+        parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
+    )
     df = fetch(query)
 
     assert len(df) > 1

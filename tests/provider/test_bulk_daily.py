@@ -1,17 +1,18 @@
 from datetime import datetime
-from meteostat import settings
-from meteostat.providers.data.daily import fetch
-from meteostat.typing import QueryDict
+import meteostat as ms
+from meteostat.providers.meteostat.daily import fetch
+from meteostat.typing import ProviderRequest
 
 
 def test_data_daily():
-    settings["cache_enable"] = False
+    ms.config.cache_enable = False
 
-    query: QueryDict = {
-        "start": datetime(2020, 2, 1, 15),
-        "end": datetime(2020, 2, 1, 17),
-        "station": {"id": "01001"},
-    }
+    query = ProviderRequest(
+        start=datetime(2020, 2, 1),
+        end=datetime(2020, 2, 3),
+        station=ms.Station(id="10637"),
+        parameters=[ms.Parameter.TMIN, ms.Parameter.PRCP],
+    )
     df = fetch(query)
 
     assert len(df) > 1

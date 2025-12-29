@@ -1,20 +1,21 @@
 from datetime import datetime
-from meteostat import settings
+import meteostat as ms
 from meteostat.providers.noaa.ghcnd import fetch
-from meteostat.typing import QueryDict
+from meteostat.typing import ProviderRequest
 
 
 def test_noaa_ghcnd():
     """
     It should load data from NOAA GHCND
     """
-    settings["cache_enable"] = False
+    ms.config.cache_enable = False
 
-    query: QueryDict = {
-        "start": datetime(2021, 2, 1, 15),
-        "end": datetime(2022, 2, 1, 17),
-        "station": {"id": "10637", "identifiers": {"ghcn": "GMW00035032"}},
-    }
+    query = ProviderRequest(
+        start=datetime(2021, 2, 1, 15),
+        end=datetime(2022, 2, 1, 17),
+        station=ms.Station(id="10637", identifiers={"ghcn": "GMW00035032"}),
+        parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
+    )
     df = fetch(query)
 
     assert len(df) > 1

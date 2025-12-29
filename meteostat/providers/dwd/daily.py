@@ -23,7 +23,6 @@ from meteostat.providers.dwd.shared import get_ftp_connection
 
 BASE_DIR = "/climate_environment/CDC/observations_germany/climate/daily/kl/"
 USECOLS = [1, 3, 4, 6, 8, 9, 10, 12, 13, 14, 15, 16]  # CSV cols which should be read
-PARSE_DATES = {"time": [0]}  # Which columns should be parsed as dates?
 NAMES = {
     "FX": Parameter.WPGT,
     "FM": Parameter.WSPD,
@@ -88,13 +87,16 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
         date_format="%Y%m%d",
         na_values=["-999", -999],
         usecols=USECOLS,
-        parse_dates=PARSE_DATES,
         engine="python",
     )
 
     # Rename columns
     df = df.rename(columns=lambda x: x.strip())
     df = df.rename(columns=NAMES)
+
+    # Parse date column (first column contains the date)
+    df['time'] = pd.to_datetime(df.iloc[:, 0], format="%Y%m%d")
+    df = df.drop(df.columns[0], axis=1)
 
     # Convert data
     df[Parameter.SNWD] = df[Parameter.SNWD] * 10
