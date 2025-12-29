@@ -71,38 +71,11 @@ plt.show()
 
 Take a look at the expected output:
 
-![2018 temperature data for Vancouver, BC][product-screenshot]
-
-### 🎯 Spatial Interpolation
-
-Meteostat supports multiple interpolation methods for estimating weather data at specific points:
-
-```python
-from datetime import datetime
-import meteostat as ms
-
-point = ms.Point(50.1155, 8.6842, 113)  # Frankfurt, Germany
-stations = ms.stations.nearby(point, limit=5)
-ts = ms.hourly(stations, datetime(2020, 1, 1, 6), datetime(2020, 1, 1, 18))
-
-# Auto method (default) - intelligently selects best method
-df = ms.interpolate(ts, point, method="auto")
-
-# Or choose a specific method:
-# - "nearest": Nearest neighbor interpolation
-# - "idw": Inverse Distance Weighting
-df = ms.interpolate(ts, point, method="idw")
-```
-
-Each method has different characteristics:
-
-- **Auto**: Adaptively selects between nearest neighbor and IDW based on station proximity
-- **Nearest**: Fast, uses closest station's data (best for very close stations)
-- **IDW**: Weighted average considering distance and elevation (good general-purpose method)
+![2018 temperature data for Frankfurt, Germany][product-screenshot]
 
 ## 🤝 Contributing
 
-Instructions on building and testing the Meteostat Python package can be found in the [documentation](https://dev.meteostat.net/python/contributing.html). More information about the Meteostat bulk data interface is available [here](https://dev.meteostat.net/bulk/).
+Please read our [contributing guidelines](https://dev.meteostat.net/python/contributing) for details on how to contribute to the Meteostat Python library.
 
 **Top contributors**
 
@@ -111,12 +84,6 @@ Instructions on building and testing the Meteostat Python package can be found i
 </a>
 
 ## 🌟 Featured In
-
-<!--
-<div align="center">
-  <img src="..." alt="" width="" height="">
-</div>
--->
 
 Meteostat has been featured and used by various media outlets and organizations, including:
 
@@ -129,7 +96,7 @@ Join the growing community of users and researchers relying on Meteostat for the
 
 ## 📄 License
 
-Meteostat is licensed under the **MIT License**.
+Meteostat is licensed under the **MIT License**. Data provided by Meteostat is generally licensed under the [**Creative Commons Attribution 4.0 International (CC BY 4.0)**](https://creativecommons.org/licenses/by/4.0) license. Please refer to the [documentation](https://dev.meteostat.net/license) for more information.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
