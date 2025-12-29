@@ -1,22 +1,21 @@
-from datetime import date
-import logging
+"""
+Monthly Data Example
+====================
+This example demonstrates how to retrieve and display monthly weather data
+for a specific weather station over a defined time period using the
+Meteostat library.
+"""
 
-from matplotlib import pyplot as plt
+from datetime import date
 import meteostat as ms
 
-logging.basicConfig(
-    level=logging.INFO, format="%(levelname)s [%(filename)s:%(lineno)s] %(message)s"
-)
+# Set time period
+start = date(2000, 1, 1)
+end = date(2018, 12, 31)
 
-# ms.settings["load_sources"] = True
+# Get monthly data
+ts = ms.monthly(ms.Station(id='10637'), start, end)
+df = ts.fetch()
 
-ts = ms.monthly(
-    "10637",
-    date(2022, 1, 1),
-    date(2022, 12, 31),
-    providers=[ms.Provider.MONTHLY_DERIVED],
-)
-
-print(ts.fetch(sources=True))
-exit()
-plt.show()
+# Print DataFrame
+print(df)

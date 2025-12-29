@@ -1,29 +1,21 @@
+"""
+Daily Data Example
+==================
+This example demonstrates how to retrieve and display daily weather data
+for a specific weather station over a defined time period using the
+Meteostat library.
+"""
+
 from datetime import date
 import meteostat as ms
-import logging
 
-from meteostat.enumerations import Provider
+# Set time period
+start = date(2018, 1, 1)
+end = date(2018, 12, 31)
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s - %(filename)s:%(lineno)d - %(message)s"
-)
+# Get daily data
+ts = ms.daily(ms.Station(id='10637'), start, end)
+df = ts.fetch()
 
-ts = ms.hourly("10637", date(2024, 1, 1), date(2024, 1, 1))
-print(ts.fetch(sources=True))
-exit()
-
-
-# Specify location and time range
-POINT = ms.Point(50.1155, 8.6842, 113)
-START = date(2024, 1, 1)
-END = date(2024, 1, 1)
-
-# Get nearby weather stations
-stations = ms.nearby(POINT, limit=4)
-
-# Get daily data & perform interpolation
-ts = ms.hourly(stations, START, END)
-print(ts.fetch())
-df = ms.interpolate(ts, POINT)
-
+# Print DataFrame
 print(df)

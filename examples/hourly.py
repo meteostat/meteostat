@@ -1,21 +1,21 @@
-from datetime import date
+"""
+Hourly Data Example
+==================
+This example demonstrates how to retrieve and display hourly weather data
+for a specific weather station over a defined time period using the
+Meteostat library.
+"""
+
+from datetime import datetime
 import meteostat as ms
 
-import logging
+# Set time period
+start = datetime(2018, 1, 1)
+end = datetime(2018, 12, 31, 23, 59)
 
-logging.basicConfig(
-    level=logging.DEBUG, format="%(levelname)s - %(filename)s:%(lineno)d - %(message)s"
-)
+# Get hourly data
+ts = ms.hourly(ms.Station(id='72219'), start, end)
+df = ts.fetch()
 
-point = ms.Point(50.3167, 8.5, 320)
-stations = ms.stations.nearby(point, limit=5)
-
-ts = ms.hourly(
-    stations,
-    start=date(2021, 1, 1),
-    end=date(2021, 1, 2),
-)
-
-df = ms.interpolate(ts, point)
-
+# Print DataFrame
 print(df)

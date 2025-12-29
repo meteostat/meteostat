@@ -1,10 +1,16 @@
+"""
+Climate Normals Data Example
+============================
+This example demonstrates how to retrieve and display climate normals data
+for a specific weather station over a defined time period using the
+Meteostat library.
+"""
+
 import meteostat as ms
 
-ts = ms.normals(
-    "01001",
-    2010,
-    2020,
-)
+# Get climate normals data
+ts = ms.normals(ms.Station(id='10637'), 1961, 1990)
+df = ts.fetch()
 
-# TODO: Make fetch squashable
-print(ts.fetch(squash=False))
+# Print DataFrame
+print(df)
