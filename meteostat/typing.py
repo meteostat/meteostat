@@ -78,7 +78,7 @@ class ParameterSpec:
 
     id: Parameter | str  # The parameter ID
     name: str  # A descriptive parameter name
-    granularity: Granularity  # The perameter's granularity
+    granularity: Granularity  # The parameter's granularity
     dtype: str  # The parameter's data type
     unit: Optional[Unit] = None  # The parameter's data unit
     validators: List[Validator | Callable] = field(

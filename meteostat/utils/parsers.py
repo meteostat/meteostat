@@ -1,7 +1,7 @@
 """
 Data parsers
 
-The cod is licensed under the MIT license.
+The code is licensed under the MIT license.
 """
 
 import calendar
