@@ -144,6 +144,12 @@ def reshape_by_source(df: pd.DataFrame) -> pd.DataFrame:
     df_pivoted.index = df_pivoted.index.rename(["time", "source"])
     df_pivoted.columns.name = None
 
+    # Preserve the original parameter column order from value_rows
+    # Pivot often produces alphabetical column order; reindex to match input
+    ordered_columns = [col for col in value_rows.columns if col in df_pivoted.columns]
+    if ordered_columns:
+        df_pivoted = df_pivoted.reindex(columns=ordered_columns)
+
     return df_pivoted
 
 

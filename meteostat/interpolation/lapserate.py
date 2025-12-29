@@ -9,7 +9,7 @@ from meteostat.core.config import config
 from meteostat.enumerations import Parameter
 
 
-def lapse_rate(ts: TimeSeries) -> float | None:
+def lapse_rate(ts: TimeSeries, parameter: Parameter = Parameter.TEMP) -> float | None:
     """
     Calculate the lapse rate (temperature gradient) in degrees Celsius per kilometer
     based on temperature and elevation data from multiple stations.
@@ -26,11 +26,11 @@ def lapse_rate(ts: TimeSeries) -> float | None:
     """
     df = ts.fetch(location=True)
 
-    if df is None or "elevation" not in df.columns or Parameter.TEMP not in df.columns:
+    if df is None or "elevation" not in df.columns or parameter not in df.columns:
         return None
 
     elev_by_station = df["elevation"].groupby(level="station").first()
-    temp_by_station = df[Parameter.TEMP].groupby(level="station").mean()
+    temp_by_station = df[parameter].groupby(level="station").mean()
 
     if len(elev_by_station) < 2 or len(temp_by_station) < 2:
         return None

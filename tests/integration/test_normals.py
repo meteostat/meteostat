@@ -126,6 +126,21 @@ def test_normals_parameters_property(mock_monthly_fetch, mock_stations_database)
     assert "temp" in params
 
 
+def test_normals_column_order(mock_monthly_fetch, mock_stations_database):
+    """
+    It preserves the documented/default parameter column order
+    """
+    import meteostat as ms
+    from meteostat.api.monthly import DEFAULT_PARAMETERS
+
+    ts = ms.normals("10637", 2005, 2015)
+    df = ts.fetch()
+
+    assert df is not None
+    expected = [str(p) for p in DEFAULT_PARAMETERS if str(p) in df.columns]
+    assert list(df.columns) == expected
+
+
 def test_normals_empty_property(
     mock_monthly_fetch, empty_dataframe, mocker, mock_stations_database
 ):

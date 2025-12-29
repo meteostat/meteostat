@@ -56,13 +56,24 @@ def _add_source_columns(
             grouped = grouped.to_frame(name=source_cols[0])
         grouped.index.name = "time"
 
-        # Join the aggregated source columns into the result, aligning on time
-        if "time" in result.columns:
+        # Safely align on time and add/fill source columns without causing overlaps
+        result_has_time_col = "time" in result.columns
+        if result_has_time_col:
             result = result.set_index("time")
-            result = result.join(grouped)
+
+        # Ensure both frames align on the same index (time)
+        # For each source column, add it if missing or fill NaNs if present
+        for col in source_cols:
+            if col in grouped.columns:
+                if col in result.columns:
+                    # Fill missing values in result using aggregated sources
+                    result[col] = result[col].where(result[col].notna(), grouped[col])
+                else:
+                    # Add aggregated source column
+                    result[col] = grouped[col]
+
+        if result_has_time_col:
             result = result.reset_index()
-        else:
-            result = result.join(grouped, how="left")
     return result
 
 
