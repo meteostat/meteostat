@@ -23,14 +23,14 @@
   <p align="center">
     Access and analyze historical weather and climate data with Python.
     <p>
-      <a href="https://dev.meteostat.net"><strong>Explore the docs »</strong></a>
+      <a href="https://dev.meteostat.net" target="_blank"><strong>Explore the docs »</strong></a>
     </p>
     <p>
-      <a href="https://meteostat.net">Visit Website</a>
+      <a href="https://meteostat.net" target="_blank">Visit Website</a>
       &middot;
-      <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Report Bug</a>
+      <a href="https://github.com/meteostat/meteostat/issues">Report Bug</a>
       &middot;
-      <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Request Feature</a>
+      <a href="https://github.com/orgs/meteostat/discussions">Request Feature</a>
     </p>
   </p>
 </div>
@@ -113,4 +113,4 @@ Meteostat is licensed under the **MIT License**. Data provided by Meteostat is g
 [license-url]: https://github.com/meteostat/meteostat-python/blob/master/LICENSE.txt
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/company/meteostat
-[product-screenshot]: https://dev.meteostat.net/assets/img/py-example-chart.046f8b8e.png
+[product-screenshot]: https://dev.meteostat.net/assets/images/example-8b6cf2a3fe2efa285bc72d7dc72c4865.png
