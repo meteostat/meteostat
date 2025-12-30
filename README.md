@@ -96,7 +96,7 @@ Join the growing community of users and researchers relying on Meteostat for the
 
 ## 📄 License
 
-Meteostat is licensed under the **MIT License**. Data provided by Meteostat is generally licensed under the [**Creative Commons Attribution 4.0 International (CC BY 4.0)**](https://creativecommons.org/licenses/by/4.0) license. Please refer to the [documentation](https://dev.meteostat.net/license) for more information.
+Meteostat is licensed under the [**MIT License**](https://github.com/meteostat/meteostat/blob/main/LICENSE). Data provided by Meteostat is generally licensed under the [**Creative Commons Attribution 4.0 International (CC BY 4.0)**](https://creativecommons.org/licenses/by/4.0) license. Please refer to the [documentation](https://dev.meteostat.net/license) for more information.
 
 
 <!-- MARKDOWN LINKS & IMAGES -->
