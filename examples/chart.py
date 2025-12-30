@@ -22,7 +22,7 @@ stations = ms.stations.nearby(POINT, limit=4)
 
 # Get daily data & perform interpolation
 ts = ms.daily(stations, START, END)
-df = ms.interpolate(ts, POINT)
+df = ms.interpolate(ts, POINT).fetch()
 
 # Plot line chart including average, minimum and maximum temperature
 df.plot(y=[ms.Parameter.TEMP, ms.Parameter.TMIN, ms.Parameter.TMAX])
