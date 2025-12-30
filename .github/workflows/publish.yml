@@ -30,6 +30,10 @@ jobs:
         run: |
           poetry install --no-root --only main
 
+      - name: Install Twine
+        run: |
+          pip install twine
+
       - name: Build distribution
         run: |
           poetry build
