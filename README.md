@@ -14,7 +14,7 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/meteostat/meteostat-python">
+  <a href="https://github.com/meteostat/meteostat">
     <img src="https://media.meteostat.net/icon.svg" alt="Meteostat Logo" width="80" height="80">
   </a>
 
@@ -23,10 +23,10 @@
   <p align="center">
     Access and analyze historical weather and climate data with Python.
     <p>
-      <a href="https://dev.meteostat.net" target="_blank"><strong>Explore the docs »</strong></a>
+      <a href="https://dev.meteostat.net/python"><strong>Explore the docs »</strong></a>
     </p>
     <p>
-      <a href="https://meteostat.net" target="_blank">Visit Website</a>
+      <a href="https://meteostat.net">Visit Website</a>
       &middot;
       <a href="https://github.com/meteostat/meteostat/issues">Report Bug</a>
       &middot;
@@ -62,7 +62,7 @@ stations = ms.stations.nearby(POINT, limit=4)
 
 # Get daily data & perform interpolation
 ts = ms.daily(stations, START, END)
-df = ms.interpolate(ts, POINT)
+df = ms.interpolate(ts, POINT).fetch()
 
 # Plot line chart including average, minimum and maximum temperature
 df.plot(y=[ms.Parameter.TEMP, ms.Parameter.TMIN, ms.Parameter.TMAX])
@@ -79,8 +79,8 @@ Please read our [contributing guidelines](https://dev.meteostat.net/python/contr
 
 **Top contributors**
 
-<a href="https://github.com/meteostat/meteostat-python/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=meteostat/meteostat-python" alt="Meteostat Contributors" />
+<a href="https://github.com/meteostat/meteostat/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=meteostat/meteostat" alt="Meteostat Contributors" />
 </a>
 
 ## 🌟 Featured In
@@ -101,16 +101,16 @@ Meteostat is licensed under the **MIT License**. Data provided by Meteostat is g
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/meteostat/meteostat-python.svg?style=for-the-badge
-[contributors-url]: https://github.com/meteostat/meteostat-python/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/meteostat/meteostat-python.svg?style=for-the-badge
-[forks-url]: https://github.com/meteostat/meteostat-python/network/members
-[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat-python.svg?style=for-the-badge
-[stars-url]: https://github.com/meteostat/meteostat-python/stargazers
-[issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat-python.svg?style=for-the-badge
-[issues-url]: https://github.com/meteostat/meteostat-python/issues
-[license-shield]: https://img.shields.io/github/license/meteostat/meteostat-python.svg?style=for-the-badge
-[license-url]: https://github.com/meteostat/meteostat-python/blob/master/LICENSE.txt
+[contributors-shield]: https://img.shields.io/github/contributors/meteostat/meteostat.svg?style=for-the-badge
+[contributors-url]: https://github.com/meteostat/meteostat/graphs/contributors
+[forks-shield]: https://img.shields.io/github/forks/meteostat/meteostat.svg?style=for-the-badge
+[forks-url]: https://github.com/meteostat/meteostat/network/members
+[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat.svg?style=for-the-badge
+[stars-url]: https://github.com/meteostat/meteostat/stargazers
+[issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat.svg?style=for-the-badge
+[issues-url]: https://github.com/meteostat/meteostat/issues
+[license-shield]: https://img.shields.io/github/license/meteostat/meteostat.svg?style=for-the-badge
+[license-url]: https://github.com/meteostat/meteostat/blob/main/LICENSE
 [linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
 [linkedin-url]: https://www.linkedin.com/company/meteostat
 [product-screenshot]: https://dev.meteostat.net/assets/images/example-8b6cf2a3fe2efa285bc72d7dc72c4865.png
