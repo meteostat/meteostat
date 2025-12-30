@@ -23,10 +23,10 @@
   <p align="center">
     Access and analyze historical weather and climate data with Python.
     <p>
-      <a href="https://dev.meteostat.net" target="_blank"><strong>Explore the docs »</strong></a>
+      <a href="https://dev.meteostat.net/python"><strong>Explore the docs »</strong></a>
     </p>
     <p>
-      <a href="https://meteostat.net" target="_blank">Visit Website</a>
+      <a href="https://meteostat.net">Visit Website</a>
       &middot;
       <a href="https://github.com/meteostat/meteostat/issues">Report Bug</a>
       &middot;
