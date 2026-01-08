@@ -223,6 +223,7 @@ def interpolate(
             "elevation_diff",
         ],
         axis=1,
+        errors="ignore",
     )
 
     # Add source columns: aggregate all columns that end with "_source"
