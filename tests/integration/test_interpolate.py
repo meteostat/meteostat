@@ -38,7 +38,7 @@ def test_interpolate(mock_stations_database, mock_hourly_fetch):
 
 def test_interpolate_without_elevation(mock_stations_database, mock_hourly_fetch):
     """
-    It interpolates data for a point without elevation without error
+    It interpolates data for a point without elevation
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)

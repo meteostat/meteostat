@@ -213,17 +213,18 @@ def interpolate(
         return _create_timeseries(ts, point)
 
     # Drop location-related columns & return
-    cols_to_drop = [
-        "latitude",
-        "longitude",
-        "elevation",
-        "distance",
-        "effective_distance",
-        "elevation_diff",
-    ]
-    # Only drop columns that exist in the result DataFrame
-    cols_to_drop = [col for col in cols_to_drop if col in result.columns]
-    result = result.drop(cols_to_drop, axis=1)
+    result = result.drop(
+        [
+            "latitude",
+            "longitude",
+            "elevation",
+            "distance",
+            "effective_distance",
+            "elevation_diff",
+        ],
+        axis=1,
+        errors="ignore",
+    )
 
     # Add source columns: aggregate all columns that end with "_source"
     result = _add_source_columns(result, df)
