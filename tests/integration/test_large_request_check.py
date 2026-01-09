@@ -2,7 +2,7 @@
 Tests for large request blocking functionality
 
 Tests the check that blocks requests with a time range longer than 30 years
-when config.block_large_requests is True.
+or more than 10 stations when `config.block_large_requests` is `True`.
 """
 
 from datetime import datetime
