@@ -12,12 +12,18 @@ import pandas as pd
 from meteostat.api.point import Point
 from meteostat.api.timeseries import TimeSeries
 from meteostat.typing import Station
+from meteostat.enumerations import Parameter
 from meteostat.interpolation.lapserate import apply_lapse_rate
 from meteostat.interpolation.nearest import nearest_neighbor
 from meteostat.interpolation.idw import inverse_distance_weighting
 from meteostat.utils.data import aggregate_sources, reshape_by_source, stations_to_df
 from meteostat.utils.geo import get_distance
 from meteostat.utils.parsers import parse_station
+from meteostat.core.schema import schema_service
+
+
+# Parameters that are categorical and should not use IDW interpolation
+CATEGORICAL_PARAMETERS = {Parameter.WDIR, Parameter.COCO}
 
 
 def _create_timeseries(
@@ -170,6 +176,11 @@ def interpolate(
     # Initialize variables
     df_nearest = None
     df_idw = None
+    
+    # Identify categorical columns in the data (excluding source columns)
+    data_cols = [c for c in df.columns if not c.endswith("_source")]
+    categorical_cols = [c for c in data_cols if c in CATEGORICAL_PARAMETERS]
+    non_categorical_cols = [c for c in data_cols if c not in CATEGORICAL_PARAMETERS]
 
     # Perform nearest neighbor if applicable
     if use_nearest:
@@ -187,16 +198,37 @@ def interpolate(
         df_filtered = df[distance_filter & elevation_filter]
         df_nearest = nearest_neighbor(df_filtered, ts, point)
 
-    # Check if we need to use IDW
+    # Check if we need to use IDW for non-categorical parameters
     if (
         not use_nearest
         or df_nearest is None
         or len(df_nearest) == 0
         or df_nearest.isna().any().any()
     ):
-        # Perform IDW interpolation
+        # For categorical parameters, always use nearest neighbor
+        if categorical_cols:
+            df_categorical = nearest_neighbor(df, ts, point)
+            # Keep only categorical columns that exist in the result
+            existing_categorical = [c for c in categorical_cols if c in df_categorical.columns]
+            df_categorical = df_categorical[existing_categorical] if existing_categorical else pd.DataFrame()
+        else:
+            df_categorical = pd.DataFrame()
+        
+        # Perform IDW interpolation for all parameters
         idw_func = inverse_distance_weighting(power=power)
         df_idw = idw_func(df, ts, point)
+        
+        # Remove categorical columns from IDW result if they exist
+        if not df_categorical.empty and df_idw is not None:
+            # Drop categorical columns from IDW result
+            idw_cols_to_keep = [c for c in df_idw.columns if c not in categorical_cols]
+            df_idw = df_idw[idw_cols_to_keep] if idw_cols_to_keep else pd.DataFrame()
+        
+        # Combine categorical (nearest) and non-categorical (IDW) results
+        if not df_categorical.empty and not df_idw.empty:
+            df_idw = pd.concat([df_idw, df_categorical], axis=1)
+        elif not df_categorical.empty:
+            df_idw = df_categorical
 
     # Merge DataFrames with priority to nearest neighbor
     if use_nearest and df_nearest is not None and len(df_nearest) > 0:
@@ -229,6 +261,18 @@ def interpolate(
     # Add source columns: aggregate all columns that end with "_source"
     result = _add_source_columns(result, df)
 
+    # Format the result using schema_service to apply proper rounding
+    # Extract just the data columns (without time index) for formatting
+    if isinstance(result.index, pd.DatetimeIndex):
+        result_reset = result.reset_index()
+        data_cols = [c for c in result_reset.columns if c != "time" and not c.endswith("_source")]
+        if data_cols:
+            # Format only the data columns
+            result_reset[data_cols] = schema_service.format(
+                result_reset[data_cols], ts.granularity
+            )
+        result = result_reset.set_index("time")
+    
     # Reshape by source
     result = reshape_by_source(result)
 
