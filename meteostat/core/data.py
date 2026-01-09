@@ -16,7 +16,7 @@ from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
-from meteostat.enumerations import Parameter, Provider
+from meteostat.enumerations import Granularity, Parameter, Provider
 from meteostat.typing import Station, Request
 from meteostat.utils.data import stations_to_df
 
@@ -87,6 +87,31 @@ class DataService:
         except ValueError:
             return pd.DataFrame()
 
+    def _validate_request(self, req: Request) -> None:
+        """
+        Validate request
+        """
+        if config.block_large_requests:
+            if req.start is None:
+                raise ValueError(
+                    "Requests without a start date are blocked by default. "
+                    "To enable large requests, set `config.block_large_requests = False`."
+                )
+
+            time_diff_years = abs((req.end or datetime.now()).year - req.start.year)
+
+            if req.granularity is Granularity.HOURLY and time_diff_years > 5:
+                raise ValueError(
+                    "Hourly requests longer than 5 years are blocked by default. "
+                    "To enable large requests, set `config.block_large_requests = False`."
+                )
+
+            if req.granularity is Granularity.DAILY and time_diff_years > 30:
+                raise ValueError(
+                    "Daily requests longer than 30 years are blocked by default. "
+                    "To enable large requests, set `config.block_large_requests = False`."
+                )
+
     def _fetch_provider_data(
         self, req: Request, station: Station, provider: Provider
     ) -> Optional[pd.DataFrame]:
@@ -148,15 +173,8 @@ class DataService:
         """
         Load meteorological time series data from different providers
         """
-        if config.block_large_requests and (
-            req.start is None
-            or req.end is None
-            or abs(req.end.year - req.start.year) > 30
-        ):
-            raise ValueError(
-                "Requests with a time range longer than 30 years are blocked by default. "
-                "To enable large requests, set `config.block_large_requests = False`."
-            )
+        # Validate request
+        self._validate_request(req)
 
         # Convert stations to list if single Station
         stations: List[Station] = (
