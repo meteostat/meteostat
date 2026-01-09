@@ -10,7 +10,7 @@ from typing import List, Optional
 import pandas as pd
 
 from meteostat.core.logger import logger
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service

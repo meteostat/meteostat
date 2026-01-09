@@ -9,7 +9,7 @@ import pandas as pd
 
 from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
 from meteostat.typing import ProviderRequest
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.core.cache import cache_service
 from meteostat.utils.data import reshape_by_source
 

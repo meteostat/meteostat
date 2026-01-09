@@ -13,7 +13,7 @@ import pytz
 
 from meteostat.api.stations import stations as stations_service
 from meteostat.api.point import Point
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.typing import Station
 
 

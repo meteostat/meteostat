@@ -6,7 +6,7 @@ from typing import Optional
 
 import pandas as pd
 
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.enumerations import TTL
 from meteostat.providers.meteostat.shared import filter_model_data, handle_exceptions
 from meteostat.typing import ProviderRequest

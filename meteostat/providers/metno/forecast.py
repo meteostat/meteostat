@@ -3,7 +3,7 @@ from urllib.error import HTTPError
 
 import pandas as pd
 
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.core.network import network_service

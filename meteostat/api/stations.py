@@ -15,7 +15,7 @@ from requests import Response
 from meteostat.api.inventory import Inventory
 from meteostat.api.point import Point
 from meteostat.core.cache import cache_service
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.core.logger import logger
 from meteostat.core.network import network_service
 from meteostat.enumerations import Provider

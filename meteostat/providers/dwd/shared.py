@@ -1,7 +1,7 @@
 from typing import Union
 from ftplib import FTP
 
-from meteostat.core.config import config
+from meteostat.api.config import config
 
 
 DWD_FTP_SERVER = config.dwd_ftp_host
