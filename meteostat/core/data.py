@@ -10,6 +10,7 @@ from typing import List, Optional, Union, cast
 
 import pandas as pd
 
+from meteostat.api.config import config
 from meteostat.api.timeseries import TimeSeries
 from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service
@@ -147,6 +148,16 @@ class DataService:
         """
         Load meteorological time series data from different providers
         """
+        if config.block_large_requests and (
+            req.start is None
+            or req.end is None
+            or abs(req.end.year - req.start.year) > 30
+        ):
+            raise ValueError(
+                "Requests with a time range longer than 30 years are blocked by default. "
+                "To enable large requests, set `config.block_large_requests = False`."
+            )
+
         # Convert stations to list if single Station
         stations: List[Station] = (
             cast(List[Station], req.station)
