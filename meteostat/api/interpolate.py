@@ -180,7 +180,6 @@ def interpolate(
     # Identify categorical columns in the data (excluding source columns)
     data_cols = [c for c in df.columns if not c.endswith("_source")]
     categorical_cols = [c for c in data_cols if c in CATEGORICAL_PARAMETERS]
-    non_categorical_cols = [c for c in data_cols if c not in CATEGORICAL_PARAMETERS]
 
     # Perform nearest neighbor if applicable
     if use_nearest:
