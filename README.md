@@ -2,10 +2,10 @@
 <div align="center">
   
   [![Downloads][downloads-shield]][downloads-url]
-  [![Stargazers][stars-shield]][stars-url]
   [![Provider Tests][provider-tests-shield]][provider-tests-url]
   [![Issues][issues-shield]][issues-url]
   [![MIT License][license-shield]][license-url]
+  [![Stargazers][stars-shield]][stars-url]
   
 </div>
 
@@ -102,8 +102,6 @@ Meteostat is licensed under the [**MIT License**](https://github.com/meteostat/m
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [downloads-shield]: https://img.shields.io/pypi/dm/meteostat
 [downloads-url]: https://pypi.org/project/meteostat/
-[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat.svg
-[stars-url]: https://github.com/meteostat/meteostat/stargazers
 [provider-tests-shield]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml/badge.svg
 [provider-tests-url]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml
 [issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat.svg
@@ -111,3 +109,5 @@ Meteostat is licensed under the [**MIT License**](https://github.com/meteostat/m
 [license-shield]: https://img.shields.io/github/license/meteostat/meteostat.svg
 [license-url]: https://github.com/meteostat/meteostat?tab=readme-ov-file#-license
 [product-screenshot]: https://dev.meteostat.net/assets/images/example-8b6cf2a3fe2efa285bc72d7dc72c4865.png
+[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat.svg
+[stars-url]: https://github.com/meteostat/meteostat/stargazers
