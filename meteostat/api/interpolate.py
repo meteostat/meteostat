@@ -124,13 +124,13 @@ def _should_use_nearest_neighbor(
     """
     min_distance = df["distance"].min()
     use_nearest = distance_threshold is None or min_distance <= distance_threshold
-    
+
     if use_nearest and point.elevation is not None and "elevation" in df.columns:
         min_elev_diff = np.abs(df["elevation"] - point.elevation).min()
         use_nearest = (
             elevation_threshold is None or min_elev_diff <= elevation_threshold
         )
-    
+
     return use_nearest
 
 
@@ -180,21 +180,27 @@ def _interpolate_with_idw_and_categorical(
     if categorical_cols:
         df_categorical = nearest_neighbor(df, ts, point)
         # Keep only categorical columns that exist in the result
-        existing_categorical = [c for c in categorical_cols if c in df_categorical.columns]
-        df_categorical = df_categorical[existing_categorical] if existing_categorical else pd.DataFrame()
+        existing_categorical = [
+            c for c in categorical_cols if c in df_categorical.columns
+        ]
+        df_categorical = (
+            df_categorical[existing_categorical]
+            if existing_categorical
+            else pd.DataFrame()
+        )
     else:
         df_categorical = pd.DataFrame()
-    
+
     # Perform IDW interpolation for all parameters
     idw_func = inverse_distance_weighting(power=power)
     df_idw = idw_func(df, ts, point)
-    
+
     # Remove categorical columns from IDW result if they exist
     if not df_categorical.empty and df_idw is not None:
         # Drop categorical columns from IDW result
         idw_cols_to_keep = [c for c in df_idw.columns if c not in categorical_cols]
         df_idw = df_idw[idw_cols_to_keep] if idw_cols_to_keep else pd.DataFrame()
-    
+
     # Combine categorical (nearest) and non-categorical (IDW) results
     if not df_categorical.empty and not df_idw.empty:
         return pd.concat([df_idw, df_categorical], axis=1)
@@ -244,7 +250,7 @@ def _postprocess_result(
 
     # Add source columns
     result = _add_source_columns(result, df)
-    
+
     # Reshape by source
     result = reshape_by_source(result)
 
@@ -340,7 +346,7 @@ def interpolate(
     # Perform interpolation
     df_nearest = None
     df_idw = None
-    
+
     if use_nearest:
         logger.debug("Using nearest neighbor interpolation.")
         df_nearest = _interpolate_with_nearest_neighbor(

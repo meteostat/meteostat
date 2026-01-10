@@ -81,10 +81,6 @@ class SchemaService:
         temp = copy(df)
 
         for col in df.columns:
-            # Skip source columns
-            if col.endswith("_source"):
-                continue
-            
             parameter = parameter_service.get_parameter(col, granularity)
 
             if not parameter:
