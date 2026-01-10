@@ -59,9 +59,9 @@ def test_interpolate_without_elevation(mock_stations_database, mock_hourly_fetch
     assert len(df_interpolated) == 48
 
 
-def test_interpolate_rounding_and_categorical(mock_stations_database, mock_hourly_fetch):
+def test_interpolate_rounding(mock_stations_database, mock_hourly_fetch):
     """
-    It rounds interpolated values and uses nearest neighbor for categorical parameters
+    It rounds interpolated values to appropriate precision
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
@@ -89,6 +89,28 @@ def test_interpolate_rounding_and_categorical(mock_stations_database, mock_hourl
             if '.' in temp_str:
                 decimal_part = temp_str.split('.')[1]
                 assert len(decimal_part) <= 1, f"Temperature {temp_val} has more than 1 decimal place"
+
+
+def test_interpolate_categorical(mock_stations_database, mock_hourly_fetch):
+    """
+    It uses nearest neighbor for categorical parameters (WDIR, COCO)
+    """
+    start = datetime(2024, 1, 10, 0, 0)
+    end = datetime(2024, 1, 11, 23, 59)
+    ts = ms.hourly(
+        [
+            ms.stations.meta("10637"),
+            ms.stations.meta("10635"),
+            ms.stations.meta("10532"),
+        ],
+        start,
+        end,
+    )
+    point = ms.Point(50.3167, 8.5, 320)
+    test_interpolated = ms.interpolate(ts, point)
+    df_interpolated = test_interpolated.fetch(sources=True)
+    
+    assert df_interpolated is not None
     
     # Check that categorical parameters (WDIR, COCO) are integers (not interpolated)
     if "wdir" in df_interpolated.columns:
