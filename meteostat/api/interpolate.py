@@ -261,10 +261,7 @@ def interpolate(
     result = _add_source_columns(result, df)
 
     # Format the result using schema_service to apply proper rounding
-    # Reset index temporarily to format data columns
-    result_reset = result.reset_index()
-    result_reset = schema_service.format(result_reset, ts.granularity)
-    result = result_reset.set_index("time")
+    result = schema_service.format(result, ts.granularity)
     
     # Reshape by source
     result = reshape_by_source(result)
