@@ -179,30 +179,30 @@ class TestLargeTimeRangeBlocking:
 
     def test_hourly_request_large_time_range_blocked(self, mock_stations_database):
         """
-        Hourly requests longer than 5 years should be blocked
+        Hourly requests longer than 3 years should be blocked
         """
         with pytest.raises(
-            ValueError, match="Hourly requests longer than 5 years are blocked"
+            ValueError, match="Hourly requests longer than 3 years are blocked"
         ):
             ts = ms.hourly("10637", datetime(2015, 1, 1), datetime(2021, 12, 31))
             ts.fetch()
 
-    def test_hourly_request_5_years_allowed(
+    def test_hourly_request_3_years_allowed(
         self, mock_daily_fetch, mock_stations_database
     ):
         """
-        Hourly requests with exactly 5 years should be allowed
+        Hourly requests with exactly 3 years should be allowed
         """
-        ts = ms.hourly("10637", datetime(2019, 1, 1), datetime(2024, 12, 31))
+        ts = ms.hourly("10637", datetime(2019, 1, 1), datetime(2022, 12, 31))
         df = ts.fetch()
         assert df is not None
 
-    def test_hourly_request_over_5_years_blocked(self, mock_stations_database):
+    def test_hourly_request_over_3_years_blocked(self, mock_stations_database):
         """
-        Hourly requests over 5 years should be blocked
+        Hourly requests over 3 years should be blocked
         """
         with pytest.raises(
-            ValueError, match="Hourly requests longer than 5 years are blocked"
+            ValueError, match="Hourly requests longer than 3 years are blocked"
         ):
             ts = ms.hourly("10637", datetime(2018, 1, 1), datetime(2024, 12, 31))
             ts.fetch()
