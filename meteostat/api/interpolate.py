@@ -20,10 +20,11 @@ from meteostat.utils.data import aggregate_sources, reshape_by_source, stations_
 from meteostat.utils.geo import get_distance
 from meteostat.utils.parsers import parse_station
 from meteostat.core.schema import schema_service
+from meteostat.core.logger import logger
 
 
 # Parameters that are categorical and should not use IDW interpolation
-CATEGORICAL_PARAMETERS = {Parameter.WDIR, Parameter.COCO}
+CATEGORICAL_PARAMETERS = {Parameter.WDIR, Parameter.CLDC, Parameter.COCO}
 
 
 def _create_timeseries(
@@ -243,9 +244,6 @@ def _postprocess_result(
 
     # Add source columns
     result = _add_source_columns(result, df)
-
-    # Format the result using schema_service to apply proper rounding
-    result = schema_service.format(result, ts.granularity)
     
     # Reshape by source
     result = reshape_by_source(result)
@@ -255,6 +253,12 @@ def _postprocess_result(
     result = result.set_index("station", append=True).reorder_levels(
         ["station", "time", "source"]
     )
+
+    # Reorder columns to match the canonical schema order
+    result = schema_service.purge(result, ts.parameters)
+
+    # Format the result using schema_service to apply proper rounding
+    result = schema_service.format(result, ts.granularity)
 
     return result
 
@@ -309,6 +313,7 @@ def interpolate(
 
     # If no data is returned, return None
     if df is None:
+        logger.debug("No data available for interpolation. Returning empty TimeSeries.")
         return _create_timeseries(ts, point)
 
     # Prepare data with distance and elevation calculations
@@ -320,6 +325,7 @@ def interpolate(
         and point.elevation
         and df["elevation_diff"].max() >= lapse_rate_threshold
     ):
+        logger.debug("Applying lapse rate correction.")
         df = apply_lapse_rate(df, point.elevation, lapse_rate)
 
     # Determine if nearest neighbor should be used
@@ -329,12 +335,14 @@ def interpolate(
 
     # Identify categorical columns
     categorical_cols = _get_categorical_columns(df)
+    logger.debug(f"Categorical columns identified: {categorical_cols}")
 
     # Perform interpolation
     df_nearest = None
     df_idw = None
     
     if use_nearest:
+        logger.debug("Using nearest neighbor interpolation.")
         df_nearest = _interpolate_with_nearest_neighbor(
             df, ts, point, distance_threshold, elevation_threshold
         )
@@ -346,6 +354,7 @@ def interpolate(
         or len(df_nearest) == 0
         or df_nearest.isna().any().any()
     ):
+        logger.debug("Using IDW interpolation.")
         df_idw = _interpolate_with_idw_and_categorical(
             df, ts, point, categorical_cols, power
         )
