@@ -1,12 +1,11 @@
 <!-- PROJECT SHIELDS -->
 <div align="center">
   
-  [![Contributors][contributors-shield]][contributors-url]
-  [![Forks][forks-shield]][forks-url]
-  [![Stargazers][stars-shield]][stars-url]
+  [![Downloads][downloads-shield]][downloads-url]
+  [![Provider Tests][provider-tests-shield]][provider-tests-url]
   [![Issues][issues-shield]][issues-url]
-  [![Unlicense License][license-shield]][license-url]
-  [![LinkedIn][linkedin-shield]][linkedin-url]
+  [![MIT License][license-shield]][license-url]
+  [![Stargazers][stars-shield]][stars-url]
   
 </div>
 
@@ -101,16 +100,14 @@ Meteostat is licensed under the [**MIT License**](https://github.com/meteostat/m
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/meteostat/meteostat.svg?style=for-the-badge
-[contributors-url]: https://github.com/meteostat/meteostat/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/meteostat/meteostat.svg?style=for-the-badge
-[forks-url]: https://github.com/meteostat/meteostat/network/members
-[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat.svg?style=for-the-badge
-[stars-url]: https://github.com/meteostat/meteostat/stargazers
-[issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat.svg?style=for-the-badge
+[downloads-shield]: https://img.shields.io/pypi/dm/meteostat
+[downloads-url]: https://pypi.org/project/meteostat/
+[provider-tests-shield]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml/badge.svg
+[provider-tests-url]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml
+[issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat.svg
 [issues-url]: https://github.com/meteostat/meteostat/issues
-[license-shield]: https://img.shields.io/github/license/meteostat/meteostat.svg?style=for-the-badge
-[license-url]: https://github.com/meteostat/meteostat/blob/main/LICENSE
-[linkedin-shield]: https://img.shields.io/badge/-LinkedIn-black.svg?style=for-the-badge&logo=linkedin&colorB=555
-[linkedin-url]: https://www.linkedin.com/company/meteostat
+[license-shield]: https://img.shields.io/github/license/meteostat/meteostat.svg
+[license-url]: https://github.com/meteostat/meteostat?tab=readme-ov-file#-license
 [product-screenshot]: https://dev.meteostat.net/assets/images/example-8b6cf2a3fe2efa285bc72d7dc72c4865.png
+[stars-shield]: https://img.shields.io/github/stars/meteostat/meteostat.svg
+[stars-url]: https://github.com/meteostat/meteostat/stargazers
