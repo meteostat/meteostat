@@ -10,7 +10,6 @@ from typing import List, Optional, Union, cast
 
 import pandas as pd
 
-from meteostat.api.config import config
 from meteostat.api.timeseries import TimeSeries
 from meteostat.core.logger import logger
 from meteostat.core.parameters import parameter_service

@@ -92,7 +92,7 @@ class TestLargeTimeRangeBlocking:
         # When start is None, the check should block the request
         # This tests the condition: req.start is None
         with pytest.raises(
-            ValueError, match="Requests without a start date are blocked"
+            ValueError, match="Hourly and daily requests without a start date are blocked"
         ):
             ts = ms.daily("10637", None, datetime(2024, 12, 31))
             ts.fetch()
@@ -115,7 +115,7 @@ class TestLargeTimeRangeBlocking:
         Requests without a start date should be blocked
         """
         with pytest.raises(
-            ValueError, match="Requests without a start date are blocked"
+            ValueError, match="Hourly and daily requests without a start date are blocked"
         ):
             ts = ms.daily("10637", None, None)
             ts.fetch()
@@ -272,8 +272,7 @@ class TestLargeStationCountBlocking:
         """
         Requests with exactly 10 stations should be allowed
         """
-        # Create a list of 10 valid station IDs (using the same valid station repeated)
-        station_ids = ["10637"] * 10
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=10)
 
         # Mock the provider
         mocker.patch(
@@ -285,7 +284,7 @@ class TestLargeStationCountBlocking:
         ts = ms.daily(station_ids, datetime(2024, 1, 1), datetime(2024, 12, 31))
         ts.fetch()  # Just verify it doesn't raise
 
-    def test_11_stations_blocked_by_default(self, mock_stations_database):
+    def test_multiple_stations_just_over_limit(self, mock_stations_database):
         """
         Requests with more than 10 stations should be blocked by default
         """
@@ -293,21 +292,9 @@ class TestLargeStationCountBlocking:
         assert config.block_large_requests is True
 
         # Create a list of 11 station IDs
-        station_ids = [f"1063{i}" for i in range(11)]
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=11)
 
         # Request with 11 stations should raise ValueError
-        with pytest.raises(
-            ValueError, match="Requests with more than 10 stations are blocked"
-        ):
-            ts = ms.daily(station_ids, datetime(2024, 1, 1), datetime(2024, 12, 31))
-            ts.fetch()
-
-    def test_multiple_stations_just_over_limit(self, mock_stations_database):
-        """
-        Requests with 11 stations (just over the limit) should be blocked
-        """
-        station_ids = [f"1063{i}" for i in range(11)]
-
         with pytest.raises(
             ValueError, match="Requests with more than 10 stations are blocked"
         ):
@@ -318,7 +305,7 @@ class TestLargeStationCountBlocking:
         """
         Requests with many stations should be blocked
         """
-        station_ids = [f"1063{i:02d}" for i in range(50)]
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=50)
 
         with pytest.raises(
             ValueError, match="Requests with more than 10 stations are blocked"
@@ -333,7 +320,7 @@ class TestLargeStationCountBlocking:
         Large station requests should be allowed when config.block_large_requests is False
         """
         # Create a list of 11 valid station IDs (using the same valid station repeated)
-        station_ids = ["10637"] * 11
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=11)
 
         # Mock the provider
         mocker.patch(
@@ -357,7 +344,7 @@ class TestLargeStationCountBlocking:
         """
         Error message for station count should mention how to disable the check
         """
-        station_ids = [f"1063{i}" for i in range(15)]
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=15)
 
         with pytest.raises(
             ValueError, match="set `config.block_large_requests = False`"
@@ -369,7 +356,7 @@ class TestLargeStationCountBlocking:
         """
         Station count check should also apply to hourly data
         """
-        station_ids = [f"1063{i}" for i in range(11)]
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=11)
 
         with pytest.raises(
             ValueError, match="Requests with more than 10 stations are blocked"
@@ -381,7 +368,7 @@ class TestLargeStationCountBlocking:
         """
         Station count check should also apply to monthly data
         """
-        station_ids = [f"1063{i}" for i in range(11)]
+        station_ids = ms.stations.nearby(ms.Point(50, 8), limit=11)
 
         with pytest.raises(
             ValueError, match="Requests with more than 10 stations are blocked"
