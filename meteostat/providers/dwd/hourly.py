@@ -18,7 +18,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.utils.conversions import ms_to_kmh
 from meteostat.providers.dwd.shared import get_condicode
 from meteostat.providers.dwd.shared import get_ftp_connection

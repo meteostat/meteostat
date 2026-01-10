@@ -11,7 +11,7 @@ import requests
 
 from meteostat import __version__
 from meteostat.core.logger import logger
-from meteostat.core.config import config
+from meteostat.api.config import config
 
 
 class NetworkService:

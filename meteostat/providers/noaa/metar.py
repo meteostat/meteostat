@@ -8,7 +8,7 @@ import pandas as pd
 from metar import Metar
 
 from meteostat.core.logger import logger
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.enumerations import TTL, Frequency, Parameter
 from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import temp_dwpt_to_rhum

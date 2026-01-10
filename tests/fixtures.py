@@ -7,7 +7,7 @@ from meteostat.api.hourly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_HOURLY
 from meteostat.api.daily import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_DAILY
 from meteostat.api.monthly import DEFAULT_PARAMETERS as DEFAULT_PARAMETERS_MONTHLY
 from meteostat.api.stations import stations
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.core.data import data_service
 from meteostat.providers.meteostat.hourly import fetch as fetch_hourly
 from meteostat.providers.meteostat.daily import fetch as fetch_daily

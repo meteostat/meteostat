@@ -18,6 +18,7 @@ from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Provider
 from meteostat.typing import Station, Request
 from meteostat.utils.data import stations_to_df
+from meteostat.utils.guards import request_size_guard
 
 
 class DataService:
@@ -147,6 +148,9 @@ class DataService:
         """
         Load meteorological time series data from different providers
         """
+        # Guard request
+        request_size_guard(req)
+
         # Convert stations to list if single Station
         stations: List[Station] = (
             cast(List[Station], req.station)

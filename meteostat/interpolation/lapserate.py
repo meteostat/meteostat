@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from meteostat.api.timeseries import TimeSeries
-from meteostat.core.config import config
+from meteostat.api.config import config
 from meteostat.enumerations import Parameter
 
 

@@ -15,9 +15,9 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.utils.types import extract_property_type, validate_parsed_value
 
 
-class Config:
+class ConfigService:
     """
-    Configuration Base Class
+    Configuration Service for Meteostat
     """
 
     prefix: str
@@ -92,9 +92,9 @@ class Config:
                 self._set_env_value(key, value)
 
 
-class ConfigService(Config):
+class Config(ConfigService):
     """
-    Configuration Service for Meteostat
+    Meteostat Configuration
 
     Manages all configuration settings including cache, network, stations,
     interpolation, and provider-specific settings. Supports loading configuration
@@ -155,4 +155,4 @@ class ConfigService(Config):
     metno_user_agent: Optional[str] = None
 
 
-config = ConfigService("MS")
+config = Config("MS")
