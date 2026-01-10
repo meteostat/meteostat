@@ -19,6 +19,7 @@ from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Provider
 from meteostat.typing import Station, Request
 from meteostat.utils.data import stations_to_df
+from meteostat.utils.guards import request_size_guard
 
 
 class DataService:
@@ -148,15 +149,8 @@ class DataService:
         """
         Load meteorological time series data from different providers
         """
-        if config.block_large_requests and (
-            req.start is None
-            or req.end is None
-            or abs(req.end.year - req.start.year) > 30
-        ):
-            raise ValueError(
-                "Requests with a time range longer than 30 years are blocked by default. "
-                "To enable large requests, set `config.block_large_requests = False`."
-            )
+        # Guard request
+        request_size_guard(req)
 
         # Convert stations to list if single Station
         stations: List[Station] = (

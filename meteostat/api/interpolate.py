@@ -12,12 +12,19 @@ import pandas as pd
 from meteostat.api.point import Point
 from meteostat.api.timeseries import TimeSeries
 from meteostat.typing import Station
+from meteostat.enumerations import Parameter
 from meteostat.interpolation.lapserate import apply_lapse_rate
 from meteostat.interpolation.nearest import nearest_neighbor
 from meteostat.interpolation.idw import inverse_distance_weighting
 from meteostat.utils.data import aggregate_sources, reshape_by_source, stations_to_df
 from meteostat.utils.geo import get_distance
 from meteostat.utils.parsers import parse_station
+from meteostat.core.schema import schema_service
+from meteostat.core.logger import logger
+
+
+# Parameters that are categorical and should not use IDW interpolation
+CATEGORICAL_PARAMETERS = {Parameter.WDIR, Parameter.CLDC, Parameter.COCO}
 
 
 def _create_timeseries(
@@ -77,6 +84,191 @@ def _add_source_columns(
     return result
 
 
+def _prepare_data_with_distances(
+    df: pd.DataFrame, point: Point, elevation_weight: float
+) -> pd.DataFrame:
+    """
+    Add distance and elevation calculations to the DataFrame
+    """
+    # Add distance column
+    df["distance"] = get_distance(
+        point.latitude, point.longitude, df["latitude"], df["longitude"]
+    )
+
+    # Add effective distance column if elevation is available
+    if point.elevation is not None and "elevation" in df.columns:
+        elev_diff = np.abs(df["elevation"] - point.elevation)
+        df["effective_distance"] = np.sqrt(
+            df["distance"] ** 2 + (elev_diff * elevation_weight) ** 2
+        )
+    else:
+        df["effective_distance"] = df["distance"]
+
+    # Add elevation difference column
+    if "elevation" in df.columns and point.elevation is not None:
+        df["elevation_diff"] = np.abs(df["elevation"] - point.elevation)
+    else:
+        df["elevation_diff"] = np.nan
+
+    return df
+
+
+def _should_use_nearest_neighbor(
+    df: pd.DataFrame,
+    point: Point,
+    distance_threshold: Union[int, None],
+    elevation_threshold: Union[int, None],
+) -> bool:
+    """
+    Determine if nearest neighbor should be used based on thresholds
+    """
+    min_distance = df["distance"].min()
+    use_nearest = distance_threshold is None or min_distance <= distance_threshold
+
+    if use_nearest and point.elevation is not None and "elevation" in df.columns:
+        min_elev_diff = np.abs(df["elevation"] - point.elevation).min()
+        use_nearest = (
+            elevation_threshold is None or min_elev_diff <= elevation_threshold
+        )
+
+    return use_nearest
+
+
+def _get_categorical_columns(df: pd.DataFrame) -> list:
+    """
+    Identify categorical columns in the data (excluding source columns)
+    """
+    data_cols = [c for c in df.columns if not c.endswith("_source")]
+    return [c for c in data_cols if c in CATEGORICAL_PARAMETERS]
+
+
+def _interpolate_with_nearest_neighbor(
+    df: pd.DataFrame,
+    ts: TimeSeries,
+    point: Point,
+    distance_threshold: Union[int, None],
+    elevation_threshold: Union[int, None],
+) -> Optional[pd.DataFrame]:
+    """
+    Perform nearest neighbor interpolation with threshold filtering
+    """
+    distance_filter = (
+        pd.Series([True] * len(df), index=df.index)
+        if distance_threshold is None
+        else (df["distance"] <= distance_threshold)
+    )
+    elevation_filter = (
+        pd.Series([True] * len(df), index=df.index)
+        if elevation_threshold is None
+        else (np.abs(df["elevation"] - point.elevation) <= elevation_threshold)
+    )
+    df_filtered = df[distance_filter & elevation_filter]
+    return nearest_neighbor(df_filtered, ts, point)
+
+
+def _interpolate_with_idw_and_categorical(
+    df: pd.DataFrame,
+    ts: TimeSeries,
+    point: Point,
+    categorical_cols: list,
+    power: float,
+) -> Optional[pd.DataFrame]:
+    """
+    Perform IDW interpolation for non-categorical parameters and nearest neighbor for categorical
+    """
+    # For categorical parameters, always use nearest neighbor
+    if categorical_cols:
+        df_categorical = nearest_neighbor(df, ts, point)
+        # Keep only categorical columns that exist in the result
+        existing_categorical = [
+            c for c in categorical_cols if c in df_categorical.columns
+        ]
+        df_categorical = (
+            df_categorical[existing_categorical]
+            if existing_categorical
+            else pd.DataFrame()
+        )
+    else:
+        df_categorical = pd.DataFrame()
+
+    # Perform IDW interpolation for all parameters
+    idw_func = inverse_distance_weighting(power=power)
+    df_idw = idw_func(df, ts, point)
+
+    # Remove categorical columns from IDW result if they exist
+    if not df_categorical.empty and df_idw is not None:
+        # Drop categorical columns from IDW result
+        idw_cols_to_keep = [c for c in df_idw.columns if c not in categorical_cols]
+        df_idw = df_idw[idw_cols_to_keep] if idw_cols_to_keep else pd.DataFrame()
+
+    # Combine categorical (nearest) and non-categorical (IDW) results
+    if not df_categorical.empty and not df_idw.empty:
+        return pd.concat([df_idw, df_categorical], axis=1)
+    elif not df_categorical.empty:
+        return df_categorical
+    else:
+        return df_idw
+
+
+def _merge_interpolation_results(
+    df_nearest: Optional[pd.DataFrame],
+    df_idw: Optional[pd.DataFrame],
+    use_nearest: bool,
+) -> Optional[pd.DataFrame]:
+    """
+    Merge nearest neighbor and IDW results with appropriate priority
+    """
+    if use_nearest and df_nearest is not None and len(df_nearest) > 0:
+        if df_idw is not None:
+            # Combine nearest and IDW results, prioritizing nearest values
+            return df_nearest.combine_first(df_idw)
+        else:
+            return df_nearest
+    else:
+        return df_idw
+
+
+def _postprocess_result(
+    result: pd.DataFrame, df: pd.DataFrame, ts: TimeSeries
+) -> pd.DataFrame:
+    """
+    Post-process the interpolation result: drop location columns, add sources, format, reshape
+    """
+    # Drop location-related columns
+    result = result.drop(
+        [
+            "latitude",
+            "longitude",
+            "elevation",
+            "distance",
+            "effective_distance",
+            "elevation_diff",
+        ],
+        axis=1,
+        errors="ignore",
+    )
+
+    # Add source columns
+    result = _add_source_columns(result, df)
+
+    # Reshape by source
+    result = reshape_by_source(result)
+
+    # Add station index
+    result["station"] = "$0001"
+    result = result.set_index("station", append=True).reorder_levels(
+        ["station", "time", "source"]
+    )
+
+    # Reorder columns to match the canonical schema order
+    result = schema_service.purge(result, ts.parameters)
+
+    # Format the result using schema_service to apply proper rounding
+    result = schema_service.format(result, ts.granularity)
+
+    return result
+
+
 def interpolate(
     ts: TimeSeries,
     point: Point,
@@ -127,27 +319,11 @@ def interpolate(
 
     # If no data is returned, return None
     if df is None:
+        logger.debug("No data available for interpolation. Returning empty TimeSeries.")
         return _create_timeseries(ts, point)
 
-    # Add distance column
-    df["distance"] = get_distance(
-        point.latitude, point.longitude, df["latitude"], df["longitude"]
-    )
-
-    # Add effective distance column if elevation is available
-    if point.elevation is not None and "elevation" in df.columns:
-        elev_diff = np.abs(df["elevation"] - point.elevation)
-        df["effective_distance"] = np.sqrt(
-            df["distance"] ** 2 + (elev_diff * elevation_weight) ** 2
-        )
-    else:
-        df["effective_distance"] = df["distance"]
-
-    # Add elevation difference column
-    if "elevation" in df.columns and point.elevation is not None:
-        df["elevation_diff"] = np.abs(df["elevation"] - point.elevation)
-    else:
-        df["elevation_diff"] = np.nan
+    # Prepare data with distance and elevation calculations
+    df = _prepare_data_with_distances(df, point, elevation_weight)
 
     # Apply lapse rate if specified and elevation is available
     if (
@@ -155,87 +331,48 @@ def interpolate(
         and point.elevation
         and df["elevation_diff"].max() >= lapse_rate_threshold
     ):
+        logger.debug("Applying lapse rate correction.")
         df = apply_lapse_rate(df, point.elevation, lapse_rate)
 
-    # Check if any stations are close enough for nearest neighbor
-    min_distance = df["distance"].min()
-    use_nearest = distance_threshold is None or min_distance <= distance_threshold
-    if use_nearest and point.elevation is not None and "elevation" in df.columns:
-        # Calculate minimum elevation difference
-        min_elev_diff = np.abs(df["elevation"] - point.elevation).min()
-        use_nearest = (
-            elevation_threshold is None or min_elev_diff <= elevation_threshold
-        )
+    # Determine if nearest neighbor should be used
+    use_nearest = _should_use_nearest_neighbor(
+        df, point, distance_threshold, elevation_threshold
+    )
 
-    # Initialize variables
+    # Identify categorical columns
+    categorical_cols = _get_categorical_columns(df)
+    logger.debug(f"Categorical columns identified: {categorical_cols}")
+
+    # Perform interpolation
     df_nearest = None
     df_idw = None
 
-    # Perform nearest neighbor if applicable
     if use_nearest:
-        # Filter applicable stations based on thresholds
-        distance_filter = (
-            pd.Series([True] * len(df), index=df.index)
-            if distance_threshold is None
-            else (df["distance"] <= distance_threshold)
+        logger.debug("Using nearest neighbor interpolation.")
+        df_nearest = _interpolate_with_nearest_neighbor(
+            df, ts, point, distance_threshold, elevation_threshold
         )
-        elevation_filter = (
-            pd.Series([True] * len(df), index=df.index)
-            if elevation_threshold is None
-            else (np.abs(df["elevation"] - point.elevation) <= elevation_threshold)
-        )
-        df_filtered = df[distance_filter & elevation_filter]
-        df_nearest = nearest_neighbor(df_filtered, ts, point)
 
-    # Check if we need to use IDW
+    # Use IDW if nearest neighbor doesn't provide complete data
     if (
         not use_nearest
         or df_nearest is None
         or len(df_nearest) == 0
         or df_nearest.isna().any().any()
     ):
-        # Perform IDW interpolation
-        idw_func = inverse_distance_weighting(power=power)
-        df_idw = idw_func(df, ts, point)
+        logger.debug("Using IDW interpolation.")
+        df_idw = _interpolate_with_idw_and_categorical(
+            df, ts, point, categorical_cols, power
+        )
 
-    # Merge DataFrames with priority to nearest neighbor
-    if use_nearest and df_nearest is not None and len(df_nearest) > 0:
-        if df_idw is not None:
-            # Combine nearest and IDW results, prioritizing nearest values
-            result = df_nearest.combine_first(df_idw)
-        else:
-            result = df_nearest
-    else:
-        result = df_idw
+    # Merge results
+    result = _merge_interpolation_results(df_nearest, df_idw, use_nearest)
 
     # If no data is returned, return None
     if result is None or result.empty:
         return _create_timeseries(ts, point)
 
-    # Drop location-related columns & return
-    result = result.drop(
-        [
-            "latitude",
-            "longitude",
-            "elevation",
-            "distance",
-            "effective_distance",
-            "elevation_diff",
-        ],
-        axis=1,
-        errors="ignore",
-    )
-
-    # Add source columns: aggregate all columns that end with "_source"
-    result = _add_source_columns(result, df)
-
-    # Reshape by source
-    result = reshape_by_source(result)
-
-    # Add station index
-    result["station"] = "$0001"
-    result = result.set_index("station", append=True).reorder_levels(
-        ["station", "time", "source"]
-    )
+    # Post-process result
+    result = _postprocess_result(result, df, ts)
 
     return _create_timeseries(ts, point, result)

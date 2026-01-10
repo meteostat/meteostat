@@ -13,7 +13,6 @@ import pytz
 
 from meteostat.api.stations import stations as stations_service
 from meteostat.api.point import Point
-from meteostat.api.config import config
 from meteostat.typing import Station
 
 
@@ -53,12 +52,6 @@ def parse_station(
     else:
         # It's a list
         stations = station
-
-    if config.block_large_requests and len(stations) > 10:
-        raise ValueError(
-            "Requests with more than 10 stations are blocked by default. "
-            "To enable large requests, set `config.block_large_requests = False`."
-        )
 
     # Get station meta data
     data = []
