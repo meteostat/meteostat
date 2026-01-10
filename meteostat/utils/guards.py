@@ -38,9 +38,9 @@ def request_size_guard(req: Request) -> None:
 
     logger.debug(f"Request time range: {time_diff_years} years.")
 
-    if req.granularity is Granularity.HOURLY and time_diff_years > 5:
+    if req.granularity is Granularity.HOURLY and time_diff_years > 3:
         raise ValueError(
-            "Hourly requests longer than 5 years are blocked by default. "
+            "Hourly requests longer than 3 years are blocked by default. "
             "To enable large requests, set `config.block_large_requests = False`."
         )
 
