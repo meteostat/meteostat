@@ -1,11 +1,9 @@
 from datetime import datetime
-import pytest
 import meteostat as ms
 from meteostat.providers.noaa.ghcnd import fetch
 from meteostat.typing import ProviderRequest
 
 
-@pytest.mark.skip(reason="NOAA GHCND provider tests are taking very long to run.")
 def test_noaa_ghcnd():
     """
     It should load data from NOAA GHCND

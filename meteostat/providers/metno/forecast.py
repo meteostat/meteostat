@@ -11,9 +11,6 @@ from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import percentage_to_okta
 from meteostat.core.cache import cache_service
 
-
-ENDPOINT = config.metno_forecast_endpoint
-USER_AGENT = config.metno_user_agent
 CONDICODES = {
     "clearsky": 1,
     "cloudy": 3,
@@ -130,13 +127,26 @@ def map_data(record):
 
 @cache_service.cache(TTL.HOUR, "pickle")
 def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.DataFrame]:
-    file_url = ENDPOINT.format(
+    endpoint = config.metno_forecast_endpoint
+    user_agent = config.metno_user_agent
+
+    if not endpoint:
+        logger.warning("MET Norway forecast endpoint is not configured.")
+        return None
+
+    if not user_agent:
+        logger.warning(
+            "MET Norway requires a unique user agent as per their terms of service. Please use config to specify your user agent. For now, this provider is skipped."
+        )
+        return Nonex
+
+    file_url = endpoint.format(
         latitude=latitude,
         longitude=longitude,
         elevation=elevation,
     )
 
-    headers = {"User-Agent": USER_AGENT}
+    headers = {"User-Agent": user_agent}
 
     try:
         response = network_service.get(file_url, headers=headers)
@@ -173,12 +183,6 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
-    if not USER_AGENT:
-        logger.warning(
-            "MET Norway requires a unique user agent as per their terms of service. Please use config to specify your user agent. For now, this provider is skipped."
-        )
-        return None
-
     return get_df(
         req.station.latitude,
         req.station.longitude,
