@@ -30,6 +30,8 @@ jobs:
           poetry install --all-groups
 
       - name: Run provider tests
+        env:
+          METEOSTAT_USER_AGENT: ${{ secrets.METEOSTAT_USER_AGENT }}
         run: |
           poetry run pytest tests/provider -v
 

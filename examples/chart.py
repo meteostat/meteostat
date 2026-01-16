@@ -24,6 +24,9 @@ stations = ms.stations.nearby(POINT, limit=4)
 ts = ms.daily(stations, START, END)
 df = ms.interpolate(ts, POINT).fetch()
 
+if df is None or df.empty:
+    raise RuntimeError("No data available for the specified location and time period.")
+
 # Plot line chart including average, minimum and maximum temperature
 df.plot(y=[ms.Parameter.TEMP, ms.Parameter.TMIN, ms.Parameter.TMAX])
 plt.show()

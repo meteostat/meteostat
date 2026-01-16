@@ -18,6 +18,11 @@ def test_dwd_daily():
     )
     df = fetch(query)
 
-    assert len(df) > 1
-    assert "temp" in df
-    assert "prcp" in df
+    # Check if data is returned at all.
+    assert df is not None and not df.empty, "No data returned at all."
+    assert "temp" in df, "Temperature data is missing altogether."
+    assert "prcp" in df, "Precipitation data is missing altogether."
+
+    # Check that data contains reasonable number of non-missing entries.
+    assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
+    assert df["prcp"].notna().sum() >= 3, "Insufficient precipitation data returned."
