@@ -12,7 +12,9 @@ def test_data_daily():
 
     # Calculate date three days ago
     three_days_ago = datetime.now() - timedelta(days=3)
-    three_days_ago = datetime(three_days_ago.year, three_days_ago.month, three_days_ago.day)
+    three_days_ago = datetime(
+        three_days_ago.year, three_days_ago.month, three_days_ago.day
+    )
 
     query = ProviderRequest(
         start=three_days_ago,
@@ -32,4 +34,6 @@ def test_data_daily():
     assert df["temp"].notna().sum() >= 1, "Insufficient temperature data returned."
 
     # Check if three days ago is present in the index
-    assert three_days_ago in df.index.get_level_values("time"), f"Date three days ago ({three_days_ago}) is not in the index"
+    assert three_days_ago in df.index.get_level_values("time"), (
+        f"Date three days ago ({three_days_ago}) is not in the index"
+    )

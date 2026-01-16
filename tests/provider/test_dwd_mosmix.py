@@ -29,7 +29,9 @@ def test_dwd_mosmix_forecast():
 
     # The provider will return all forecast data, regardless of the requested date range.
     # Therefore, we are just testing if there is a reasonable amount of non-missing data.
-    assert df["temp"].notna().sum() > 20, "Insufficient temperature data returned for the 7th day."
+    assert df["temp"].notna().sum() > 20, (
+        "Insufficient temperature data returned for the 7th day."
+    )
 
     # Check if at least one datetime on the 7th day is present in the index.
     # Here we're making sure the time series contains data for a date multiple days ahead.

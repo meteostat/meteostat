@@ -25,4 +25,6 @@ def test_noaa_isd_lite():
 
     # Check that data contains reasonable number of non-missing entries.
     assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
-    assert df["rhum"].notna().sum() >= 3, "Insufficient relative humidity data returned."
+    assert df["rhum"].notna().sum() >= 3, (
+        "Insufficient relative humidity data returned."
+    )

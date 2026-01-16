@@ -30,9 +30,13 @@ def test_data_monthly():
 
     # The provider will return all data, regardless of the requested date range.
     # Therefore, we are just testing if there is a reasonable amount of non-missing data.
-    assert df["tmin"].notna().sum() >= 8, "Insufficient minimum temperature data returned."
+    assert df["tmin"].notna().sum() >= 8, (
+        "Insufficient minimum temperature data returned."
+    )
     assert df["prcp"].notna().sum() >= 8, "Insufficient precipitation data returned."
 
     # Check if six months ago is present in the index
     six_months_ago = end - relativedelta(months=6)
-    assert six_months_ago in df.index.get_level_values("time"), f"Date six months ago ({six_months_ago}) is not in the index"
+    assert six_months_ago in df.index.get_level_values("time"), (
+        f"Date six months ago ({six_months_ago}) is not in the index"
+    )

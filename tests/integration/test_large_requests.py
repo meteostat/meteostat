@@ -92,7 +92,8 @@ class TestLargeTimeRangeBlocking:
         # When start is None, the check should block the request
         # This tests the condition: req.start is None
         with pytest.raises(
-            ValueError, match="Hourly and daily requests without a start date are blocked"
+            ValueError,
+            match="Hourly and daily requests without a start date are blocked",
         ):
             ts = ms.daily("10637", None, datetime(2024, 12, 31))
             ts.fetch()
@@ -115,7 +116,8 @@ class TestLargeTimeRangeBlocking:
         Requests without a start date should be blocked
         """
         with pytest.raises(
-            ValueError, match="Hourly and daily requests without a start date are blocked"
+            ValueError,
+            match="Hourly and daily requests without a start date are blocked",
         ):
             ts = ms.daily("10637", None, None)
             ts.fetch()

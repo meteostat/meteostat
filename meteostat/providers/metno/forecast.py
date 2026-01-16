@@ -138,7 +138,7 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
         logger.warning(
             "MET Norway requires a unique user agent as per their terms of service. Please use config to specify your user agent. For now, this provider is skipped."
         )
-        return Nonex
+        return None
 
     file_url = endpoint.format(
         latitude=latitude,
