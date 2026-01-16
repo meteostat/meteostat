@@ -18,6 +18,11 @@ def test_noaa_isd_lite():
     )
     df = fetch(query)
 
-    assert len(df) > 1
-    assert "temp" in df
-    assert "rhum" in df
+    # Check if data is returned at all.
+    assert df is not None and not df.empty, "No data returned at all."
+    assert "temp" in df, "Temperature data is missing altogether."
+    assert "rhum" in df, "Relative humidity data is missing altogether."
+
+    # Check that data contains reasonable number of non-missing entries.
+    assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
+    assert df["rhum"].notna().sum() >= 3, "Insufficient relative humidity data returned."
