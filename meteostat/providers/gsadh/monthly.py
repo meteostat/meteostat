@@ -133,7 +133,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
             gsadh_params.append(METEOSTAT_TO_GSADH[param])
 
     if not gsadh_params:
-        logger.info(f"No mappable parameters for GeoSphere Austria monthly data")
+        logger.info("No mappable parameters for GeoSphere Austria monthly data")
         return None
 
     # Fetch data
