@@ -102,6 +102,10 @@ class Provider(StrEnum):
     ECCC_DAILY = "eccc_daily"
     ECCC_MONTHLY = "eccc_monthly"
     METNO_FORECAST = "metno_forecast"
+    GSADH_HOURLY = "gsadh_hourly"
+    GSADH_SYNOP = "gsadh_synop"
+    GSADH_DAILY = "gsadh_daily"
+    GSADH_MONTHLY = "gsadh_monthly"
 
     HOURLY = "hourly"
     DAILY = "daily"

@@ -473,6 +473,113 @@ PROVIDER_METNO_FORECAST = ProviderSpec(
     module="meteostat.providers.metno.forecast",
 )
 
+PROVIDER_GSADH_HOURLY = ProviderSpec(
+    id=Provider.GSADH_HOURLY,
+    name="GeoSphere Austria Hourly",
+    granularity=Granularity.HOURLY,
+    priority=Priority.HIGHEST,
+    grade=Grade.RECORD,
+    license=License(
+        commercial=True,
+        attribution="GeoSphere Austria",
+        name="CC BY 4.0",
+        url="https://creativecommons.org/licenses/by/4.0/",
+    ),
+    requires=["identifiers"],
+    countries=["AT"],
+    parameters=[
+        Parameter.TEMP,
+        Parameter.PRCP,
+        Parameter.PRES,
+        Parameter.WSPD,
+        Parameter.WDIR,
+        Parameter.RHUM,
+        Parameter.TSUN,
+    ],
+    start=date(1880, 4, 1),
+    module="meteostat.providers.gsadh.hourly",
+)
+
+PROVIDER_GSADH_SYNOP = ProviderSpec(
+    id=Provider.GSADH_SYNOP,
+    name="GeoSphere Austria SYNOP",
+    granularity=Granularity.HOURLY,
+    priority=Priority.HIGH,
+    grade=Grade.OBSERVATION,
+    license=License(
+        commercial=True,
+        attribution="GeoSphere Austria",
+        name="CC BY 4.0",
+        url="https://creativecommons.org/licenses/by/4.0/",
+    ),
+    requires=["identifiers"],
+    countries=["AT"],
+    parameters=[
+        Parameter.TEMP,
+        Parameter.PRES,
+        Parameter.RHUM,
+        Parameter.WSPD,
+        Parameter.WDIR,
+        Parameter.PRCP,
+    ],
+    start=date(2000, 1, 1),
+    module="meteostat.providers.gsadh.synop",
+)
+
+PROVIDER_GSADH_DAILY = ProviderSpec(
+    id=Provider.GSADH_DAILY,
+    name="GeoSphere Austria Daily",
+    granularity=Granularity.DAILY,
+    priority=Priority.HIGHEST,
+    grade=Grade.RECORD,
+    license=License(
+        commercial=True,
+        attribution="GeoSphere Austria",
+        name="CC BY 4.0",
+        url="https://creativecommons.org/licenses/by/4.0/",
+    ),
+    requires=["identifiers"],
+    countries=["AT"],
+    parameters=[
+        Parameter.TEMP,
+        Parameter.TMIN,
+        Parameter.TMAX,
+        Parameter.PRCP,
+        Parameter.PRES,
+        Parameter.RHUM,
+        Parameter.WSPD,
+        Parameter.TSUN,
+    ],
+    start=date(1880, 4, 1),
+    module="meteostat.providers.gsadh.daily",
+)
+
+PROVIDER_GSADH_MONTHLY = ProviderSpec(
+    id=Provider.GSADH_MONTHLY,
+    name="GeoSphere Austria Monthly",
+    granularity=Granularity.MONTHLY,
+    priority=Priority.HIGHEST,
+    grade=Grade.RECORD,
+    license=License(
+        commercial=True,
+        attribution="GeoSphere Austria",
+        name="CC BY 4.0",
+        url="https://creativecommons.org/licenses/by/4.0/",
+    ),
+    requires=["identifiers"],
+    countries=["AT"],
+    parameters=[
+        Parameter.TEMP,
+        Parameter.TMIN,
+        Parameter.TMAX,
+        Parameter.PRCP,
+        Parameter.PRES,
+        Parameter.TSUN,
+    ],
+    start=date(1880, 4, 1),
+    module="meteostat.providers.gsadh.monthly",
+)
+
 
 DEFAULT_PROVIDERS = [
     PROVIDER_HOURLY,
@@ -493,4 +600,8 @@ DEFAULT_PROVIDERS = [
     PROVIDER_CLIMAT,
     PROVIDER_METAR,
     PROVIDER_METNO_FORECAST,
+    PROVIDER_GSADH_HOURLY,
+    PROVIDER_GSADH_SYNOP,
+    PROVIDER_GSADH_DAILY,
+    PROVIDER_GSADH_MONTHLY,
 ]
