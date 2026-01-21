@@ -15,7 +15,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsadh.shared import API_BASE_URL
+from meteostat.providers.gsadh.shared import API_BASE_URL, convert_wspd_ms_to_kmh
 from meteostat.core.network import network_service
 
 
@@ -34,13 +34,6 @@ PARAMETER_MAPPING: Dict[str, Parameter] = {
 
 # Inverse mapping
 METEOSTAT_TO_GSADH = {v: k for k, v in PARAMETER_MAPPING.items()}
-
-
-def _convert_wspd_ms_to_kmh(value):
-    """Convert wind speed from m/s to km/h"""
-    if pd.isna(value):
-        return value
-    return value * 3.6
 
 
 @cache_service.cache(TTL.DAY, "pickle")
@@ -152,7 +145,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     # Convert units where necessary
     if Parameter.WSPD in df.columns:
-        df[Parameter.WSPD] = df[Parameter.WSPD].apply(_convert_wspd_ms_to_kmh)
+        df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
 
     # Round values
     df = df.round(1)

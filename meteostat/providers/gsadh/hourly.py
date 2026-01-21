@@ -15,7 +15,11 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsadh.shared import API_BASE_URL
+from meteostat.providers.gsadh.shared import (
+    API_BASE_URL,
+    convert_wspd_ms_to_kmh,
+    convert_tsun_h_to_min,
+)
 from meteostat.core.network import network_service
 
 
@@ -36,20 +40,6 @@ PARAMETER_MAPPING: Dict[str, Parameter] = {
 
 # Inverse mapping
 METEOSTAT_TO_GSADH = {v: k for k, v in PARAMETER_MAPPING.items()}
-
-
-def _convert_wspd_ms_to_kmh(value):
-    """Convert wind speed from m/s to km/h"""
-    if pd.isna(value):
-        return value
-    return value * 3.6
-
-
-def _convert_tsun_h_to_min(value):
-    """Convert sunshine duration from hours to minutes"""
-    if pd.isna(value):
-        return value
-    return value * 60
 
 
 @cache_service.cache(TTL.DAY, "pickle")
@@ -161,10 +151,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     # Convert units where necessary
     if Parameter.WSPD in df.columns:
-        df[Parameter.WSPD] = df[Parameter.WSPD].apply(_convert_wspd_ms_to_kmh)
+        df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
 
     if Parameter.TSUN in df.columns:
-        df[Parameter.TSUN] = df[Parameter.TSUN].apply(_convert_tsun_h_to_min)
+        df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
 
     # Round values
     df = df.round(1)
