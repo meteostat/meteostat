@@ -102,7 +102,7 @@ def get_df(parameter: str, mode: str, station_code: str) -> Optional[pd.DataFram
 
     buffer.seek(0)
     df = pd.read_csv(buffer, sep=";").rename(columns=lambda col: col.strip().lower())
-    df.rename(columns=param_config["stubnames"], inplace=True)
+    df = df.rename(columns=param_config["stubnames"])
 
     # Convert wide to long format
     df = pd.wide_to_long(
