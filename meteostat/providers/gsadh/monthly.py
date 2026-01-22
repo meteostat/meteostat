@@ -23,13 +23,12 @@ RESOURCE_ID = "klima-v2-1m"
 
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
-    "t": Parameter.TEMP,  # Mean air temperature (°C)
-    "tmin": Parameter.TMIN,  # Minimum air temperature (°C)
-    "tmax": Parameter.TMAX,  # Maximum air temperature (°C)
-    "rr": Parameter.PRCP,  # Precipitation (mm)
-    "p": Parameter.PRES,  # Air pressure (hPa)
-    "so": Parameter.TSUN,  # Sunshine duration (h)
-    # Additional parameters can be mapped as needed
+    "tlmin": Parameter.TMIN,  # Minimum air temperature (°C) - Lufttemperatur 2m Minimalwert
+    "tlmax": Parameter.TMAX,  # Maximum air temperature (°C) - Lufttemperatur 2m Maximalwert
+    "rr": Parameter.PRCP,  # Precipitation sum (mm) - Niederschlag Summe der 24h-Summen
+    "p": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
+    "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
+    # Note: Mean temperature (TEMP) not directly available in monthly dataset
 }
 
 # Inverse mapping
@@ -47,9 +46,9 @@ def get_data(
         f"Fetching monthly data for station '{station_id}' from {start} to {end}"
     )
 
-    # Format dates as ISO 8601 (year-month for monthly data)
-    start_str = start.strftime("%Y-%m")
-    end_str = end.strftime("%Y-%m")
+    # Format dates as ISO 8601 (full date for monthly data)
+    start_str = start.strftime("%Y-%m-%d")
+    end_str = end.strftime("%Y-%m-%d")
 
     # Build URL
     url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
@@ -79,26 +78,40 @@ def get_data(
             logger.info(f"No monthly data returned for station {station_id}")
             return None
 
-        # Extract time series data from GeoJSON response
-        records = []
-        for feature in data["features"]:
-            props = feature.get("properties", {})
-            timestamp = props.get("time")
-            if not timestamp:
-                continue
-
-            record = {"time": pd.to_datetime(timestamp)}
-            for param in parameters:
-                if param in props:
-                    record[param] = props[param]
-
-            records.append(record)
-
-        if not records:
+        # Get timestamps array
+        timestamps = data.get("timestamps")
+        if not timestamps:
+            logger.warning("No timestamps in monthly response")
             return None
 
-        df = pd.DataFrame(records)
-        df = df.set_index("time")
+        # Extract time series data from GeoJSON response
+        # New API format has timestamps at top level and data as arrays
+        feature = data["features"][0]
+        props = feature.get("properties", {})
+        params_data = props.get("parameters", {})
+
+        if not params_data:
+            logger.info(f"No parameter data returned for station {station_id}")
+            return None
+
+        # Build DataFrame from timestamps and parameter arrays
+        df_dict = {}
+        for param in parameters:
+            if param in params_data:
+                param_info = params_data[param]
+                if "data" in param_info:
+                    df_dict[param] = param_info["data"]
+
+        if not df_dict:
+            return None
+
+        # Create DataFrame with timestamps as index
+        df = pd.DataFrame(df_dict)
+        df.index = pd.to_datetime(timestamps)
+        df.index.name = "time"
+
+        # Remove timezone info to match expected format (naive datetime)
+        df.index = df.index.tz_localize(None)
 
         # Sort by time
         df = df.sort_index()

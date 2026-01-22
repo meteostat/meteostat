@@ -85,26 +85,40 @@ def get_data(
             logger.info(f"No data returned for station {station_id}")
             return None
 
-        # Extract time series data from GeoJSON response
-        records = []
-        for feature in data["features"]:
-            props = feature.get("properties", {})
-            timestamp = props.get("time")
-            if not timestamp:
-                continue
-
-            record = {"time": pd.to_datetime(timestamp)}
-            for param in parameters:
-                if param in props:
-                    record[param] = props[param]
-
-            records.append(record)
-
-        if not records:
+        # Get timestamps array
+        timestamps = data.get("timestamps")
+        if not timestamps:
+            logger.warning("No timestamps in hourly response")
             return None
 
-        df = pd.DataFrame(records)
-        df = df.set_index("time")
+        # Extract time series data from GeoJSON response
+        # New API format has timestamps at top level and data as arrays
+        feature = data["features"][0]
+        props = feature.get("properties", {})
+        params_data = props.get("parameters", {})
+
+        if not params_data:
+            logger.info(f"No parameter data returned for station {station_id}")
+            return None
+
+        # Build DataFrame from timestamps and parameter arrays
+        df_dict = {}
+        for param in parameters:
+            if param in params_data:
+                param_info = params_data[param]
+                if "data" in param_info:
+                    df_dict[param] = param_info["data"]
+
+        if not df_dict:
+            return None
+
+        # Create DataFrame with timestamps as index
+        df = pd.DataFrame(df_dict)
+        df.index = pd.to_datetime(timestamps)
+        df.index.name = "time"
+
+        # Remove timezone info to match expected format (naive datetime)
+        df.index = df.index.tz_localize(None)
 
         # Sort by time
         df = df.sort_index()

@@ -23,13 +23,12 @@ RESOURCE_ID = "synop-v1-1h"
 
 # Mapping from GeoSphere Austria SYNOP parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
-    "t": Parameter.TEMP,  # Air temperature (°C)
-    "p": Parameter.PRES,  # Air pressure (hPa)
-    "rf": Parameter.RHUM,  # Relative humidity (%)
-    "ff": Parameter.WSPD,  # Wind speed (m/s)
-    "dd": Parameter.WDIR,  # Wind direction (°)
-    "rr": Parameter.PRCP,  # Precipitation (mm)
-    # Additional SYNOP parameters can be mapped as they are identified
+    "T": Parameter.TEMP,  # Air temperature (°C) - Lufttemperatur
+    "Pp": Parameter.PRES,  # Air pressure (hPa) - Reduzierter Luftdruck
+    "rel": Parameter.RHUM,  # Relative humidity (%) - Relative Feuchte
+    "ff": Parameter.WSPD,  # Wind speed (m/s) - Windgeschwindigkeit
+    "dd": Parameter.WDIR,  # Wind direction (°) - Windrichtung
+    "RRR": Parameter.PRCP,  # Precipitation (mm) - Niederschlagsmenge
 }
 
 # Inverse mapping
@@ -79,26 +78,40 @@ def get_data(
             logger.info(f"No SYNOP data returned for station {station_id}")
             return None
 
-        # Extract time series data from GeoJSON response
-        records = []
-        for feature in data["features"]:
-            props = feature.get("properties", {})
-            timestamp = props.get("time")
-            if not timestamp:
-                continue
-
-            record = {"time": pd.to_datetime(timestamp)}
-            for param in parameters:
-                if param in props:
-                    record[param] = props[param]
-
-            records.append(record)
-
-        if not records:
+        # Get timestamps array
+        timestamps = data.get("timestamps")
+        if not timestamps:
+            logger.warning("No timestamps in SYNOP response")
             return None
 
-        df = pd.DataFrame(records)
-        df = df.set_index("time")
+        # Extract time series data from GeoJSON response
+        # New API format has timestamps at top level and data as arrays
+        feature = data["features"][0]
+        props = feature.get("properties", {})
+        params_data = props.get("parameters", {})
+
+        if not params_data:
+            logger.info(f"No parameter data returned for station {station_id}")
+            return None
+
+        # Build DataFrame from timestamps and parameter arrays
+        df_dict = {}
+        for param in parameters:
+            if param in params_data:
+                param_info = params_data[param]
+                if "data" in param_info:
+                    df_dict[param] = param_info["data"]
+
+        if not df_dict:
+            return None
+
+        # Create DataFrame with timestamps as index
+        df = pd.DataFrame(df_dict)
+        df.index = pd.to_datetime(timestamps)
+        df.index.name = "time"
+
+        # Remove timezone info to match expected format (naive datetime)
+        df.index = df.index.tz_localize(None)
 
         # Sort by time
         df = df.sort_index()
@@ -114,10 +127,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch SYNOP hourly data from GeoSphere Austria Data Hub
     """
-    if "geosphere_id" not in req.station.identifiers:
+    if "wmo" not in req.station.identifiers:
         return None
 
-    station_id = req.station.identifiers["geosphere_id"]
+    station_id = req.station.identifiers["wmo"]
 
     # Map Meteostat parameters to GeoSphere Austria SYNOP parameters
     gsadh_params = []

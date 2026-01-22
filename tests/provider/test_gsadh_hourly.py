@@ -13,7 +13,7 @@ def test_gsadh_hourly():
     query = ProviderRequest(
         start=datetime(2024, 1, 1, 0),
         end=datetime(2024, 1, 1, 5),
-        station=ms.Station(id="11035", identifiers={"geosphere_id": "11035"}),
+        station=ms.Station(id="1", identifiers={"geosphere_id": "1"}),
         parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
     )
     df = fetch(query)

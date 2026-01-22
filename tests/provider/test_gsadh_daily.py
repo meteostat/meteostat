@@ -13,18 +13,15 @@ def test_gsadh_daily():
     query = ProviderRequest(
         start=datetime(2024, 1, 1),
         end=datetime(2024, 1, 5),
-        station=ms.Station(id="11035", identifiers={"geosphere_id": "11035"}),
-        parameters=[ms.Parameter.TEMP, ms.Parameter.TMIN, ms.Parameter.TMAX],
+        station=ms.Station(id="1", identifiers={"geosphere_id": "1"}),
+        parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
     )
     df = fetch(query)
 
     # Check if data is returned at all.
     assert df is not None and not df.empty, "No data returned at all."
     assert "temp" in df, "Temperature data is missing altogether."
-    assert "tmin" in df, "Minimum temperature data is missing altogether."
-    assert "tmax" in df, "Maximum temperature data is missing altogether."
+    assert "prcp" in df, "Precipitation data is missing altogether."
 
     # Check that data contains reasonable number of non-missing entries.
     assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
-    assert df["tmin"].notna().sum() >= 3, "Insufficient minimum temperature data returned."
-    assert df["tmax"].notna().sum() >= 3, "Insufficient maximum temperature data returned."

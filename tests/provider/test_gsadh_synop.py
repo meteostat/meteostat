@@ -13,7 +13,7 @@ def test_gsadh_synop():
     query = ProviderRequest(
         start=datetime(2024, 1, 1, 0),
         end=datetime(2024, 1, 1, 5),
-        station=ms.Station(id="11035", identifiers={"geosphere_id": "11035"}),
+        station=ms.Station(id="11035", identifiers={"wmo": "11035"}),
         parameters=[ms.Parameter.TEMP, ms.Parameter.PRES],
     )
     df = fetch(query)
