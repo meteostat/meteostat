@@ -65,12 +65,25 @@ def get_df(usaf: str, wban: str, year: int) -> Optional[pd.DataFrame]:
     try:
         df = pd.read_fwf(
             f"{ISD_LITE_ENDPOINT}{year}/{filename}",
-            parse_dates={"time": [0, 1, 2, 3]},
             na_values=["-9999", -9999],
             header=None,
             colspecs=COLSPECS,
             compression="gzip",
         )
+
+        # Parse datetime from first 4 columns (year, month, day, hour)
+        df[0] = pd.to_datetime(
+            df[0].astype(str)
+            + "-"
+            + df[1].astype(str).str.zfill(2)
+            + "-"
+            + df[2].astype(str).str.zfill(2)
+            + " "
+            + df[3].astype(str).str.zfill(2)
+            + ":00",
+            format="%Y-%m-%d %H:%M",
+        )
+        df = df.drop(columns=[1, 2, 3])
 
         # Rename columns
         df.columns = COLUMN_NAMES

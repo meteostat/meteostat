@@ -253,7 +253,7 @@ class TestLocalize:
         result = localize(df, "Europe/Berlin")
 
         # The time should be converted to Berlin timezone
-        assert result.index.get_level_values("time")[0].tz.zone == "Europe/Berlin"
+        assert str(result.index.get_level_values("time")[0].tz) == "Europe/Berlin"
 
     def test_localize_preserves_data(self):
         """Test that localize preserves data values"""
