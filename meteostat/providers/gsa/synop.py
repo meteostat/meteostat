@@ -1,7 +1,7 @@
 """
-GeoSphere Austria Data Hub daily data import routine
+GeoSphere Austria Data Hub SYNOP hourly data import routine
 
-Get daily climate data for weather stations in Austria.
+Get SYNOP (synoptic observation) hourly data for weather stations in Austria.
 
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 """
@@ -15,45 +15,40 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsadh.shared import (
-    API_BASE_URL,
-    convert_wspd_ms_to_kmh,
-    convert_tsun_h_to_min,
-)
+from meteostat.providers.gsa.shared import API_BASE_URL, convert_wspd_ms_to_kmh
 from meteostat.core.network import network_service
 
 
-RESOURCE_ID = "klima-v2-1d"
+RESOURCE_ID = "synop-v1-1h"
 
-# Mapping from GeoSphere Austria parameter names to Meteostat parameters
+# Mapping from GeoSphere Austria SYNOP parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
-    "tl_mittel": Parameter.TEMP,  # Mean air temperature (°C) - Lufttemperatur 2m Mittelwert
-    # Note: tmin/tmax not available in klima-v2-1d dataset
-    "rr": Parameter.PRCP,  # Precipitation 24h sum (mm) - Niederschlag 24h Summe
-    "p_mittel": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
-    "rf_mittel": Parameter.RHUM,  # Mean relative humidity (%) - Relative Feuchte Mittelwert
-    "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
-    # Note: Wind speed (ff_mittel) and wind direction (dd_mittel) also available but not mapped yet
+    "T": Parameter.TEMP,  # Air temperature (°C) - Lufttemperatur
+    "Pp": Parameter.PRES,  # Air pressure (hPa) - Reduzierter Luftdruck
+    "rel": Parameter.RHUM,  # Relative humidity (%) - Relative Feuchte
+    "ff": Parameter.WSPD,  # Wind speed (m/s) - Windgeschwindigkeit
+    "dd": Parameter.WDIR,  # Wind direction (°) - Windrichtung
+    "RRR": Parameter.PRCP,  # Precipitation (mm) - Niederschlagsmenge
 }
 
 # Inverse mapping
 METEOSTAT_TO_GSADH = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 
-@cache_service.cache(TTL.WEEK, "pickle")
+@cache_service.cache(TTL.DAY, "pickle")
 def get_data(
     station_id: str, parameters: list[str], start: datetime, end: datetime
 ) -> Optional[pd.DataFrame]:
     """
-    Fetch data from GeoSphere Austria Data Hub API
+    Fetch SYNOP data from GeoSphere Austria Data Hub API
     """
     logger.debug(
-        f"Fetching daily data for station '{station_id}' from {start} to {end}"
+        f"Fetching SYNOP hourly data for station '{station_id}' from {start} to {end}"
     )
 
-    # Format dates as ISO 8601 (date only for daily data)
-    start_str = start.strftime("%Y-%m-%d")
-    end_str = end.strftime("%Y-%m-%d")
+    # Format dates as ISO 8601
+    start_str = start.strftime("%Y-%m-%dT%H:%M")
+    end_str = end.strftime("%Y-%m-%dT%H:%M")
 
     # Build URL
     url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
@@ -72,7 +67,7 @@ def get_data(
 
     if response.status_code != 200:
         logger.warning(
-            f"Failed to fetch daily data for station {station_id} (status: {response.status_code})"
+            f"Failed to fetch SYNOP data for station {station_id} (status: {response.status_code})"
         )
         return None
 
@@ -80,13 +75,13 @@ def get_data(
         data = response.json()
 
         if not data.get("features"):
-            logger.info(f"No daily data returned for station {station_id}")
+            logger.info(f"No SYNOP data returned for station {station_id}")
             return None
 
         # Get timestamps array
         timestamps = data.get("timestamps")
         if not timestamps:
-            logger.warning("No timestamps in daily response")
+            logger.warning("No timestamps in SYNOP response")
             return None
 
         # Extract time series data from GeoJSON response
@@ -124,27 +119,27 @@ def get_data(
         return df
 
     except Exception as error:
-        logger.warning(f"Error parsing daily response: {error}", exc_info=True)
+        logger.warning(f"Error parsing SYNOP response: {error}", exc_info=True)
         return None
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
-    Fetch daily data from GeoSphere Austria Data Hub
+    Fetch SYNOP hourly data from GeoSphere Austria Data Hub
     """
-    if "geosphere_id" not in req.station.identifiers:
+    if "wmo" not in req.station.identifiers:
         return None
 
-    station_id = req.station.identifiers["geosphere_id"]
+    station_id = req.station.identifiers["wmo"]
 
-    # Map Meteostat parameters to GeoSphere Austria parameters
+    # Map Meteostat parameters to GeoSphere Austria SYNOP parameters
     gsadh_params = []
     for param in req.parameters:
         if param in METEOSTAT_TO_GSADH:
             gsadh_params.append(METEOSTAT_TO_GSADH[param])
 
     if not gsadh_params:
-        logger.info("No mappable parameters for GeoSphere Austria daily data")
+        logger.info("No mappable parameters for GeoSphere Austria SYNOP data")
         return None
 
     # Fetch data
@@ -164,9 +159,6 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     # Convert units where necessary
     if Parameter.WSPD in df.columns:
         df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
-
-    if Parameter.TSUN in df.columns:
-        df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
 
     # Round values
     df = df.round(1)

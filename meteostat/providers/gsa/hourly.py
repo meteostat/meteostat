@@ -1,7 +1,7 @@
 """
-GeoSphere Austria Data Hub monthly data import routine
+GeoSphere Austria Data Hub hourly data import routine
 
-Get monthly climate data for weather stations in Austria.
+Get hourly climate data for weather stations in Austria.
 
 License: CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/)
 """
@@ -15,27 +15,34 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsadh.shared import API_BASE_URL, convert_tsun_h_to_min
+from meteostat.providers.gsa.shared import (
+    API_BASE_URL,
+    convert_wspd_ms_to_kmh,
+    convert_tsun_h_to_min,
+)
 from meteostat.core.network import network_service
 
 
-RESOURCE_ID = "klima-v2-1m"
+RESOURCE_ID = "klima-v2-1h"
 
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
-    "tlmin": Parameter.TMIN,  # Minimum air temperature (°C) - Lufttemperatur 2m Minimalwert
-    "tlmax": Parameter.TMAX,  # Maximum air temperature (°C) - Lufttemperatur 2m Maximalwert
-    "rr": Parameter.PRCP,  # Precipitation sum (mm) - Niederschlag Summe der 24h-Summen
-    "p": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
-    "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
-    # Note: Mean temperature (TEMP) not directly available in monthly dataset
+    "tl": Parameter.TEMP,  # Air temperature (°C)
+    "rr": Parameter.PRCP,  # Precipitation (mm)
+    "p": Parameter.PRES,  # Air pressure (hPa)
+    "ff": Parameter.WSPD,  # Wind speed (m/s)
+    "dd": Parameter.WDIR,  # Wind direction (°)
+    "rf": Parameter.RHUM,  # Relative humidity (%)
+    "so_h": Parameter.TSUN,  # Sunshine duration (h)
+    # Note: WPGT (wind gust), CLDC (cloud cover), SNWD (snow depth) may need different parameter names
+    # from the API - these would need to be mapped once we have access to full API documentation
 }
 
 # Inverse mapping
 METEOSTAT_TO_GSADH = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 
-@cache_service.cache(TTL.MONTH, "pickle")
+@cache_service.cache(TTL.DAY, "pickle")
 def get_data(
     station_id: str, parameters: list[str], start: datetime, end: datetime
 ) -> Optional[pd.DataFrame]:
@@ -43,12 +50,12 @@ def get_data(
     Fetch data from GeoSphere Austria Data Hub API
     """
     logger.debug(
-        f"Fetching monthly data for station '{station_id}' from {start} to {end}"
+        f"Fetching hourly data for station '{station_id}' from {start} to {end}"
     )
 
-    # Format dates as ISO 8601 (full date for monthly data)
-    start_str = start.strftime("%Y-%m-%d")
-    end_str = end.strftime("%Y-%m-%d")
+    # Format dates as ISO 8601
+    start_str = start.strftime("%Y-%m-%dT%H:%M")
+    end_str = end.strftime("%Y-%m-%dT%H:%M")
 
     # Build URL
     url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
@@ -67,7 +74,7 @@ def get_data(
 
     if response.status_code != 200:
         logger.warning(
-            f"Failed to fetch monthly data for station {station_id} (status: {response.status_code})"
+            f"Failed to fetch data for station {station_id} (status: {response.status_code})"
         )
         return None
 
@@ -75,13 +82,13 @@ def get_data(
         data = response.json()
 
         if not data.get("features"):
-            logger.info(f"No monthly data returned for station {station_id}")
+            logger.info(f"No data returned for station {station_id}")
             return None
 
         # Get timestamps array
         timestamps = data.get("timestamps")
         if not timestamps:
-            logger.warning("No timestamps in monthly response")
+            logger.warning("No timestamps in hourly response")
             return None
 
         # Extract time series data from GeoJSON response
@@ -119,13 +126,13 @@ def get_data(
         return df
 
     except Exception as error:
-        logger.warning(f"Error parsing monthly response: {error}", exc_info=True)
+        logger.warning(f"Error parsing response: {error}", exc_info=True)
         return None
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
-    Fetch monthly data from GeoSphere Austria Data Hub
+    Fetch hourly data from GeoSphere Austria Data Hub
     """
     if "geosphere_id" not in req.station.identifiers:
         return None
@@ -139,7 +146,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
             gsadh_params.append(METEOSTAT_TO_GSADH[param])
 
     if not gsadh_params:
-        logger.info("No mappable parameters for GeoSphere Austria monthly data")
+        logger.info("No mappable parameters for GeoSphere Austria hourly data")
         return None
 
     # Fetch data
@@ -157,6 +164,9 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     df = df.rename(columns=rename_map)
 
     # Convert units where necessary
+    if Parameter.WSPD in df.columns:
+        df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
+
     if Parameter.TSUN in df.columns:
         df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
 

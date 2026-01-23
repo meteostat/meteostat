@@ -473,8 +473,8 @@ PROVIDER_METNO_FORECAST = ProviderSpec(
     module="meteostat.providers.metno.forecast",
 )
 
-PROVIDER_GSADH_HOURLY = ProviderSpec(
-    id=Provider.GSADH_HOURLY,
+PROVIDER_GSA_HOURLY = ProviderSpec(
+    id=Provider.GSA_HOURLY,
     name="GeoSphere Austria Hourly",
     granularity=Granularity.HOURLY,
     priority=Priority.HIGHEST,
@@ -497,11 +497,11 @@ PROVIDER_GSADH_HOURLY = ProviderSpec(
         Parameter.TSUN,
     ],
     start=date(1880, 4, 1),
-    module="meteostat.providers.gsadh.hourly",
+    module="meteostat.providers.gsa.hourly",
 )
 
-PROVIDER_GSADH_SYNOP = ProviderSpec(
-    id=Provider.GSADH_SYNOP,
+PROVIDER_GSA_SYNOP = ProviderSpec(
+    id=Provider.GSA_SYNOP,
     name="GeoSphere Austria SYNOP",
     granularity=Granularity.HOURLY,
     priority=Priority.HIGH,
@@ -523,11 +523,11 @@ PROVIDER_GSADH_SYNOP = ProviderSpec(
         Parameter.PRCP,
     ],
     start=date(2000, 1, 1),
-    module="meteostat.providers.gsadh.synop",
+    module="meteostat.providers.gsa.synop",
 )
 
-PROVIDER_GSADH_DAILY = ProviderSpec(
-    id=Provider.GSADH_DAILY,
+PROVIDER_GSA_DAILY = ProviderSpec(
+    id=Provider.GSA_DAILY,
     name="GeoSphere Austria Daily",
     granularity=Granularity.DAILY,
     priority=Priority.HIGHEST,
@@ -551,11 +551,11 @@ PROVIDER_GSADH_DAILY = ProviderSpec(
         Parameter.TSUN,
     ],
     start=date(1880, 4, 1),
-    module="meteostat.providers.gsadh.daily",
+    module="meteostat.providers.gsa.daily",
 )
 
-PROVIDER_GSADH_MONTHLY = ProviderSpec(
-    id=Provider.GSADH_MONTHLY,
+PROVIDER_GSA_MONTHLY = ProviderSpec(
+    id=Provider.GSA_MONTHLY,
     name="GeoSphere Austria Monthly",
     granularity=Granularity.MONTHLY,
     priority=Priority.HIGHEST,
@@ -577,7 +577,7 @@ PROVIDER_GSADH_MONTHLY = ProviderSpec(
         Parameter.TSUN,
     ],
     start=date(1880, 4, 1),
-    module="meteostat.providers.gsadh.monthly",
+    module="meteostat.providers.gsa.monthly",
 )
 
 
@@ -600,8 +600,8 @@ DEFAULT_PROVIDERS = [
     PROVIDER_CLIMAT,
     PROVIDER_METAR,
     PROVIDER_METNO_FORECAST,
-    PROVIDER_GSADH_HOURLY,
-    PROVIDER_GSADH_SYNOP,
-    PROVIDER_GSADH_DAILY,
-    PROVIDER_GSADH_MONTHLY,
+    PROVIDER_GSA_HOURLY,
+    PROVIDER_GSA_SYNOP,
+    PROVIDER_GSA_DAILY,
+    PROVIDER_GSA_MONTHLY,
 ]

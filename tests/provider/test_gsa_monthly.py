@@ -1,10 +1,10 @@
 from datetime import datetime
 import meteostat as ms
-from meteostat.providers.gsadh.monthly import fetch
+from meteostat.providers.gsa.monthly import fetch
 from meteostat.typing import ProviderRequest
 
 
-def test_gsadh_monthly():
+def test_gsa_monthly():
     """
     It should load data from GeoSphere Austria Data Hub (monthly)
     """
