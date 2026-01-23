@@ -82,7 +82,7 @@ def create_df(element, dict_element):
         df_element = move_col_to_front(col, df_element)
 
     # Convert numerical values to float
-    df_element.loc[:, element] = df_element.loc[:, element].astype(float)
+    df_element[element] = df_element[element].astype(float)
 
     return df_element
 
@@ -180,7 +180,7 @@ def dly_to_df(ftp, station_id):
     list_dfs = []
     for df in list(all_dfs.keys()):
         list_dfs += [all_dfs[df]]
-    df_all = pd.concat(list_dfs, axis=1)
+    df_all = pd.concat(list_dfs, axis=1, sort=False)
     df_all.index.name = "MM/DD/YYYY"
 
     # Remove duplicated/broken columns and rows
