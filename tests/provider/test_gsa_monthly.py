@@ -13,7 +13,7 @@ def test_gsa_monthly():
     query = ProviderRequest(
         start=datetime(2023, 1, 1),
         end=datetime(2023, 6, 1),
-        station=ms.Station(id="1", identifiers={"geosphere_id": "1"}),
+        station=ms.Station(id="11035", identifiers={"national": "105"}),
         parameters=[ms.Parameter.TMIN, ms.Parameter.TMAX, ms.Parameter.PRCP],
     )
     df = fetch(query)

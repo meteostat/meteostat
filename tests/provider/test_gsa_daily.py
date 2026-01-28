@@ -13,7 +13,7 @@ def test_gsa_daily():
     query = ProviderRequest(
         start=datetime(2024, 1, 1),
         end=datetime(2024, 1, 5),
-        station=ms.Station(id="1", identifiers={"geosphere_id": "1"}),
+        station=ms.Station(id="11035", identifiers={"national": "105"}),
         parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
     )
     df = fetch(query)
@@ -25,3 +25,4 @@ def test_gsa_daily():
 
     # Check that data contains reasonable number of non-missing entries.
     assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
+    assert df["prcp"].notna().sum() >= 3, "Insufficient precipitation data returned."

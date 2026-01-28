@@ -134,10 +134,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Fetch hourly data from GeoSphere Austria Data Hub
     """
-    if "geosphere_id" not in req.station.identifiers:
+    if "national" not in req.station.identifiers:
         return None
 
-    station_id = req.station.identifiers["geosphere_id"]
+    station_id = req.station.identifiers["national"]
 
     # Map Meteostat parameters to GeoSphere Austria parameters
     gsadh_params = []
