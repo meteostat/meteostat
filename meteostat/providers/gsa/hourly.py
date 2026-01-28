@@ -39,7 +39,7 @@ PARAMETER_MAPPING: Dict[str, Parameter] = {
 }
 
 # Inverse mapping
-METEOSTAT_TO_GSADH = {v: k for k, v in PARAMETER_MAPPING.items()}
+METEOSTAT_TO_GSA = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 
 @cache_service.cache(TTL.DAY, "pickle")
@@ -123,6 +123,24 @@ def get_data(
         # Sort by time
         df = df.sort_index()
 
+        # Rename columns to Meteostat parameter names
+        rename_map = {}
+        for gsadh_param, meteostat_param in PARAMETER_MAPPING.items():
+            if gsadh_param in df.columns:
+                rename_map[gsadh_param] = meteostat_param
+
+        df = df.rename(columns=rename_map)
+
+        # Convert units where necessary
+        if Parameter.WSPD in df.columns:
+            df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
+
+        if Parameter.TSUN in df.columns:
+            df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
+
+        # Round values
+        df = df.round(1)
+
         return df
 
     except Exception as error:
@@ -142,8 +160,8 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     # Map Meteostat parameters to GeoSphere Austria parameters
     gsadh_params = []
     for param in req.parameters:
-        if param in METEOSTAT_TO_GSADH:
-            gsadh_params.append(METEOSTAT_TO_GSADH[param])
+        if param in METEOSTAT_TO_GSA:
+            gsadh_params.append(METEOSTAT_TO_GSA[param])
 
     if not gsadh_params:
         logger.info("No mappable parameters for GeoSphere Austria hourly data")
@@ -154,23 +172,5 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     if df is None or df.empty:
         return None
-
-    # Rename columns to Meteostat parameter names
-    rename_map = {}
-    for gsadh_param, meteostat_param in PARAMETER_MAPPING.items():
-        if gsadh_param in df.columns:
-            rename_map[gsadh_param] = meteostat_param
-
-    df = df.rename(columns=rename_map)
-
-    # Convert units where necessary
-    if Parameter.WSPD in df.columns:
-        df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
-
-    if Parameter.TSUN in df.columns:
-        df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
-
-    # Round values
-    df = df.round(1)
 
     return df
