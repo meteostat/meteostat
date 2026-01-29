@@ -15,7 +15,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsa.shared import API_BASE_URL
+from meteostat.api.config import config
 from meteostat.core.network import network_service
 from meteostat.utils.conversions import ms_to_kmh
 
@@ -25,11 +25,17 @@ RESOURCE_ID = "synop-v1-1h"
 # Mapping from GeoSphere Austria SYNOP parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "T": Parameter.TEMP,  # Air temperature (°C) - Lufttemperatur
+    # TODO: Needs investigation
     "Pp": Parameter.PRES,  # Air pressure (hPa) - Reduzierter Luftdruck
     "rel": Parameter.RHUM,  # Relative humidity (%) - Relative Feuchte
     "ff": Parameter.WSPD,  # Wind speed (m/s) - Windgeschwindigkeit
+    "boe": Parameter.WPGT,  # Wind gust (m/s) - Windböe
     "dd": Parameter.WDIR,  # Wind direction (°) - Windrichtung
     "RRR": Parameter.PRCP,  # Precipitation (mm) - Niederschlagsmenge
+    # TODO: Snow depth (schnee) also available but not mapped yet
+    "N": Parameter.CLDC,  # Cloud cover (okta) - Bedeckungsgrad
+    # TODO: Visibility (VV) also available but not mapped yet
+    # TODO: Condition code (ww) also available but not mapped yet
 }
 
 # Inverse mapping
@@ -52,7 +58,7 @@ def get_data(
     end_str = end.strftime("%Y-%m-%dT%H:%M")
 
     # Build URL
-    url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
+    url = f"{config.gsa_api_base_url}/station/historical/{RESOURCE_ID}"
 
     # Make request
     response = network_service.get(
@@ -129,6 +135,13 @@ def get_data(
         if Parameter.WSPD in df.columns:
             df[Parameter.WSPD] = df[Parameter.WSPD].apply(ms_to_kmh)
 
+        if Parameter.WPGT in df.columns:
+            df[Parameter.WPGT] = df[Parameter.WPGT].apply(ms_to_kmh)
+
+        # RRR returns -1 for no precipitation; convert to 0
+        if Parameter.PRCP in df.columns:
+            df[Parameter.PRCP] = df[Parameter.PRCP].replace(-1, 0)
+
         # Round values
         df = df.round(1)
 
@@ -149,17 +162,17 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     station_id = req.station.identifiers["wmo"]
 
     # Map Meteostat parameters to GeoSphere Austria SYNOP parameters
-    gsadh_params = []
+    gsa_params = []
     for param in req.parameters:
         if param in METEOSTAT_TO_GSA:
-            gsadh_params.append(METEOSTAT_TO_GSA[param])
+            gsa_params.append(METEOSTAT_TO_GSA[param])
 
-    if not gsadh_params:
+    if not gsa_params:
         logger.info("No mappable parameters for GeoSphere Austria SYNOP data")
         return None
 
     # Fetch data
-    df = get_data(station_id, gsadh_params, req.start, req.end)
+    df = get_data(station_id, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None

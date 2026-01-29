@@ -15,7 +15,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsa.shared import API_BASE_URL
+from meteostat.api.config import config
 from meteostat.core.network import network_service
 from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh
 
@@ -23,16 +23,17 @@ from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh
 RESOURCE_ID = "klima-v2-1h"
 
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
+# See: https://dataset.api.hub.geosphere.at/v1/station/historical/klima-v2-1h/metadata
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "tl": Parameter.TEMP,  # Air temperature (°C)
     "rr": Parameter.PRCP,  # Precipitation (mm)
-    "p": Parameter.PRES,  # Air pressure (hPa)
+    "pred": Parameter.PRES,  # Air pressure (hPa)
     "ff": Parameter.WSPD,  # Wind speed (m/s)
+    "ffx": Parameter.WPGT,  # Wind gust (m/s)
     "dd": Parameter.WDIR,  # Wind direction (°)
     "rf": Parameter.RHUM,  # Relative humidity (%)
     "so_h": Parameter.TSUN,  # Sunshine duration (h)
-    # Note: WPGT (wind gust), CLDC (cloud cover), SNWD (snow depth) may need different parameter names
-    # from the API - these would need to be mapped once we have access to full API documentation
+    "sh": Parameter.SNWD,  # Snow depth (cm)
 }
 
 # Inverse mapping
@@ -55,7 +56,7 @@ def get_data(
     end_str = end.strftime("%Y-%m-%dT%H:%M")
 
     # Build URL
-    url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
+    url = f"{config.gsa_api_base_url}/station/historical/{RESOURCE_ID}"
 
     # Make request
     response = network_service.get(
@@ -132,6 +133,9 @@ def get_data(
         if Parameter.WSPD in df.columns:
             df[Parameter.WSPD] = df[Parameter.WSPD].apply(ms_to_kmh)
 
+        if Parameter.WPGT in df.columns:
+            df[Parameter.WPGT] = df[Parameter.WPGT].apply(ms_to_kmh)
+
         if Parameter.TSUN in df.columns:
             df[Parameter.TSUN] = df[Parameter.TSUN].apply(hours_to_minutes)
 
@@ -155,17 +159,17 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     station_id = req.station.identifiers["national"]
 
     # Map Meteostat parameters to GeoSphere Austria parameters
-    gsadh_params = []
+    gsa_params = []
     for param in req.parameters:
         if param in METEOSTAT_TO_GSA:
-            gsadh_params.append(METEOSTAT_TO_GSA[param])
+            gsa_params.append(METEOSTAT_TO_GSA[param])
 
-    if not gsadh_params:
+    if not gsa_params:
         logger.info("No mappable parameters for GeoSphere Austria hourly data")
         return None
 
     # Fetch data
-    df = get_data(station_id, gsadh_params, req.start, req.end)
+    df = get_data(station_id, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None

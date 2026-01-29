@@ -15,9 +15,9 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsa.shared import API_BASE_URL
+from meteostat.api.config import config
 from meteostat.core.network import network_service
-from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh
+from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh, percentage_to_okta
 
 
 RESOURCE_ID = "klima-v2-1d"
@@ -25,12 +25,16 @@ RESOURCE_ID = "klima-v2-1d"
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "tl_mittel": Parameter.TEMP,  # Mean air temperature (°C) - Lufttemperatur 2m Mittelwert
-    # Note: tmin/tmax not available in klima-v2-1d dataset
+    "tlmax": Parameter.TMAX,  # Maximum air temperature (°C) - Lufttemperatur 2m Maximalwert
+    "tlmin": Parameter.TMIN,  # Minimum air temperature (°C) - Lufttemperatur 2m Minimalwert
     "rr": Parameter.PRCP,  # Precipitation 24h sum (mm) - Niederschlag 24h Summe
-    "p_mittel": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
+    "sh": Parameter.SNWD,  # Snow depth (cm) - Schneehöhe
+    "vv_mittel": Parameter.WSPD,  # Mean wind speed (km/h) - Windgeschwindigkeit Mittelwert
+    "ffx": Parameter.WPGT,  # Maximum wind gust (m/s) - Windböe Maximum
+    # TODO: Air pressure (p_mittel) also available, but probably not MSL
     "rf_mittel": Parameter.RHUM,  # Mean relative humidity (%) - Relative Feuchte Mittelwert
     "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
-    # Note: Wind speed (ff_mittel) and wind direction (dd_mittel) also available but not mapped yet
+    "bewm_mittel": Parameter.CLDC,  # Mean cloud cover (%) - Bedeckung Mittelwert
 }
 
 # Inverse mapping
@@ -53,7 +57,7 @@ def get_data(
     end_str = end.strftime("%Y-%m-%d")
 
     # Build URL
-    url = f"{API_BASE_URL}/station/historical/{RESOURCE_ID}"
+    url = f"{config.gsa_api_base_url}/station/historical/{RESOURCE_ID}"
 
     # Make request
     response = network_service.get(
@@ -130,8 +134,15 @@ def get_data(
         if Parameter.WSPD in df.columns:
             df[Parameter.WSPD] = df[Parameter.WSPD].apply(ms_to_kmh)
 
+        if Parameter.WPGT in df.columns:
+            df[Parameter.WPGT] = df[Parameter.WPGT].apply(ms_to_kmh)
+
         if Parameter.TSUN in df.columns:
             df[Parameter.TSUN] = df[Parameter.TSUN].apply(hours_to_minutes)
+
+        if Parameter.CLDC in df.columns:
+            # Convert from fraction (0-1) to percentage (0-100)
+            df[Parameter.CLDC] = df[Parameter.CLDC].apply(percentage_to_okta)
 
         # Round values
         df = df.round(1)
@@ -153,17 +164,17 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     station_id = req.station.identifiers["national"]
 
     # Map Meteostat parameters to GeoSphere Austria parameters
-    gsadh_params = []
+    gsa_params = []
     for param in req.parameters:
         if param in METEOSTAT_TO_GSA:
-            gsadh_params.append(METEOSTAT_TO_GSA[param])
+            gsa_params.append(METEOSTAT_TO_GSA[param])
 
-    if not gsadh_params:
+    if not gsa_params:
         logger.info("No mappable parameters for GeoSphere Austria daily data")
         return None
 
     # Fetch data
-    df = get_data(station_id, gsadh_params, req.start, req.end)
+    df = get_data(station_id, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None
