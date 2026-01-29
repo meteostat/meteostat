@@ -112,11 +112,9 @@ def get_data(
 
         # Create DataFrame with timestamps as index
         df = pd.DataFrame(df_dict)
-        df.index = pd.to_datetime(timestamps)
+        dt_index = pd.DatetimeIndex(pd.to_datetime(timestamps))
+        df.index = dt_index.tz_localize(None)
         df.index.name = "time"
-
-        # Remove timezone info to match expected format (naive datetime)
-        df.index = df.index.tz_localize(None)
 
         # Sort by time
         df = df.sort_index()

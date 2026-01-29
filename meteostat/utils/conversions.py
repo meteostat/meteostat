@@ -113,6 +113,10 @@ def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter
         if pd.isna(pres) or pd.isna(t) or altitude is None or pres == -999:
             return None
 
+        # Type narrowing for arithmetic operations
+        if not isinstance(pres, (int, float)) or not isinstance(t, (int, float)):
+            return None
+
         return round(
             pres
             * math.pow(
