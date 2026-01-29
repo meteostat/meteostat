@@ -15,12 +15,9 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsa.shared import (
-    API_BASE_URL,
-    convert_wspd_ms_to_kmh,
-    convert_tsun_h_to_min,
-)
+from meteostat.providers.gsa.shared import API_BASE_URL
 from meteostat.core.network import network_service
+from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh
 
 
 RESOURCE_ID = "klima-v2-1d"
@@ -131,10 +128,10 @@ def get_data(
 
         # Convert units where necessary
         if Parameter.WSPD in df.columns:
-            df[Parameter.WSPD] = df[Parameter.WSPD].apply(convert_wspd_ms_to_kmh)
+            df[Parameter.WSPD] = df[Parameter.WSPD].apply(ms_to_kmh)
 
         if Parameter.TSUN in df.columns:
-            df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
+            df[Parameter.TSUN] = df[Parameter.TSUN].apply(hours_to_minutes)
 
         # Round values
         df = df.round(1)

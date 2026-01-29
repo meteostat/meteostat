@@ -83,6 +83,13 @@ def ms_to_kmh(value):
     return value * 3.6 if value is not None and not isnan(value) else None
 
 
+def hours_to_minutes(value):
+    """
+    Convert duration from hours to minutes
+    """
+    return value * 60 if value is not None and not isnan(value) else None
+
+
 def temp_dwpt_to_rhum(row: dict):
     """
     Get relative humidity from temperature and dew point

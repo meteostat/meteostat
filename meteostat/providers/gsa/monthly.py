@@ -15,8 +15,9 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
-from meteostat.providers.gsa.shared import API_BASE_URL, convert_tsun_h_to_min
+from meteostat.providers.gsa.shared import API_BASE_URL
 from meteostat.core.network import network_service
+from meteostat.utils.conversions import hours_to_minutes
 
 
 RESOURCE_ID = "klima-v2-1m"
@@ -126,7 +127,7 @@ def get_data(
 
         # Convert units where necessary
         if Parameter.TSUN in df.columns:
-            df[Parameter.TSUN] = df[Parameter.TSUN].apply(convert_tsun_h_to_min)
+            df[Parameter.TSUN] = df[Parameter.TSUN].apply(hours_to_minutes)
 
         # Round values
         df = df.round(1)

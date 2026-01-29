@@ -4,28 +4,12 @@ Shared utilities for GeoSphere Austria Data Hub providers
 
 from typing import Optional
 
-import pandas as pd
-
 from meteostat.enumerations import TTL
 from meteostat.core.cache import cache_service
 from meteostat.core.network import network_service
 from meteostat.core.logger import logger
 
 API_BASE_URL = "https://dataset.api.hub.geosphere.at/v1"
-
-
-def convert_wspd_ms_to_kmh(value):
-    """Convert wind speed from m/s to km/h"""
-    if pd.isna(value):
-        return value
-    return value * 3.6
-
-
-def convert_tsun_h_to_min(value):
-    """Convert sunshine duration from hours to minutes"""
-    if pd.isna(value):
-        return value
-    return value * 60
 
 
 @cache_service.cache(TTL.WEEK)
