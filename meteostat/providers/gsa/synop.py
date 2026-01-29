@@ -17,25 +17,22 @@ from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.api.config import config
 from meteostat.core.network import network_service
-from meteostat.utils.conversions import ms_to_kmh
+from meteostat.utils.conversions import ms_to_kmh, pres_to_msl
 
 
 RESOURCE_ID = "synop-v1-1h"
 
 # Mapping from GeoSphere Austria SYNOP parameter names to Meteostat parameters
+# See: https://dataset.api.hub.geosphere.at/v1/station/historical/synop-v1-1h/metadata
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "T": Parameter.TEMP,  # Air temperature (°C) - Lufttemperatur
-    # TODO: Needs investigation
-    "Pp": Parameter.PRES,  # Air pressure (hPa) - Reduzierter Luftdruck
+    "Pg": Parameter.PRES,  # Air pressure (hPa) - Luftdruck auf Stationshöhe
     "rel": Parameter.RHUM,  # Relative humidity (%) - Relative Feuchte
     "ff": Parameter.WSPD,  # Wind speed (m/s) - Windgeschwindigkeit
     "boe": Parameter.WPGT,  # Wind gust (m/s) - Windböe
     "dd": Parameter.WDIR,  # Wind direction (°) - Windrichtung
     "RRR": Parameter.PRCP,  # Precipitation (mm) - Niederschlagsmenge
-    # TODO: Snow depth (schnee) also available but not mapped yet
     "N": Parameter.CLDC,  # Cloud cover (okta) - Bedeckungsgrad
-    # TODO: Visibility (VV) also available but not mapped yet
-    # TODO: Condition code (ww) also available but not mapped yet
 }
 
 # Inverse mapping
@@ -44,7 +41,11 @@ METEOSTAT_TO_GSA = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 @cache_service.cache(TTL.DAY, "pickle")
 def get_data(
-    station_id: str, parameters: list[str], start: datetime, end: datetime
+    station_id: str,
+    elevation: int | None,
+    parameters: list[str],
+    start: datetime,
+    end: datetime,
 ) -> Optional[pd.DataFrame]:
     """
     Fetch SYNOP data from GeoSphere Austria Data Hub API
@@ -142,6 +143,11 @@ def get_data(
         if Parameter.PRCP in df.columns:
             df[Parameter.PRCP] = df[Parameter.PRCP].replace(-1, 0)
 
+        if Parameter.PRES in df.columns:
+            df[Parameter.PRES] = df.apply(
+                lambda row: pres_to_msl(row, elevation), axis=1
+            )
+
         # Round values
         df = df.round(1)
 
@@ -172,7 +178,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     # Fetch data
-    df = get_data(station_id, gsa_params, req.start, req.end)
+    df = get_data(station_id, req.station.elevation, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None

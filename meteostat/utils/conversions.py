@@ -8,7 +8,7 @@ The code is licensed under the MIT license.
 import math
 from typing import Optional
 
-from numpy import isnan
+import pandas as pd
 
 from meteostat.enumerations import Parameter, Unit, UnitSystem
 
@@ -73,21 +73,21 @@ def kelvin_to_celsius(value):
     """
     Convert Kelvin to Celsius
     """
-    return value - 273.15 if value is not None and not isnan(value) else None
+    return value - 273.15 if not pd.isna(value) else None
 
 
 def ms_to_kmh(value):
     """
     Convert m/s to km/h
     """
-    return value * 3.6 if value is not None and not isnan(value) else None
+    return value * 3.6 if not pd.isna(value) else None
 
 
 def hours_to_minutes(value):
     """
     Convert duration from hours to minutes
     """
-    return value * 60 if value is not None and not isnan(value) else None
+    return value * 60 if not pd.isna(value) else None
 
 
 def temp_dwpt_to_rhum(row: dict):
@@ -100,38 +100,26 @@ def temp_dwpt_to_rhum(row: dict):
             math.exp((17.625 * row["dwpt"]) / (243.04 + row["dwpt"]))
             / math.exp((17.625 * row["temp"]) / (243.04 + row["temp"]))
         )
-        if row["temp"] is not None and row["dwpt"] is not None
+        if not pd.isna(row["temp"]) and not pd.isna(row["dwpt"])
         else None
     )
 
 
 def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter.TEMP):
-    """
-    Convert local air pressure to MSL
-    """
     try:
-        return (
-            None
-            if (
-                not row[Parameter.PRES]
-                or not row[temp]
-                or not altitude
-                or row[Parameter.PRES] == -999
-            )
-            else round(
-                row[Parameter.PRES]
-                * math.pow(
-                    (
-                        1
-                        - (
-                            (0.0065 * altitude)
-                            / (row[temp] + 0.0065 * altitude + 273.15)
-                        )
-                    ),
-                    -5.257,
-                ),
-                1,
-            )
+        pres = row.get(Parameter.PRES)
+        t = row.get(temp)
+
+        if pd.isna(pres) or pd.isna(t) or altitude is None or pres == -999:
+            return None
+
+        return round(
+            pres
+            * math.pow(
+                1 - (0.0065 * altitude) / (t + 0.0065 * altitude + 273.15),
+                -5.257,
+            ),
+            1,
         )
     except Exception:
         return None
@@ -141,14 +129,14 @@ def percentage_to_okta(value):
     """
     Convert cloud cover percentage to oktas
     """
-    return round(value / 12.5) if value is not None and not isnan(value) else None
+    return round(value / 12.5) if not pd.isna(value) else None
 
 
 def jcm2_to_wm2(value):
     """
     Convert Joule/CM^2 to Watt/M^2
     """
-    return round(value * 2.78) if value is not None and not isnan(value) else None
+    return round(value * 2.78) if not pd.isna(value) else None
 
 
 def to_direction(value):

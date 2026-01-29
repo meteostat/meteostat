@@ -1,7 +1,7 @@
 """
 GeoSphere Austria Example
 ==================
-This example demonstrates how to fetch hourly weather data from the
+This example demonstrates how to fetch weather data from the
 GeoSphere Austria Data Hub for a specific weather station over a defined
 time period using the Meteostat library.
 """
@@ -27,12 +27,12 @@ print(df)
 
 # Get daily data
 print("\n=== GeoSphere Austria Daily Data ===")
-ts = ms.daily("11035", start, end, providers=[ms.Provider.GSA_DAILY])
+ts = ms.daily("11155", start, end, providers=[ms.Provider.GSA_DAILY])
 df = ts.fetch()
 print(df)
 
 # Get monthly data
 print("\n=== GeoSphere Austria Monthly Data ===")
-ts = ms.monthly("11035", start, end, providers=[ms.Provider.GSA_MONTHLY])
+ts = ms.monthly("11155", start, end, providers=[ms.Provider.GSA_MONTHLY])
 df = ts.fetch()
 print(df)

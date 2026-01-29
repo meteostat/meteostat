@@ -17,12 +17,18 @@ from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.api.config import config
 from meteostat.core.network import network_service
-from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh, percentage_to_okta
+from meteostat.utils.conversions import (
+    hours_to_minutes,
+    ms_to_kmh,
+    percentage_to_okta,
+    pres_to_msl,
+)
 
 
 RESOURCE_ID = "klima-v2-1m"
 
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
+# See: https://dataset.api.hub.geosphere.at/v1/station/historical/klima-v2-1m/metadata
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "tl_mittel": Parameter.TEMP,  # Mean air temperature (°C) - Lufttemperatur 2m Mittelwert
     "tlmin": Parameter.TXMN,  # Minimum air temperature (°C) - Lufttemperatur 2m Minimalwert
@@ -31,10 +37,8 @@ PARAMETER_MAPPING: Dict[str, Parameter] = {
     "tlmax_mittel": Parameter.TMAX,  # Mean maximum air temperature (°C) - Lufttemperatur 2m Mittelwert der Maxima
     "rf_mittel": Parameter.RHUM,  # Mean relative humidity (%) - Relative Feuchte Mittelwert
     "rr": Parameter.PRCP,  # Precipitation sum (mm) - Niederschlag Summe der 24h-Summen
-    # TODO: Snow depth (sh) also available but not mapped yet
-    # TODO: Precipiation days also available but not mapped yet
     "vv_mittel": Parameter.WSPD,  # Mean wind speed (m/s) - Windgeschwindigkeit Mittelwert
-    # TODO: Air pressure (p_mittel) also available, but probably not MSL
+    "p": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
     "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
     "bewm_mittel": Parameter.CLDC,  # Mean cloud cover (%) - Bedeckung Mittelwert
 }
@@ -45,7 +49,11 @@ METEOSTAT_TO_GSA = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 @cache_service.cache(TTL.MONTH, "pickle")
 def get_data(
-    station_id: str, parameters: list[str], start: datetime, end: datetime
+    station_id: str,
+    elevation: int | None,
+    parameters: list[str],
+    start: datetime,
+    end: datetime,
 ) -> Optional[pd.DataFrame]:
     """
     Fetch data from GeoSphere Austria Data Hub API
@@ -75,7 +83,7 @@ def get_data(
 
     if response.status_code != 200:
         logger.warning(
-            f"Failed to fetch monthly data for station {station_id} (status: {response.status_code})"
+            f"Failed to fetch monthly data for station {station_id} (status: {response.status_code}): {response.json()}",
         )
         return None
 
@@ -143,6 +151,11 @@ def get_data(
             # Convert cloud cover from % to okta
             df[Parameter.CLDC] = df[Parameter.CLDC].apply(percentage_to_okta)
 
+        if Parameter.PRES in df.columns:
+            df[Parameter.PRES] = df.apply(
+                lambda row: pres_to_msl(row, elevation), axis=1
+            )
+
         # Round values
         df = df.round(1)
 
@@ -173,7 +186,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     # Fetch data
-    df = get_data(station_id, gsa_params, req.start, req.end)
+    df = get_data(station_id, req.station.elevation, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None

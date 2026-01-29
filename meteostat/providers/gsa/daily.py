@@ -17,12 +17,18 @@ from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.api.config import config
 from meteostat.core.network import network_service
-from meteostat.utils.conversions import hours_to_minutes, ms_to_kmh, percentage_to_okta
+from meteostat.utils.conversions import (
+    hours_to_minutes,
+    ms_to_kmh,
+    percentage_to_okta,
+    pres_to_msl,
+)
 
 
 RESOURCE_ID = "klima-v2-1d"
 
 # Mapping from GeoSphere Austria parameter names to Meteostat parameters
+# See: https://dataset.api.hub.geosphere.at/v1/station/historical/klima-v2-1d/metadata
 PARAMETER_MAPPING: Dict[str, Parameter] = {
     "tl_mittel": Parameter.TEMP,  # Mean air temperature (°C) - Lufttemperatur 2m Mittelwert
     "tlmax": Parameter.TMAX,  # Maximum air temperature (°C) - Lufttemperatur 2m Maximalwert
@@ -31,7 +37,7 @@ PARAMETER_MAPPING: Dict[str, Parameter] = {
     "sh": Parameter.SNWD,  # Snow depth (cm) - Schneehöhe
     "vv_mittel": Parameter.WSPD,  # Mean wind speed (km/h) - Windgeschwindigkeit Mittelwert
     "ffx": Parameter.WPGT,  # Maximum wind gust (m/s) - Windböe Maximum
-    # TODO: Air pressure (p_mittel) also available, but probably not MSL
+    "p_mittel": Parameter.PRES,  # Mean air pressure (hPa) - Luftdruck Mittelwert
     "rf_mittel": Parameter.RHUM,  # Mean relative humidity (%) - Relative Feuchte Mittelwert
     "so_h": Parameter.TSUN,  # Sunshine duration (h) - Sonnenscheindauer
     "bewm_mittel": Parameter.CLDC,  # Mean cloud cover (%) - Bedeckung Mittelwert
@@ -43,7 +49,11 @@ METEOSTAT_TO_GSA = {v: k for k, v in PARAMETER_MAPPING.items()}
 
 @cache_service.cache(TTL.WEEK, "pickle")
 def get_data(
-    station_id: str, parameters: list[str], start: datetime, end: datetime
+    station_id: str,
+    elevation: int | None,
+    parameters: list[str],
+    start: datetime,
+    end: datetime,
 ) -> Optional[pd.DataFrame]:
     """
     Fetch data from GeoSphere Austria Data Hub API
@@ -141,8 +151,12 @@ def get_data(
             df[Parameter.TSUN] = df[Parameter.TSUN].apply(hours_to_minutes)
 
         if Parameter.CLDC in df.columns:
-            # Convert from fraction (0-1) to percentage (0-100)
             df[Parameter.CLDC] = df[Parameter.CLDC].apply(percentage_to_okta)
+
+        if Parameter.PRES in df.columns:
+            df[Parameter.PRES] = df.apply(
+                lambda row: pres_to_msl(row, elevation), axis=1
+            )
 
         # Round values
         df = df.round(1)
@@ -174,7 +188,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     # Fetch data
-    df = get_data(station_id, gsa_params, req.start, req.end)
+    df = get_data(station_id, req.station.elevation, gsa_params, req.start, req.end)
 
     if df is None or df.empty:
         return None
