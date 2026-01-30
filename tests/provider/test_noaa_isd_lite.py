@@ -8,8 +8,6 @@ def test_noaa_isd_lite():
     """
     It should load data from NOAA ISD Lite
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2022, 2, 1, 15),
         end=datetime(2022, 2, 1, 17),

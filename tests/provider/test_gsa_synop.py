@@ -1,26 +1,26 @@
 from datetime import datetime
 import meteostat as ms
-from meteostat.providers.dwd.daily import fetch
+from meteostat.providers.gsa.synop import fetch
 from meteostat.typing import ProviderRequest
 
 
-def test_dwd_daily():
+def test_gsa_synop():
     """
-    It should load data from DWD Open Data (daily)
+    It should load data from GeoSphere Austria Data Hub (SYNOP hourly)
     """
     query = ProviderRequest(
-        start=datetime(2000, 2, 1, 15),
-        end=datetime(2000, 2, 1, 17),
-        station=ms.Station(id="10637", identifiers={"national": "01420"}),
-        parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
+        start=datetime(2024, 1, 1, 0),
+        end=datetime(2024, 1, 1, 5),
+        station=ms.Station(id="11035", identifiers={"wmo": "11035"}, elevation=203),
+        parameters=[ms.Parameter.TEMP, ms.Parameter.PRES],
     )
     df = fetch(query)
 
     # Check if data is returned at all.
     assert df is not None and not df.empty, "No data returned at all."
     assert "temp" in df, "Temperature data is missing altogether."
-    assert "prcp" in df, "Precipitation data is missing altogether."
+    assert "pres" in df, "Pressure data is missing altogether."
 
     # Check that data contains reasonable number of non-missing entries.
     assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
-    assert df["prcp"].notna().sum() >= 3, "Insufficient precipitation data returned."
+    assert df["pres"].notna().sum() >= 3, "Insufficient pressure data returned."

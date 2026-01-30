@@ -33,7 +33,7 @@ jobs:
         env:
           METEOSTAT_USER_AGENT: ${{ secrets.METEOSTAT_USER_AGENT }}
         run: |
-          poetry run pytest tests/provider -v
+          poetry run pytest tests/provider -v -s
 
   create-issue:
     name: Create issue on failure

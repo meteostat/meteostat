@@ -154,5 +154,8 @@ class Config(ConfigService):
     )
     metno_user_agent: Optional[str] = None
 
+    # [Provider] GSA settings
+    gsa_api_base_url: str = "https://dataset.api.hub.geosphere.at/v1"
+
 
 config = Config("MS")

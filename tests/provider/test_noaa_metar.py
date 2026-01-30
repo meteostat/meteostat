@@ -9,7 +9,6 @@ def test_noaa_metar():
     """
     It should load data from NOAA METAR for the last 24 hours
     """
-    ms.config.cache_enable = False
     ms.config.aviationweather_user_agent = os.environ.get("METEOSTAT_USER_AGENT")
 
     now = datetime.now()

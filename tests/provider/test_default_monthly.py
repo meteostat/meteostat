@@ -9,8 +9,6 @@ def test_data_monthly():
     """
     Test default monthly data fetching.
     """
-    ms.config.cache_enable = False
-
     end = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
     start = end - relativedelta(months=12)
 
