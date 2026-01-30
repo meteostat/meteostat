@@ -82,7 +82,7 @@ def create_df(element, dict_element):
         df_element = move_col_to_front(col, df_element)
 
     # Convert numerical values to float
-    df_element.loc[:, element] = df_element.loc[:, element].astype(float)
+    df_element[element] = df_element[element].astype(float)
 
     return df_element
 

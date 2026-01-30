@@ -23,7 +23,6 @@ from meteostat.providers.dwd.shared import get_ftp_connection
 
 BASE_DIR = "/climate_environment/CDC/observations_germany/climate/monthly/kl/"
 USECOLS = [1, 4, 5, 6, 7, 9, 10, 11, 12, 14]  # CSV cols which should be read
-PARSE_DATES = {"time": [0]}  # Which columns should be parsed as dates?
 NAMES = {
     "MO_N": Parameter.CLDC,
     "MO_TT": Parameter.TEMP,
@@ -83,15 +82,19 @@ def get_df(station: str, mode: str) -> Optional[pd.DataFrame]:
     df: pd.DataFrame = pd.read_csv(  # type: ignore
         raw,
         sep=r"\s*;\s*",
-        date_format="%Y%m%d",
         na_values=["-999", -999],
         usecols=USECOLS,
-        parse_dates=PARSE_DATES,
         engine="python",
     )
 
     # Rename columns
     df = df.rename(columns=lambda x: x.strip())
+
+    # Parse date column
+    df["MESS_DATUM_BEGINN"] = pd.to_datetime(
+        df["MESS_DATUM_BEGINN"].astype(str), format="%Y%m%d"
+    )
+    df = df.rename(columns={"MESS_DATUM_BEGINN": "time"})
     df = df.rename(columns=NAMES)
 
     # Convert data
