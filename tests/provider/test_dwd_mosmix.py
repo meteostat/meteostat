@@ -8,8 +8,6 @@ def test_dwd_mosmix_forecast():
     """
     Test that the DWD MOSMIX provider returns data for the day seven days from now.
     """
-    ms.config.cache_enable = False
-
     # Calculate the date seven days from now
     target_date = datetime.now() + timedelta(days=7)
     start = datetime(target_date.year, target_date.month, target_date.day, 0, 0)

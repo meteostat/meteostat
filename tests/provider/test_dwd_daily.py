@@ -8,8 +8,6 @@ def test_dwd_daily():
     """
     It should load data from DWD Open Data (daily)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2000, 2, 1, 15),
         end=datetime(2000, 2, 1, 17),

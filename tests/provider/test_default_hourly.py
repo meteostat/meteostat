@@ -9,8 +9,6 @@ def test_data_hourly():
     Test that the default hourly provider returns data from three days in the past
     to seven days in the future.
     """
-    ms.config.cache_enable = False
-
     # Calculate the date range: 3 days ago to 7 days from now
     now = datetime.now()
     start_date = now - timedelta(days=3)

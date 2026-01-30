@@ -8,8 +8,6 @@ def test_gsa_hourly():
     """
     It should load data from GeoSphere Austria Data Hub (hourly)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2018, 1, 1, 0),
         end=datetime(2018, 1, 1, 5),

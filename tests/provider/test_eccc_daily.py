@@ -8,8 +8,6 @@ def test_eccc_daily():
     """
     It should load data from Environment and Climate Change Canada (daily)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2020, 1, 1),
         end=datetime(2020, 12, 31),

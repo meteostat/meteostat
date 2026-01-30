@@ -8,8 +8,6 @@ def test_dwd_monthly():
     """
     It should load data from DWD Open Data (monthly)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2020, 1, 1),
         end=datetime(2020, 12, 31),

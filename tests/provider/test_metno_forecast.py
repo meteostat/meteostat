@@ -9,7 +9,6 @@ def test_metno_forecast():
     """
     Test that the MET Norway forecast provider returns data for the day seven days from now.
     """
-    ms.config.cache_enable = False
     ms.config.metno_user_agent = os.environ.get("METEOSTAT_USER_AGENT")
 
     # Calculate the date seven days from now

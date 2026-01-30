@@ -8,8 +8,6 @@ def test_data_daily():
     """
     Test that the default daily provider returns data for three days ago.
     """
-    ms.config.cache_enable = False
-
     # Calculate date three days ago
     three_days_ago = datetime.now() - timedelta(days=3)
     three_days_ago = datetime(

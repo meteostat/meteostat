@@ -8,8 +8,6 @@ def test_dwd_poi():
     """
     It should load data from DWD POI for the last 24 hours
     """
-    ms.config.cache_enable = False
-
     now = datetime.now()
     query = ProviderRequest(
         start=now - timedelta(hours=24),

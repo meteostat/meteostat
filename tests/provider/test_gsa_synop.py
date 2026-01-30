@@ -8,8 +8,6 @@ def test_gsa_synop():
     """
     It should load data from GeoSphere Austria Data Hub (SYNOP hourly)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2024, 1, 1, 0),
         end=datetime(2024, 1, 1, 5),

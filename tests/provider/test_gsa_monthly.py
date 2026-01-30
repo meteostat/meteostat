@@ -8,8 +8,6 @@ def test_gsa_monthly():
     """
     It should load data from GeoSphere Austria Data Hub (monthly)
     """
-    ms.config.cache_enable = False
-
     query = ProviderRequest(
         start=datetime(2023, 1, 1),
         end=datetime(2023, 6, 1),
