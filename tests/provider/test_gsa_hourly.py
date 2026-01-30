@@ -11,8 +11,8 @@ def test_gsa_hourly():
     ms.config.cache_enable = False
 
     query = ProviderRequest(
-        start=datetime(2024, 1, 1, 0),
-        end=datetime(2024, 1, 1, 5),
+        start=datetime(2018, 1, 1, 0),
+        end=datetime(2018, 1, 1, 5),
         station=ms.Station(id="11035", identifiers={"national": "105"}),
         parameters=[ms.Parameter.TEMP, ms.Parameter.PRCP],
     )
@@ -25,4 +25,4 @@ def test_gsa_hourly():
 
     # Check that data contains reasonable number of non-missing entries.
     assert df["temp"].notna().sum() >= 3, "Insufficient temperature data returned."
-    assert df["prcp"].notna().sum() >= 0, "Precipitation data check failed."
+    assert df["prcp"].notna().sum() >= 3, "Insufficient precipitation data returned."
