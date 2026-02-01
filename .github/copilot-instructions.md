@@ -135,9 +135,9 @@ meteostat/
 ### Key Files
 
 - **`pyproject.toml`**: Poetry configuration, dependencies, build settings
-- **`meteostat/__init__.py`**: Public API exports (55 lines)
+- **`meteostat/__init__.py`**: Public API exports
 - **`meteostat/api/`**: Main user-facing API functions
-- **`meteostat/providers/index.py`**: Provider registry (15,511 bytes)
+- **`meteostat/providers/index.py`**: Provider registry mapping station IDs to providers
 
 ### Important Conventions
 
@@ -233,4 +233,4 @@ Before finalizing any code changes:
 - [ ] Run `poetry run pytest tests/integration -v` (all 86 tests must pass)
 - [ ] Do NOT run `tests/provider/` for regular PRs
 
-**Trust these instructions.** They are validated against the actual codebase and CI configuration. Only perform additional searches if information is incomplete or found to be incorrect.
+**Trust these instructions as a starting point.** They reflect the current repository state. If you encounter discrepancies, the actual code and CI configuration take precedence. Only perform additional searches if information is incomplete or found to be incorrect.
