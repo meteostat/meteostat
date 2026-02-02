@@ -1,4 +1,4 @@
-# Meteostat Python Library - Developer Instructions
+# Meteostat Python – Developer Instructions
 
 ## Repository Overview
 
@@ -6,12 +6,10 @@
 
 **Project details:**
 - **Type:** Python package published to PyPI
-- **Size:** ~4,350 lines of Python code across 50+ source files
 - **Language:** Python 3.11+
 - **Package Manager:** Poetry
 - **Build System:** poetry-core
-- **Runtime:** Python 3.11 and 3.12 (CI tests both)
-- **Key Dependencies:** pandas (>=2.2.0), requests, pytz
+- **Key Dependencies:** pandas, requests, pytz
 - **Development Tools:** pytest, ruff (linting), ty (type checking)
 
 ## Build and Validation Instructions
@@ -35,29 +33,24 @@ This installs:
 
 **ALWAYS run tests in this specific order:**
 
-1. **Unit Tests** (fast, ~2 seconds):
+1. **Unit Tests** (fast):
    ```bash
    poetry run pytest tests/unit -v
    ```
    - Tests conversions, data utilities, geo functions, parsers, validators
-   - 161 unit tests
    - Must pass before integration tests
 
-2. **Integration Tests** (~9 seconds):
+2. **Integration Tests** (moderate):
    ```bash
    poetry run pytest tests/integration -v
    ```
    - Tests API functions: daily, hourly, monthly, normals, interpolate, merge
-   - Tests large request blocking (30-year limits for daily, 3-year for hourly)
-   - 86 integration tests
-   - Requires network access (fetches real data)
 
 3. **Provider Tests** (scheduled nightly, not required for PRs):
    ```bash
    poetry run pytest tests/provider -v -s
    ```
    - Tests external data providers (DWD, NOAA, ECCC, GSA, Met.no)
-   - Requires `METEOSTAT_USER_AGENT` environment variable
    - Only run automatically in CI on schedule
    - **Do NOT run these for regular PRs** - they test external APIs
 
@@ -105,24 +98,18 @@ poetry build
 
 ```
 meteostat/
-├── meteostat/              # Main package source code
+├── meteostat/             # Main package source code
 │   ├── api/               # Public API (daily, hourly, monthly, normals, stations, etc.)
 │   ├── core/              # Core utilities (cache, logger, network, validator)
 │   ├── interpolation/     # Data interpolation (IDW, nearest, lapse rate)
 │   ├── providers/         # Data provider implementations
-│   │   ├── meteostat/    # Default Meteostat API provider
-│   │   ├── dwd/          # German Weather Service
-│   │   ├── noaa/         # NOAA (GHCND, ISD Lite, METAR)
-│   │   ├── eccc/         # Environment Canada
-│   │   ├── gsa/          # Global Surface Airports
-│   │   └── metno/        # Norwegian Meteorological Institute
 │   ├── utils/             # Utilities (conversions, data, geo, parsers, validators)
 │   ├── enumerations.py    # Enums (Granularity, Parameter, Provider, UnitSystem)
 │   ├── parameters.py      # Parameter definitions
 │   └── typing.py          # Type definitions (Station, License, etc.)
 ├── tests/
-│   ├── unit/              # Unit tests (161 tests, ~2s)
-│   ├── integration/       # Integration tests (86 tests, ~9s)
+│   ├── unit/              # Unit tests
+│   ├── integration/       # Integration
 │   ├── provider/          # Provider tests (nightly CI only)
 │   └── fixtures/          # Shared test fixtures and data
 ├── examples/              # Example scripts (chart, hourly, daily, etc.)
@@ -144,32 +131,27 @@ meteostat/
 1. **Module exports**: Public API is explicitly defined in `__all__` in `__init__.py`
 2. **Type annotations**: All code should have type annotations (checked by `ty`)
 3. **Pandas DataFrames**: Most data is returned as pandas DataFrames with specific column names
-4. **Source tracking**: Data includes 'source' in index to track provider origin
 
 ## CI/CD Workflows
 
 ### GitHub Actions Workflows
 
-The repository has 5 CI workflows (all in `.github/workflows/`):
+The repository has multiple CI workflows (all in `.github/workflows/`):
 
-1. **`tests.yml`** - Runs on push to main/next and all PRs
-   - Runs unit and integration tests on Python 3.11 and 3.12
-   - Steps: checkout → setup Python → install Poetry → `poetry install --all-groups` → run unit tests → run integration tests
+1. **`tests.yml`** - Runs on push to main and all PRs
+   - Runs unit and integration tests
    - **This must pass for PRs to be merged**
 
-2. **`lint.yml`** - Runs on push to main/next and all PRs
-   - Runs ruff linting on Python 3.11
-   - Steps: checkout → setup Python → pip install ruff → `ruff check meteostat/ tests/`
+2. **`lint.yml`** - Runs on push to main and all PRs
+   - Runs ruff linting
    - **This must pass for PRs to be merged**
 
-3. **`typing.yml`** - Runs on push to main/next and all PRs
-   - Runs type checking with `ty` on Python 3.11
-   - Steps: checkout → setup Python → install Poetry → `poetry install --all-groups` → `poetry run ty check meteostat/ tests/unit/ tests/integration/ tests/fixtures.py`
+3. **`typing.yml`** - Runs on push to main and all PRs
+   - Runs type checking with `ty`
    - **This must pass for PRs to be merged**
 
 4. **`provider-tests.yml`** - Runs nightly (scheduled)
    - Tests external data providers
-   - Requires `METEOSTAT_USER_AGENT` secret
    - Creates GitHub issue if tests fail
    - **Not required for PRs** - only runs on schedule
 
@@ -199,13 +181,6 @@ poetry run pytest tests/unit -v
 poetry run pytest tests/integration -v
 ```
 
-**Expected timing:**
-- Setup: ~30-60 seconds
-- Linting: <5 seconds
-- Type checking: ~10-20 seconds
-- Unit tests: ~2 seconds
-- Integration tests: ~9 seconds
-
 ## Common Gotchas and Workarounds
 
 1. **Poetry installation**: If Poetry is not installed, use `pip install poetry` (not the curl installer which may fail in restricted environments)
@@ -214,20 +189,16 @@ poetry run pytest tests/integration -v
 
 3. **Provider tests**: Do NOT run `tests/provider/` for regular development - these test external APIs and are scheduled nightly. Only run `tests/unit/` and `tests/integration/`.
 
-4. **Python version**: The project requires Python 3.11+ (specified in pyproject.toml). CI tests on 3.11 and 3.12.
+4. **Import structure**: The package uses absolute imports. Import from `meteostat` not from submodules directly.
 
-5. **Import structure**: The package uses absolute imports. Import from `meteostat` not from submodules directly.
-
-6. **Data fetching**: Integration tests make real network requests. They may occasionally fail due to network issues - retry if needed.
-
-7. **Type checking tool**: This project uses `ty` not `mypy` or `pyright`. Run with `poetry run ty check`.
+5. **Type checking tool**: This project uses `ty` not `mypy` or `pyright`. Run with `poetry run ty check`.
 
 ## Summary Checklist
 
 Before finalizing any code changes:
 
 - [ ] Run `poetry install --all-groups` (if dependencies changed)
-- [ ] Run `ruff check meteostat/ tests/` (must pass)
+- [ ] Run `poetry runn ruff check meteostat/ tests/` (must pass)
 - [ ] Run `poetry run ty check meteostat/ tests/unit/ tests/integration/ tests/fixtures.py` (must pass)
 - [ ] Run `poetry run pytest tests/unit -v` (all 161 tests must pass)
 - [ ] Run `poetry run pytest tests/integration -v` (all 86 tests must pass)
