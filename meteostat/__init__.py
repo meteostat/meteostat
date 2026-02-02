@@ -12,7 +12,7 @@ The code is licensed under the MIT license.
 """
 
 __appname__ = "meteostat"
-__version__ = "2.0.1"
+__version__ = "2.1.0"
 
 from meteostat.api.daily import daily
 from meteostat.api.hourly import hourly
