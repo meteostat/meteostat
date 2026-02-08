@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "meteostat"
-version = "2.1.0"
+version = "2.1.1"
 description = "Access and analyze historical weather and climate data with Python."
 authors = ["Meteostat", "Christian Lamprecht"]
 readme = "README.md"
