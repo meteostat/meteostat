@@ -4,7 +4,8 @@ Test types module
 The code is licensed under the MIT license.
 """
 
-from typing import Optional, Union, List, Dict
+import types
+from typing import Union
 
 import pytest
 
@@ -17,11 +18,11 @@ class SampleClass:
     # Use default values to make hasattr work correctly
     name: str = "default"
     age: int = 0
-    optional_value: Optional[str] = None
+    optional_value: str | None = None
     score: float = 0.0
-    tags: List[str] = []
-    settings: Dict[str, str] = {}
-    optional_tags: Optional[List[str]] = None
+    tags: list[str] = []
+    settings: dict[str, str] = {}
+    optional_tags: list[str] | None = None
 
 
 class TestExtractPropertyType:
@@ -50,11 +51,12 @@ class TestExtractPropertyType:
         expected_type, original_type = extract_property_type(
             SampleClass, "optional_value"
         )
-        # For Optional[str], expected_type should be str
+        # For str | None, expected_type should be str
         assert expected_type is str
-        # original_type should contain the Union origin
-        assert hasattr(original_type, "__origin__")
-        assert original_type.__origin__ is Union
+        # original_type should be a union type (str | None creates types.UnionType)
+        assert isinstance(original_type, types.UnionType)
+        assert str in original_type.__args__
+        assert type(None) in original_type.__args__
 
     def test_extract_property_type_nonexistent(self):
         """Test extracting type for nonexistent property"""
@@ -76,28 +78,28 @@ class TestExtractPropertyType:
     def test_extract_property_type_list(self):
         """Test extracting List type annotation"""
         expected_type, original_type = extract_property_type(SampleClass, "tags")
-        # For List[str], expected_type should be List[str]
+        # For list[str], expected_type should be list[str]
         assert hasattr(expected_type, "__origin__")
         assert expected_type.__origin__ is list
 
     def test_extract_property_type_dict(self):
         """Test extracting Dict type annotation"""
         expected_type, original_type = extract_property_type(SampleClass, "settings")
-        # For Dict[str, str], expected_type should be Dict[str, str]
+        # For dict[str, str], expected_type should be dict[str, str]
         assert hasattr(expected_type, "__origin__")
         assert expected_type.__origin__ is dict
 
     def test_extract_property_type_optional_list(self):
-        """Test extracting Optional[List[str]] type annotation"""
+        """Test extracting list[str] | None type annotation"""
         expected_type, original_type = extract_property_type(
             SampleClass, "optional_tags"
         )
-        # For Optional[List[str]], expected_type should be List[str]
+        # For list[str] | None, expected_type should be list[str]
         assert hasattr(expected_type, "__origin__")
         assert expected_type.__origin__ is list
-        # original_type should contain the Union origin
-        assert hasattr(original_type, "__origin__")
-        assert original_type.__origin__ is Union
+        # original_type should be a union type (list[str] | None creates types.UnionType)
+        assert isinstance(original_type, types.UnionType)
+        assert type(None) in original_type.__args__
 
 
 class TestValidateParsedValue:
@@ -154,7 +156,7 @@ class TestValidateParsedValue:
 
     def test_validate_parsed_value_optional_with_none(self):
         """Test validation of None value for Optional type"""
-        original_type = Optional[str]
+        original_type = str | None
         value = None
         expected_type = str
         result = validate_parsed_value(
@@ -174,7 +176,7 @@ class TestValidateParsedValue:
 
     def test_validate_parsed_value_optional_with_matching_value(self):
         """Test validation of matching value for Optional type"""
-        original_type = Optional[str]
+        original_type = str | None
         value = "valid string"
         expected_type = str
         result = validate_parsed_value(
@@ -199,56 +201,56 @@ class TestValidateParsedValue:
         assert result == value
 
     def test_validate_parsed_value_list_parameterized(self):
-        """Test validation with parameterized List[str] type"""
+        """Test validation with parameterized list[str] type"""
         value = ["item1", "item2", "item3"]
-        expected_type = List[str]
-        original_type = List[str]
+        expected_type = list[str]
+        original_type = list[str]
         result = validate_parsed_value(value, expected_type, original_type, "tags")
         assert result == value
 
     def test_validate_parsed_value_dict_parameterized(self):
-        """Test validation with parameterized Dict[str, str] type"""
+        """Test validation with parameterized dict[str, str] type"""
         value = {"key1": "value1", "key2": "value2"}
-        expected_type = Dict[str, str]
-        original_type = Dict[str, str]
+        expected_type = dict[str, str]
+        original_type = dict[str, str]
         result = validate_parsed_value(value, expected_type, original_type, "settings")
         assert result == value
 
     def test_validate_parsed_value_optional_list_with_value(self):
-        """Test validation with Optional[List[str]] and valid list value"""
+        """Test validation with list[str] | None and valid list value"""
         value = ["item1", "item2"]
-        expected_type = List[str]
-        original_type = Optional[List[str]]
+        expected_type = list[str]
+        original_type = list[str] | None
         result = validate_parsed_value(
             value, expected_type, original_type, "optional_tags"
         )
         assert result == value
 
     def test_validate_parsed_value_optional_list_with_none(self):
-        """Test validation with Optional[List[str]] and None value"""
+        """Test validation with list[str] | None and None value"""
         value = None
-        expected_type = List[str]
-        original_type = Optional[List[str]]
+        expected_type = list[str]
+        original_type = list[str] | None
         result = validate_parsed_value(
             value, expected_type, original_type, "optional_tags"
         )
         assert result is None
 
     def test_validate_parsed_value_list_type_mismatch(self):
-        """Test validation fails for type mismatch with List[str]"""
+        """Test validation fails for type mismatch with list[str]"""
         value = "not a list"
-        expected_type = List[str]
-        original_type = List[str]
+        expected_type = list[str]
+        original_type = list[str]
         with pytest.raises(ValueError) as excinfo:
             validate_parsed_value(value, expected_type, original_type, "tags")
         assert "has type" in str(excinfo.value)
         assert "but expected" in str(excinfo.value)
 
     def test_validate_parsed_value_dict_type_mismatch(self):
-        """Test validation fails for type mismatch with Dict[str, str]"""
+        """Test validation fails for type mismatch with dict[str, str]"""
         value = ["not", "a", "dict"]
-        expected_type = Dict[str, str]
-        original_type = Dict[str, str]
+        expected_type = dict[str, str]
+        original_type = dict[str, str]
         with pytest.raises(ValueError) as excinfo:
             validate_parsed_value(value, expected_type, original_type, "settings")
         assert "has type" in str(excinfo.value)

@@ -5,7 +5,32 @@ This module contains utilities for extracting and validating types
 from class annotations without creating circular imports.
 """
 
+import types
 from typing import Any, Union, get_origin, get_args
+
+
+def _is_union_type(annotation: Any) -> bool:
+    """
+    Check if an annotation is a Union type (either typing.Union or types.UnionType).
+
+    Supports both Optional[X] (typing.Union[X, None]) and X | None (types.UnionType).
+    """
+    # Python 3.10+ union syntax (X | Y)
+    if isinstance(annotation, types.UnionType):
+        return True
+    # typing.Union syntax
+    return hasattr(annotation, "__origin__") and annotation.__origin__ is Union
+
+
+def _get_union_args(annotation: Any) -> tuple:
+    """
+    Get the arguments of a Union type annotation.
+
+    Works with both typing.Union and types.UnionType.
+    """
+    if isinstance(annotation, types.UnionType):
+        return annotation.__args__
+    return getattr(annotation, "__args__", ())
 
 
 def extract_property_type(cls: type, property_name: str) -> tuple[Any, Any]:
@@ -44,8 +69,9 @@ def extract_property_type(cls: type, property_name: str) -> tuple[Any, Any]:
     expected_type = original_type
 
     # Handle Optional types (extract the inner type)
-    if hasattr(original_type, "__origin__") and original_type.__origin__ is Union:
-        args = getattr(original_type, "__args__", ())
+    # Supports both Optional[X] and X | None syntax
+    if _is_union_type(original_type):
+        args = _get_union_args(original_type)
         if len(args) == 2 and type(None) in args:
             # This is Optional[Type], extract the non-None type
             # Type narrowing: we know len(args) == 2, so both indices are valid
@@ -85,13 +111,15 @@ def validate_parsed_value(
     TypeError
         If the expected type cannot be used for isinstance checks
     """
+    # Extract type name once for error messages
+    type_name = getattr(expected_type, "__name__", str(expected_type))
+
     # Special case for Optional types - None is allowed
-    if (
-        hasattr(original_type, "__origin__")
-        and original_type.__origin__ is Union
-        and value is None
-    ):
-        return value
+    # Supports both Optional[X] and X | None syntax
+    if _is_union_type(original_type) and value is None:
+        args = _get_union_args(original_type)
+        if len(args) == 2 and type(None) in args:
+            return value
 
     # Special case for bool type - allow 0 and 1 to be parsed as False and True
     if expected_type is bool and isinstance(value, int):
@@ -104,17 +132,16 @@ def validate_parsed_value(
             f"but boolean type only accepts 0, 1, true, or false"
         )
 
-    # Get the origin type for parameterized generics (e.g., List[str] -> list)
+    # Get the origin type for parameterized generics (e.g., list[str] -> list)
     origin_type = get_origin(expected_type)
 
     # If it's a parameterized generic, validate against the origin type
     if origin_type is not None:
-        # For parameterized generics like List[str], validate against the origin (list)
+        # For parameterized generics like list[str], validate against the origin (list)
         if isinstance(value, origin_type):
             return value
 
         # Type mismatch for parameterized generic
-        type_name = getattr(expected_type, "__name__", str(expected_type))
         raise ValueError(
             f"Environment variable '{property_name}' has type {type(value).__name__} "
             f"but expected {type_name}"
@@ -131,7 +158,6 @@ def validate_parsed_value(
         ) from e
 
     # Type mismatch
-    type_name = getattr(expected_type, "__name__", str(expected_type))
     raise ValueError(
         f"Environment variable '{property_name}' has type {type(value).__name__} "
         f"but expected {type_name}"
