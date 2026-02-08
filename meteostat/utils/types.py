@@ -5,7 +5,7 @@ This module contains utilities for extracting and validating types
 from class annotations without creating circular imports.
 """
 
-from typing import Any, Union
+from typing import Any, Union, get_origin, get_args
 
 
 def extract_property_type(cls: type, property_name: str) -> tuple[Any, Any]:
@@ -82,11 +82,9 @@ def validate_parsed_value(
     ------
     ValueError
         If the value doesn't match the expected type
+    TypeError
+        If the expected type cannot be used for isinstance checks
     """
-    # Check if the parsed value matches the expected type
-    if isinstance(value, expected_type):
-        return value
-
     # Special case for Optional types - None is allowed
     if (
         hasattr(original_type, "__origin__")
@@ -106,8 +104,35 @@ def validate_parsed_value(
             f"but boolean type only accepts 0, 1, true, or false"
         )
 
+    # Get the origin type for parameterized generics (e.g., List[str] -> list)
+    origin_type = get_origin(expected_type)
+
+    # If it's a parameterized generic, validate against the origin type
+    if origin_type is not None:
+        # For parameterized generics like List[str], validate against the origin (list)
+        if isinstance(value, origin_type):
+            return value
+
+        # Type mismatch for parameterized generic
+        type_name = getattr(expected_type, "__name__", str(expected_type))
+        raise ValueError(
+            f"Environment variable '{property_name}' has type {type(value).__name__} "
+            f"but expected {type_name}"
+        )
+
+    # For non-generic types, use isinstance directly
+    try:
+        if isinstance(value, expected_type):
+            return value
+    except TypeError as e:
+        # isinstance can fail for some types, convert to ValueError with context
+        raise TypeError(
+            f"Cannot validate type for environment variable '{property_name}': {e}"
+        ) from e
+
     # Type mismatch
+    type_name = getattr(expected_type, "__name__", str(expected_type))
     raise ValueError(
         f"Environment variable '{property_name}' has type {type(value).__name__} "
-        f"but expected {expected_type.__name__}"
+        f"but expected {type_name}"
     )
