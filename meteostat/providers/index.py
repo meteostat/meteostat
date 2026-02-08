@@ -16,7 +16,6 @@ PROVIDER_HOURLY = ProviderSpec(
     priority=Priority.NONE,
     grade=None,
     license=None,
-    requires=["id"],
     parameters=[
         Parameter.TEMP,
         Parameter.RHUM,
@@ -41,7 +40,6 @@ PROVIDER_DAILY = ProviderSpec(
     priority=Priority.NONE,
     grade=None,
     license=None,
-    requires=["id"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -66,7 +64,6 @@ PROVIDER_DAILY_DERIVED = ProviderSpec(
     priority=Priority.NONE,
     grade=None,
     license=None,
-    requires=["id"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -91,7 +88,6 @@ PROVIDER_MONTHLY = ProviderSpec(
     priority=Priority.NONE,
     grade=None,
     license=None,
-    requires=["id"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -111,7 +107,6 @@ PROVIDER_MONTHLY_DERIVED = ProviderSpec(
     priority=Priority.NONE,
     grade=None,
     license=None,
-    requires=["id"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -136,7 +131,6 @@ PROVIDER_DWD_HOURLY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["DE"],
     parameters=[
         Parameter.TEMP,
@@ -165,7 +159,6 @@ PROVIDER_DWD_POI = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     parameters=[
         Parameter.CLDC,
         Parameter.TEMP,
@@ -196,7 +189,6 @@ PROVIDER_DWD_MOSMIX = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     parameters=[
         Parameter.TEMP,
         Parameter.RHUM,
@@ -225,7 +217,6 @@ PROVIDER_DWD_DAILY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["DE"],
     parameters=[
         Parameter.TEMP,
@@ -256,7 +247,6 @@ PROVIDER_DWD_MONTHLY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["DE"],
     parameters=[Parameter.TEMP, Parameter.TMIN, Parameter.TMAX, Parameter.PRCP],
     start=date(1851, 1, 1),
@@ -275,7 +265,6 @@ PROVIDER_ECCC_HOURLY = ProviderSpec(
         name="Environment and Climate Change Canada Data Servers End-use Licence",
         url="https://eccc-msc.github.io/open-data/licence/readme_en/",
     ),
-    requires=["identifiers"],
     countries=["CA"],
     parameters=[
         Parameter.TEMP,
@@ -301,7 +290,6 @@ PROVIDER_ECCC_DAILY = ProviderSpec(
         name="Environment and Climate Change Canada Data Servers End-use Licence",
         url="https://eccc-msc.github.io/open-data/licence/readme_en/",
     ),
-    requires=["identifiers"],
     countries=["CA"],
     parameters=[
         Parameter.TEMP,
@@ -328,7 +316,6 @@ PROVIDER_ECCC_MONTHLY = ProviderSpec(
         name="Environment and Climate Change Canada Data Servers End-use Licence",
         url="https://eccc-msc.github.io/open-data/licence/readme_en/",
     ),
-    requires=["identifiers"],
     countries=["CA"],
     parameters=[
         Parameter.TEMP,
@@ -353,7 +340,6 @@ PROVIDER_ISD_LITE = ProviderSpec(
         name="CC0 1.0 Universal",
         url="https://creativecommons.org/publicdomain/zero/1.0/",
     ),  # source: https://registry.opendata.aws/noaa-isd/
-    requires=["identifiers"],
     parameters=[
         Parameter.TEMP,
         Parameter.RHUM,
@@ -379,7 +365,6 @@ PROVIDER_GHCND = ProviderSpec(
         name="CC0 1.0 Universal",
         url="https://creativecommons.org/publicdomain/zero/1.0/",
     ),  # source: https://registry.opendata.aws/noaa-ghcn/
-    requires=["identifiers"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -408,7 +393,6 @@ PROVIDER_CLIMAT = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     parameters=[
         Parameter.TEMP,
         Parameter.TMIN,
@@ -432,7 +416,6 @@ PROVIDER_METAR = ProviderSpec(
     license=License(
         commercial=True,
     ),
-    requires=["identifiers"],
     parameters=[
         Parameter.TEMP,
         Parameter.RHUM,
@@ -457,7 +440,6 @@ PROVIDER_METNO_FORECAST = ProviderSpec(
         name="NLOD 2.0",
         url="https://data.norge.no/nlod/en/2.0",
     ),
-    requires=["location"],
     parameters=[
         Parameter.TEMP,
         Parameter.RHUM,
@@ -485,7 +467,6 @@ PROVIDER_GSA_HOURLY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["AT"],
     parameters=[
         Parameter.TEMP,
@@ -512,7 +493,6 @@ PROVIDER_GSA_SYNOP = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["AT"],
     parameters=[
         Parameter.TEMP,
@@ -538,7 +518,6 @@ PROVIDER_GSA_DAILY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["AT"],
     parameters=[
         Parameter.TEMP,
@@ -566,7 +545,6 @@ PROVIDER_GSA_MONTHLY = ProviderSpec(
         name="CC BY 4.0",
         url="https://creativecommons.org/licenses/by/4.0/",
     ),
-    requires=["identifiers"],
     countries=["AT"],
     parameters=[
         Parameter.TEMP,

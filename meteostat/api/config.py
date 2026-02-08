@@ -31,7 +31,10 @@ class ConfigService:
 
     def _parse_env_value(self, key: str, value: str) -> Any:
         """
-        Parse an environment variable value and validate against property type
+        Parse an environment variable value and validate against property type.
+
+        For string types, the value is used directly without JSON parsing.
+        For other types (bool, int, list, dict), JSON parsing is used.
         """
         # Extract the expected type for the property
         expected_type, original_type = extract_property_type(self.__class__, key)
@@ -44,7 +47,11 @@ class ConfigService:
                 logger.error("Failed to parse environment variable '%s'", key)
                 return None
 
-        # Parse the value using JSON
+        # For string types, use the value directly without JSON parsing
+        if expected_type is str:
+            return value
+
+        # Parse the value using JSON for non-string types
         try:
             parsed_value = json.loads(value)
         except (json.JSONDecodeError, TypeError, ValueError):
