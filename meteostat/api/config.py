@@ -22,6 +22,9 @@ class ConfigService:
 
     prefix: str
 
+    # Sentinel value to indicate we should skip this env var (distinct from None)
+    _SKIP_VALUE = object()
+
     @property
     def _prefix(self) -> str:
         """
@@ -31,10 +34,25 @@ class ConfigService:
 
     def _parse_env_value(self, key: str, value: str) -> Any:
         """
-        Parse an environment variable value and validate against property type
+        Parse an environment variable value and validate against property type.
+
+        For string types, the value is used directly without JSON parsing.
+        For other types (bool, int, list, dict), JSON parsing is used.
+
+        If validation fails, the error is logged and a sentinel value (_SKIP_VALUE)
+        is returned to skip the invalid environment variable without aborting initialization.
+
+        Returns None if the environment variable value is explicitly set to null.
         """
         # Extract the expected type for the property
-        expected_type, original_type = extract_property_type(self.__class__, key)
+        try:
+            expected_type, original_type = extract_property_type(self.__class__, key)
+        except ValueError:
+            # Property doesn't exist on this config class, skip it
+            logger.debug(
+                "Environment variable '%s' does not match any config property", key
+            )
+            return self._SKIP_VALUE
 
         if expected_type is None:
             # Fallback to JSON parsing if no type annotation is available
@@ -42,17 +60,29 @@ class ConfigService:
                 return json.loads(value)
             except (json.JSONDecodeError, TypeError, ValueError):
                 logger.error("Failed to parse environment variable '%s'", key)
-                return None
+                return self._SKIP_VALUE
 
-        # Parse the value using JSON
+        # For string types, use the value directly without JSON parsing
+        if expected_type is str:
+            return value
+
+        # Parse the value using JSON for non-string types
         try:
             parsed_value = json.loads(value)
         except (json.JSONDecodeError, TypeError, ValueError):
             logger.error("Failed to parse environment variable '%s'", key)
-            return None
+            return self._SKIP_VALUE
 
         # Validate and potentially convert the parsed value
-        return validate_parsed_value(parsed_value, expected_type, original_type, key)
+        try:
+            return validate_parsed_value(
+                parsed_value, expected_type, original_type, key
+            )
+        except (ValueError, TypeError) as e:
+            logger.error(
+                "Failed to validate environment variable '%s': %s", key, str(e)
+            )
+            return self._SKIP_VALUE
 
     def _set_env_value(self, key: str, value: Any) -> None:
         """
@@ -88,7 +118,8 @@ class ConfigService:
             key = key.replace(self._prefix, "").lower()
             value = self._parse_env_value(key, value)
 
-            if value is not None:
+            # Skip invalid values (but allow None to be set explicitly)
+            if value is not self._SKIP_VALUE:
                 self._set_env_value(key, value)
 
 

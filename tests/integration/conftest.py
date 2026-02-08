@@ -217,7 +217,6 @@ def patch_provider_start_date(mocker):
                     priority=original_provider.priority,
                     grade=original_provider.grade,
                     license=original_provider.license,
-                    requires=original_provider.requires,
                     parameters=original_provider.parameters,
                     start=date(2025, 1, 1),  # Set to an earlier date to allow test data
                     end=original_provider.end,
