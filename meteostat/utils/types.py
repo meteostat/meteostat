@@ -6,7 +6,7 @@ from class annotations without creating circular imports.
 """
 
 import types
-from typing import Any, Union, get_origin, get_args
+from typing import Any, Union, get_origin
 
 
 def _is_union_type(annotation: Any) -> bool:

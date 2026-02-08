@@ -4,9 +4,7 @@ Test config module
 The code is licensed under the MIT license.
 """
 
-import os
 
-import pytest
 
 from meteostat.api.config import ConfigService
 

@@ -5,7 +5,6 @@ The code is licensed under the MIT license.
 """
 
 import types
-from typing import Union
 
 import pytest
 
