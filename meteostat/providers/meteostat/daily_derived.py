@@ -104,7 +104,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     # Adjust DataFrame and add index
     df = df.round(1)
     dt_index = pd.DatetimeIndex(df.index)
-    df.index = pd.to_datetime(dt_index.tz_localize(None).date)  # type: ignore[attr-defined]
+    df.index = dt_index.tz_localize(None).normalize()
     df.index.name = "time"
 
     # Return reshaped DataFrame
