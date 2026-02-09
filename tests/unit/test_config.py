@@ -4,8 +4,6 @@ Test config module
 The code is licensed under the MIT license.
 """
 
-
-
 from meteostat.api.config import ConfigService
 
 
