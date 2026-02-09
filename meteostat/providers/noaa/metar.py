@@ -150,7 +150,7 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
 
     # Add RHUM column
     df[Parameter.RHUM] = df.apply(lambda row: temp_dwpt_to_rhum(row), axis=1)
-    df[Parameter.RHUM] = df[Parameter.RHUM].round()
+    df[Parameter.RHUM] = pd.to_numeric(df[Parameter.RHUM], errors="coerce").round()
 
     # Set time index
     df = df.set_index(["time"])
