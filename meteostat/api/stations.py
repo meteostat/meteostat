@@ -35,13 +35,10 @@ class Stations:
         SQLite doesn't always have built-in math functions (depends on compile options).
         This method registers Python implementations to ensure compatibility.
         """
-        # Register trigonometric functions
+        # Register trigonometric functions used in distance calculations
         conn.create_function("acos", 1, math.acos)
-        conn.create_function("asin", 1, math.asin)
-        conn.create_function("atan", 1, math.atan)
         conn.create_function("cos", 1, math.cos)
         conn.create_function("sin", 1, math.sin)
-        conn.create_function("tan", 1, math.tan)
 
         # Register radians/degrees conversion
         conn.create_function("radians", 1, math.radians)

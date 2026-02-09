@@ -13,11 +13,8 @@ def test_register_math_functions():
     stations = Stations()
     conn = sqlite3.connect(":memory:")
 
-    # Before registration, unregister any existing functions to simulate
-    # an SQLite installation without math functions
-    # (Note: We can't truly unregister in Python's sqlite3, but we can test registration)
-
     # Register the math functions
+    # This works regardless of whether SQLite was compiled with ENABLE_MATH_FUNCTIONS
     stations._register_math_functions(conn)
 
     # Test acos
