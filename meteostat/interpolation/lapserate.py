@@ -1,7 +1,6 @@
 from itertools import combinations
 from statistics import mean
 
-import numpy as np
 import pandas as pd
 
 from meteostat.api.timeseries import TimeSeries
