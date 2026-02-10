@@ -18,11 +18,34 @@ types-pytz = "^2023.3.1.1"
 pytest-mock = "^3.14.0"
 ruff = "^0.14.8"
 ty = "^0.0.1a33"
+pytest-cov = "^7.0.0"
 
 [tool.poetry.group.extras.dependencies]
 matplotlib = "^3.9.2"
 metar = "^1.11.0"
 lxml = "^5.3.0"
+
+[tool.coverage.run]
+source = ["meteostat"]
+omit = ["tests/*", "*/site-packages/*"]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
 [build-system]
 requires = ["poetry-core"]
