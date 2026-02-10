@@ -206,37 +206,43 @@ def test_interpolate_sea_level_lapse_rate(mock_stations_database, mock_hourly_fe
     assert len(df_no_lapse) > 0
     assert len(df_with_lapse) > 0
 
+    # Verify temperature data is available in fixtures
+    assert "temp" in df_no_lapse.columns, "Temperature data missing from mock fixtures"
+    assert "temp" in df_with_lapse.columns, (
+        "Temperature data missing from mock fixtures"
+    )
+
+    temps_no_lapse = df_no_lapse["temp"].dropna()
+    temps_with_lapse = df_with_lapse["temp"].dropna()
+
+    assert len(temps_no_lapse) > 0, "Expected temperature data without lapse rate"
+    assert len(temps_with_lapse) > 0, "Expected temperature data with lapse rate"
+
     # Key assertion: temperatures with lapse-rate correction should be DIFFERENT
     # from those without. Since stations are at 111m, 186m, 805m (all above sea level),
     # the lapse-rate adjustment should make sea-level temperatures WARMER.
     #
     # If elevation=0 was incorrectly treated as falsy, both results would be identical.
 
-    if "temp" in df_no_lapse.columns and "temp" in df_with_lapse.columns:
-        temps_no_lapse = df_no_lapse["temp"].dropna()
-        temps_with_lapse = df_with_lapse["temp"].dropna()
+    # Calculate mean temperatures
+    mean_no_lapse = temps_no_lapse.mean()
+    mean_with_lapse = temps_with_lapse.mean()
 
-        assert len(temps_no_lapse) > 0, "Expected temperature data without lapse rate"
-        assert len(temps_with_lapse) > 0, "Expected temperature data with lapse rate"
+    # With lapse rate correction at sea level (lower than stations),
+    # temperatures should be warmer. The difference should be noticeable.
+    assert mean_with_lapse > mean_no_lapse, (
+        f"Lapse-rate correction should make sea-level temps warmer. "
+        f"Got mean_with_lapse={mean_with_lapse:.2f}, "
+        f"mean_no_lapse={mean_no_lapse:.2f}"
+    )
 
-        # Calculate mean temperatures
-        mean_no_lapse = temps_no_lapse.mean()
-        mean_with_lapse = temps_with_lapse.mean()
-
-        # With lapse rate correction at sea level (lower than stations),
-        # temperatures should be warmer. The difference should be noticeable
-        # (at least 0.5°C given the elevation differences).
-        assert mean_with_lapse > mean_no_lapse, (
-            f"Lapse-rate correction should make sea-level temps warmer. "
-            f"Got mean_with_lapse={mean_with_lapse:.2f}, "
-            f"mean_no_lapse={mean_no_lapse:.2f}"
-        )
-
-        # Verify the difference is significant (at least 0.3°C)
-        # With stations at ~111-805m and lapse rate 6.5°C/km, we expect
-        # roughly 0.7-5.2°C difference
-        temp_diff = mean_with_lapse - mean_no_lapse
-        assert temp_diff > 0.3, (
-            f"Temperature difference {temp_diff:.2f}°C is too small. "
-            f"Expected at least 0.3°C with lapse-rate correction."
-        )
+    # Verify the difference is significant. With stations at ~111-805m and
+    # lapse rate 6.5°C/km, we theoretically expect roughly 0.7-5.2°C difference.
+    # However, IDW interpolation may average the values, so we use a conservative
+    # threshold of 0.3°C to ensure the lapse-rate correction is being applied
+    # while accounting for interpolation effects.
+    temp_diff = mean_with_lapse - mean_no_lapse
+    assert temp_diff > 0.3, (
+        f"Temperature difference {temp_diff:.2f}°C is too small. "
+        f"Expected at least 0.3°C with lapse-rate correction."
+    )
