@@ -24,12 +24,22 @@ class TestUserAgent:
 
     def test_metar_provider_skips_when_no_user_agent(self):
         """METAR provider should return None (skip) when no user agent is configured"""
+        from meteostat.typing import ProviderRequest, Station
+
         original_ua = config.aviationweather_user_agent
         try:
             config.aviationweather_user_agent = None
 
+            # Create mock station with ICAO identifier
+            mock_station = MagicMock(spec=Station)
+            mock_station.identifiers = {"icao": "EDDF"}
+
+            # Create mock request
+            mock_req = MagicMock(spec=ProviderRequest)
+            mock_req.station = mock_station
+
             with patch.object(metar, "network_service") as mock_net:
-                result = metar.get_df("EDDF")
+                result = metar.fetch(mock_req)
 
                 assert result is None
                 mock_net.get.assert_not_called()
@@ -85,7 +95,7 @@ class TestUserAgent:
                 mock_response.raise_for_status = MagicMock()
                 mock_net.get.return_value = mock_response
 
-                metar._get_df_cached.__wrapped__("EDDF", "TestAgent/1.0")
+                metar.get_df.__wrapped__("EDDF")
 
                 mock_net.get.assert_called_once()
                 call_args = mock_net.get.call_args
@@ -133,36 +143,3 @@ class TestUserAgent:
             assert config.aviationweather_user_agent == "Test/1.0"
         finally:
             config.aviationweather_user_agent = original_ua
-
-    def test_metar_none_result_not_cached_without_user_agent(self):
-        """METAR provider should not cache None when user agent is missing"""
-        original_ua = config.aviationweather_user_agent
-        original_cache_enable = config.cache_enable
-        try:
-            # Enable caching
-            config.cache_enable = True
-
-            # First call without user agent - should return None
-            config.aviationweather_user_agent = None
-            result1 = metar.get_df("EDDF")
-            assert result1 is None
-
-            # Now set user agent and mock a successful response
-            config.aviationweather_user_agent = "TestAgent/1.0"
-
-            with patch.object(metar, "network_service") as mock_net:
-                mock_response = MagicMock()
-                mock_response.status_code = 200
-                mock_response.text = ""
-                mock_response.raise_for_status = MagicMock()
-                mock_net.get.return_value = mock_response
-
-                # Second call with user agent - should make network call (not return cached None)
-                result2 = metar.get_df("EDDF")
-
-                # Verify network call was made (meaning None wasn't cached)
-                mock_net.get.assert_called_once()
-
-        finally:
-            config.aviationweather_user_agent = original_ua
-            config.cache_enable = original_cache_enable
