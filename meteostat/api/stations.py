@@ -35,8 +35,13 @@ class Stations:
         SQLite doesn't always have built-in math functions (depends on compile options).
         This method registers Python implementations to ensure compatibility.
         """
-        # Register trigonometric functions used in distance calculations
-        conn.create_function("acos", 1, math.acos)
+
+        # Register a safe acos that clamps the input to [-1, 1] to avoid ValueError
+        # This can happen due to floating point precision issues at poles
+        def safe_acos(x):
+            return math.acos(max(-1.0, min(1.0, x)))
+
+        conn.create_function("acos", 1, safe_acos)
         conn.create_function("cos", 1, math.cos)
         conn.create_function("sin", 1, math.sin)
 
@@ -147,11 +152,11 @@ class Stations:
 
         return df
 
-    def meta(self, station: str) -> Station:
+    def meta(self, station: str) -> Optional[Station]:
         """
         Get meta data for a specific weather station
         """
-        meta = self.query(
+        result = self.query(
             """
             SELECT 
                 `stations`.*,
@@ -163,7 +168,12 @@ class Stations:
             """,
             index_col="id",
             params=(station,),
-        ).to_dict("records")[0]
+        )
+
+        if result.empty:
+            return None
+
+        meta = result.to_dict("records")[0]
 
         identifiers = self.query(
             "SELECT `key`, `value` FROM `identifiers` WHERE `station` LIKE ?",

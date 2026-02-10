@@ -70,7 +70,10 @@ def inverse_distance_weighting(
                 weights = 1.0 / (effective_distance**power)
 
             # Normalize weights so they sum to 1
-            weights = weights / weights.sum()
+            weight_sum = weights.sum()
+            if weight_sum == 0 or np.isnan(weight_sum):
+                continue
+            weights = weights / weight_sum
 
             # Get numeric columns to interpolate (exclude location-related columns)
             location_cols = ["latitude", "longitude", "elevation", "distance"]
@@ -90,8 +93,12 @@ def inverse_distance_weighting(
                     valid_values = group.loc[valid_mask, col]
                     valid_weights = weights[valid_mask]
                     # Re-normalize weights for valid values only
-                    valid_weights = valid_weights / valid_weights.sum()
-                    interpolated_row[col] = (valid_values * valid_weights).sum()
+                    valid_weight_sum = valid_weights.sum()
+                    if valid_weight_sum == 0 or np.isnan(valid_weight_sum):
+                        interpolated_row[col] = np.nan
+                    else:
+                        valid_weights = valid_weights / valid_weight_sum
+                        interpolated_row[col] = (valid_values * valid_weights).sum()
                 else:
                     # If all values are NaN, result is NaN
                     interpolated_row[col] = np.nan

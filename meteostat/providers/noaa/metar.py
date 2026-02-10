@@ -18,7 +18,6 @@ from meteostat.core.network import network_service
 
 
 ENDPOINT = config.aviationweather_endpoint
-USER_AGENT = config.aviationweather_user_agent
 CLDC_MAP = {
     "FEW": 2,  # 1-2 octas
     "SCT": 4,  # 3-4 octas
@@ -118,14 +117,18 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     """
     Get CSV file from Meteostat and convert to DataFrame
     """
-    url = ENDPOINT.format(station=station)
+    user_agent = config.aviationweather_user_agent
 
-    if not USER_AGENT:
+    if not user_agent:
         logger.warning(
-            "Consider specifying a unique user agent when querying the Aviation Weather Center's data API."
+            "Aviation Weather Center requires a user agent. "
+            "Please use config.aviationweather_user_agent to specify your user agent. "
+            "For now, this provider is skipped."
         )
+        return None
 
-    headers = {"User-Agent": USER_AGENT}
+    url = ENDPOINT.format(station=station)
+    headers = {"User-Agent": user_agent}
 
     response = network_service.get(url, headers=headers)
 

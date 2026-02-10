@@ -119,13 +119,16 @@ def get_df(parameter_dir: str, mode: str, station_id: str) -> Optional[pd.DataFr
     parameter = next(param for param in PARAMETERS if param["dir"] == parameter_dir)
 
     ftp = get_ftp_connection()
-    remote_file = find_file(ftp, f"{parameter['dir']}/{mode}", station_id)
+    try:
+        remote_file = find_file(ftp, f"{parameter['dir']}/{mode}", station_id)
 
-    if remote_file is None:
-        return None
+        if remote_file is None:
+            return None
 
-    buffer = BytesIO()
-    ftp.retrbinary("RETR " + remote_file, buffer.write)
+        buffer = BytesIO()
+        ftp.retrbinary("RETR " + remote_file, buffer.write)
+    finally:
+        ftp.quit()
 
     # Unzip file
     with ZipFile(buffer, "r") as zipped:

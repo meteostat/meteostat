@@ -327,8 +327,8 @@ def interpolate(
 
     # Apply lapse rate if specified and elevation is available
     if (
-        lapse_rate
-        and point.elevation
+        lapse_rate is not None
+        and point.elevation is not None
         and df["elevation_diff"].max() >= lapse_rate_threshold
     ):
         logger.debug("Applying lapse rate correction.")

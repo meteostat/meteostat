@@ -4,6 +4,7 @@ Test conversions module
 The code is licensed under the MIT license.
 """
 
+import numpy as np
 from meteostat.utils.conversions import (
     celsius_to_fahrenheit,
     celsius_to_kelvin,
@@ -35,10 +36,10 @@ class TestTemperatureConversions:
 
     def test_celsius_to_kelvin(self):
         """Test Celsius to Kelvin conversion"""
-        assert celsius_to_kelvin(0) == 273.1
-        assert celsius_to_kelvin(100) == 373.1
+        assert celsius_to_kelvin(0) == 273.15
+        assert celsius_to_kelvin(100) == 373.15
         assert celsius_to_kelvin(-273.15) == 0.0
-        assert celsius_to_kelvin(20) == 293.1
+        assert celsius_to_kelvin(20) == 293.15
 
     def test_kelvin_to_celsius(self):
         """Test Kelvin to Celsius conversion"""
@@ -287,6 +288,51 @@ class TestWindDirectionConversions:
         assert to_direction(337) == "N"
 
 
+class TestToDirectionEdgeCases:
+    """Test edge cases for wind direction conversion."""
+
+    def test_none_returns_none(self):
+        """to_direction(None) should return None, not raise TypeError."""
+        result = to_direction(None)
+        assert result is None
+
+    def test_nan_returns_none(self):
+        """to_direction(NaN) should return None."""
+        import numpy as np
+
+        result = to_direction(np.nan)
+        assert result is None
+
+    def test_negative_90_not_north(self):
+        """to_direction(-90) should NOT return 'N'."""
+        result = to_direction(-90)
+        assert result != "N"
+
+    def test_negative_180_not_north(self):
+        """to_direction(-180) should NOT return 'N'."""
+        result = to_direction(-180)
+        assert result != "N"
+
+    def test_370_returns_north(self):
+        """to_direction(370) should return 'N' (normalized to 10 degrees)."""
+        result = to_direction(370)
+        assert result == "N"
+
+    def test_450_returns_east(self):
+        """to_direction(450) should return 'E' (normalized to 90 degrees)."""
+        result = to_direction(450)
+        assert result == "E"
+
+    def test_720_returns_north(self):
+        """to_direction(720) should return 'N' (normalized to 0 degrees)."""
+        result = to_direction(720)
+        assert result == "N"
+
+    def test_360_returns_north(self):
+        """360 degrees should return North."""
+        assert to_direction(360) == "N"
+
+
 class TestWeatherConditionConversions:
     """Test weather condition conversion functions"""
 
@@ -334,3 +380,39 @@ class TestWeatherConditionConversions:
     def test_to_condition_invalid_negative(self):
         """Test weather condition conversion with negative value"""
         assert to_condition(-1) is None
+
+
+class TestConversionPrecision:
+    """Test precision and round-trip conversions."""
+
+    def test_celsius_kelvin_roundtrip_preserves_precision(self):
+        """Round-trip C->K->C should preserve precision."""
+        original = 20.123456
+        converted_k = celsius_to_kelvin(original)
+        converted_back = kelvin_to_celsius(converted_k)
+
+        assert abs(original - converted_back) < 0.01
+
+    def test_kmh_mph_conversion_accuracy(self):
+        """km/h to mph should be accurate."""
+        speed_kmh = 100.0
+        expected_mph = 62.1
+
+        result = kmh_to_mph(speed_kmh)
+
+        assert abs(result - expected_mph) < 0.1
+
+    def test_nan_handling_consistent_celsius_to_kelvin(self):
+        """celsius_to_kelvin should handle NaN consistently."""
+        result = celsius_to_kelvin(np.nan)
+        assert result is None
+
+    def test_none_handling_celsius_to_kelvin(self):
+        """celsius_to_kelvin(None) should return None."""
+        result = celsius_to_kelvin(None)
+        assert result is None
+
+    def test_none_handling_kmh_to_mph(self):
+        """kmh_to_mph(None) should return None."""
+        result = kmh_to_mph(None)
+        assert result is None

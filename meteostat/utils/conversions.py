@@ -17,23 +17,28 @@ def celsius_to_fahrenheit(value):
     """
     Convert Celsius to Fahrenheit
     """
-
+    if value is None or pd.isna(value):
+        return None
     return round((value * 9 / 5) + 32, 1)
 
 
 def celsius_to_kelvin(value):
     """
-    Convert Celsius to Kelvin
-    """
+    Convert Celsius to Kelvin.
 
-    return round(value + 273.15, 1)
+    Returns the exact conversion without rounding.
+    """
+    if value is None or pd.isna(value):
+        return None
+    return value + 273.15
 
 
 def millimeters_to_inches(value):
     """
     Convert millimeters to inches
     """
-
+    if value is None or pd.isna(value):
+        return None
     return round(value / 25.4, 3)
 
 
@@ -41,7 +46,8 @@ def centimeters_to_inches(value):
     """
     Convert centimeters to inches
     """
-
+    if value is None or pd.isna(value):
+        return None
     return round(value / 2.54, 3)
 
 
@@ -49,7 +55,8 @@ def meters_to_feet(value):
     """
     Convert meters to feet
     """
-
+    if value is None or pd.isna(value):
+        return None
     return round(value / 0.3048, 1)
 
 
@@ -57,7 +64,8 @@ def kmh_to_ms(value):
     """
     Convert kilometers per hour to meters per second
     """
-
+    if value is None or pd.isna(value):
+        return None
     return round(value / 3.6, 1)
 
 
@@ -65,8 +73,9 @@ def kmh_to_mph(value):
     """
     Convert kilometers per hour to miles per hour
     """
-
-    return round(value * 0.6214, 1)
+    if value is None or pd.isna(value):
+        return None
+    return round(value * 0.621371, 1)
 
 
 def kelvin_to_celsius(value):
@@ -106,17 +115,19 @@ def temp_dwpt_to_rhum(row: dict):
 
 
 def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter.TEMP):
+    from meteostat.core.logger import logger
+
+    pres = row.get(Parameter.PRES)
+    t = row.get(temp)
+
+    if pd.isna(pres) or pd.isna(t) or altitude is None or pres == -999:
+        return None
+
+    # Type narrowing for arithmetic operations
+    if not isinstance(pres, (int, float)) or not isinstance(t, (int, float)):
+        return None
+
     try:
-        pres = row.get(Parameter.PRES)
-        t = row.get(temp)
-
-        if pd.isna(pres) or pd.isna(t) or altitude is None or pres == -999:
-            return None
-
-        # Type narrowing for arithmetic operations
-        if not isinstance(pres, (int, float)) or not isinstance(t, (int, float)):
-            return None
-
         return round(
             pres
             * math.pow(
@@ -125,7 +136,8 @@ def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter
             ),
             1,
         )
-    except Exception:
+    except (TypeError, ValueError, ZeroDivisionError) as e:
+        logger.debug("pres_to_msl calculation failed: %s", e)
         return None
 
 
@@ -147,6 +159,12 @@ def to_direction(value):
     """
     Convert degrees to wind direction
     """
+    # Handle None and NaN values
+    if value is None or pd.isna(value):
+        return None
+
+    # Normalize value to 0-359 range
+    value = value % 360
 
     wdir = None
 

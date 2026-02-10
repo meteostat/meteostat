@@ -106,9 +106,19 @@ def fill_df(
 
 def localize(df: pd.DataFrame, timezone: str) -> pd.DataFrame:
     """
-    Convert time data to any time zone
+    Convert time data to any time zone.
+
+    Handles both timezone-naive (assumes UTC) and timezone-aware data.
     """
-    return df.tz_localize("UTC", level="time").tz_convert(timezone, level="time")
+    time_index = df.index.get_level_values("time")
+
+    # Check if already tz-aware
+    if time_index.tz is not None:
+        # Already aware - just convert
+        return df.tz_convert(timezone, level="time")
+    else:
+        # Naive - localize first, then convert
+        return df.tz_localize("UTC", level="time").tz_convert(timezone, level="time")
 
 
 def reshape_by_source(df: pd.DataFrame) -> pd.DataFrame:

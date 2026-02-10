@@ -194,7 +194,10 @@ def dly_to_df(ftp, station_id):
 @cache_service.cache(TTL.DAY, "pickle")
 def get_df(station: str) -> pd.DataFrame:
     ftp = connect_to_ftp()
-    df = dly_to_df(ftp, station)
+    try:
+        df = dly_to_df(ftp, station)
+    finally:
+        ftp.quit()
     # Filter relevant columns
     df = df.drop(columns=[col for col in df if col not in COLUMN_NAMES.keys()])
     # Add missing columns
