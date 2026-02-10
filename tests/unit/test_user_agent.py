@@ -72,6 +72,7 @@ class TestUserAgent:
             try:
                 network_service.get("https://example.com")
             except Exception:
+                # Ignore exceptions - we only care about verifying headers were set
                 pass
 
             if mock_get.called:
