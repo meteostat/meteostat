@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from requests.exceptions import HTTPError
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -102,7 +102,7 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         return df
 
     except HTTPError as error:
-        status_code = error.response.status_code if error.response else "unknown"
+        status_code = error.code
         logger.info(
             f"Couldn't load DWD POI data for weather station {station} (status: {status_code})"
         )
