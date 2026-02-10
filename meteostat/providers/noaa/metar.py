@@ -113,20 +113,10 @@ def map_data(record):
 
 
 @cache_service.cache(TTL.HOUR, "pickle")
-def get_df(station: str) -> Optional[pd.DataFrame]:
+def _get_df_cached(station: str, user_agent: str) -> Optional[pd.DataFrame]:
     """
-    Get CSV file from Meteostat and convert to DataFrame
+    Get CSV file from Meteostat and convert to DataFrame (cached implementation)
     """
-    user_agent = config.aviationweather_user_agent
-
-    if not user_agent:
-        logger.warning(
-            "Aviation Weather Center requires a user agent. "
-            "Please use config.aviationweather_user_agent to specify your user agent. "
-            "For now, this provider is skipped."
-        )
-        return None
-
     url = ENDPOINT.format(station=station)
     headers = {"User-Agent": user_agent}
 
@@ -159,6 +149,26 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     df = df.set_index(["time"])
 
     return enforce_freq(df, Frequency.HOURLY)
+
+
+def get_df(station: str) -> Optional[pd.DataFrame]:
+    """
+    Get CSV file from Meteostat and convert to DataFrame
+
+    Validates user agent configuration before calling cached implementation
+    to prevent caching of configuration errors.
+    """
+    user_agent = config.aviationweather_user_agent
+
+    if not user_agent:
+        logger.warning(
+            "Aviation Weather Center requires a user agent. "
+            "Please use config.aviationweather_user_agent to specify your user agent. "
+            "For now, this provider is skipped."
+        )
+        return None
+
+    return _get_df_cached(station, user_agent)
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
