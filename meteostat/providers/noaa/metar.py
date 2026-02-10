@@ -118,15 +118,6 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     Get CSV file from Meteostat and convert to DataFrame
     """
     user_agent = config.aviationweather_user_agent
-
-    if not user_agent:
-        logger.warning(
-            "Aviation Weather Center requires a user agent. "
-            "Please use config.aviationweather_user_agent to specify your user agent. "
-            "For now, this provider is skipped."
-        )
-        return None
-
     url = ENDPOINT.format(station=station)
     headers = {"User-Agent": user_agent}
 
@@ -162,5 +153,16 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
-    if "icao" in req.station.identifiers:
-        return get_df(req.station.identifiers["icao"])
+    if "icao" not in req.station.identifiers:
+        return None
+
+    user_agent = config.aviationweather_user_agent
+    if not user_agent:
+        logger.warning(
+            "Aviation Weather Center requires a user agent. "
+            "Please use config.aviationweather_user_agent to specify your user agent. "
+            "For now, this provider is skipped."
+        )
+        return None
+
+    return get_df(req.station.identifiers["icao"])

@@ -24,12 +24,22 @@ class TestUserAgent:
 
     def test_metar_provider_skips_when_no_user_agent(self):
         """METAR provider should return None (skip) when no user agent is configured"""
+        from meteostat.typing import ProviderRequest, Station
+
         original_ua = config.aviationweather_user_agent
         try:
             config.aviationweather_user_agent = None
 
+            # Create mock station with ICAO identifier
+            mock_station = MagicMock(spec=Station)
+            mock_station.identifiers = {"icao": "EDDF"}
+
+            # Create mock request
+            mock_req = MagicMock(spec=ProviderRequest)
+            mock_req.station = mock_station
+
             with patch.object(metar, "network_service") as mock_net:
-                result = metar.get_df.__wrapped__("EDDF")
+                result = metar.fetch(mock_req)
 
                 assert result is None
                 mock_net.get.assert_not_called()
