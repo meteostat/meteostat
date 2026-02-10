@@ -69,28 +69,6 @@ class TestPointElevation:
         assert no_elevation.elevation is None
         assert sea_level.elevation != no_elevation.elevation
 
-    def test_truthiness_check_fails_for_sea_level(self):
-        """Demonstrate the bug: truthiness check fails for elevation=0"""
-        point = Point(52.3676, 4.9041, elevation=0)
-
-        if point.elevation:
-            has_elevation = True
-        else:
-            has_elevation = False
-
-        assert has_elevation is False
-
-    def test_correct_pattern_elevation_is_not_none(self):
-        """Correct pattern: use explicit None check instead of truthiness"""
-        point = Point(52.3676, 4.9041, elevation=0)
-
-        if point.elevation is not None:
-            has_elevation = True
-        else:
-            has_elevation = False
-
-        assert has_elevation is True
-
     def test_multiple_elevation_values_truthiness_bug(self):
         """Verify the bug is fixed: all non-None elevations should be recognized"""
         elevations = [0, -2, -5, 1, 100, 1000]
