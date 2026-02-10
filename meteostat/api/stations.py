@@ -4,6 +4,7 @@ Stations Module
 Provides the Stations class for working with weather station metadata.
 """
 
+import math
 import os
 from typing import List, Optional
 from io import BytesIO
@@ -26,6 +27,22 @@ class Stations:
     """
     Stations Database
     """
+
+    def _register_math_functions(self, conn: sqlite3.Connection) -> None:
+        """
+        Register mathematical functions for SQLite.
+
+        SQLite doesn't always have built-in math functions (depends on compile options).
+        This method registers Python implementations to ensure compatibility.
+        """
+        # Register trigonometric functions used in distance calculations
+        conn.create_function("acos", 1, math.acos)
+        conn.create_function("cos", 1, math.cos)
+        conn.create_function("sin", 1, math.sin)
+
+        # Register radians/degrees conversion
+        conn.create_function("radians", 1, math.radians)
+        conn.create_function("degrees", 1, math.degrees)
 
     def _fetch_file(self, stream=False) -> Response:
         """
@@ -75,6 +92,9 @@ class Stations:
         # Create an in-memory SQLite database
         conn = sqlite3.connect(":memory:")
 
+        # Register math functions for compatibility
+        self._register_math_functions(conn)
+
         # Read the downloaded database file into memory
         content = BytesIO(response.content)
 
@@ -93,6 +113,9 @@ class Stations:
             raise FileNotFoundError("SQLite database file not found")
 
         conn = sqlite3.connect(file)
+
+        # Register math functions for compatibility
+        self._register_math_functions(conn)
 
         return conn
 
