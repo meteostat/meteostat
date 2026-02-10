@@ -134,6 +134,7 @@ class TestTimeSeriesCompleteness:
         )
 
         result = ts.completeness(Parameter.TEMP)
+        assert result is not None
         assert abs(result - 0.7) < 0.01
 
     def test_completeness_all_none_values(self, stations_df):
