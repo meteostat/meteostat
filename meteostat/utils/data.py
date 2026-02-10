@@ -113,7 +113,7 @@ def localize(df: pd.DataFrame, timezone: str) -> pd.DataFrame:
     time_index = df.index.get_level_values("time")
 
     # Check if already tz-aware
-    if time_index.tz is not None:
+    if hasattr(time_index, "tz") and time_index.tz is not None:
         # Already aware - just convert
         return df.tz_convert(timezone, level="time")
     else:

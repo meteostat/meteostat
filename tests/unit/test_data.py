@@ -286,6 +286,7 @@ class TestLocalize:
         result = localize(df, "Europe/Berlin")
 
         time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
         assert str(time_index.tz) == "Europe/Berlin"
 
     def test_localize_already_utc_to_other_timezone(self):
@@ -295,6 +296,7 @@ class TestLocalize:
         result = localize(df, "Europe/Berlin")
 
         time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
         assert str(time_index.tz) == "Europe/Berlin"
 
     def test_localize_from_other_timezone(self):
@@ -304,6 +306,7 @@ class TestLocalize:
         result = localize(df, "Europe/Berlin")
 
         time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
         assert str(time_index.tz) == "Europe/Berlin"
 
     def test_localize_preserves_actual_time(self):
@@ -342,6 +345,7 @@ class TestLocalize:
         result = localize(df, "Europe/London")
 
         time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
         assert str(time_index.tz) == "Europe/London"
         assert len(result) == 10
 
@@ -383,6 +387,7 @@ class TestLocalize:
         result = localize(df, "Europe/Berlin")
 
         time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
         assert str(time_index.tz) == "Europe/Berlin"
 
         assert df.equals(result)
@@ -395,7 +400,9 @@ class TestLocalize:
         df_back = localize(df_berlin, "UTC")
 
         original_times = df_original.index.get_level_values("time")
-        back_times = df_back.index.get_level_values("time").tz_convert("UTC")
+        back_times_index = df_back.index.get_level_values("time")
+        # Both should have tz attribute since we've localized them
+        back_times = back_times_index.tz_convert("UTC")  # type: ignore[union-attr]
 
         assert (original_times == back_times).all()
 

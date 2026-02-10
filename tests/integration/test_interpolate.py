@@ -9,11 +9,17 @@ def test_interpolate(mock_stations_database, mock_hourly_fetch):
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
     ts = ms.hourly(
         [
-            ms.stations.meta("10637"),
-            ms.stations.meta("10635"),
-            ms.stations.meta("10532"),
+            station_10637,
+            station_10635,
+            station_10532,
         ],
         start,
         end,
@@ -42,11 +48,17 @@ def test_interpolate_without_elevation(mock_stations_database, mock_hourly_fetch
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
     ts = ms.hourly(
         [
-            ms.stations.meta("10637"),
-            ms.stations.meta("10635"),
-            ms.stations.meta("10532"),
+            station_10637,
+            station_10635,
+            station_10532,
         ],
         start,
         end,
@@ -65,11 +77,17 @@ def test_interpolate_rounding(mock_stations_database, mock_hourly_fetch):
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
     ts = ms.hourly(
         [
-            ms.stations.meta("10637"),
-            ms.stations.meta("10635"),
-            ms.stations.meta("10532"),
+            station_10637,
+            station_10635,
+            station_10532,
         ],
         start,
         end,
@@ -99,11 +117,17 @@ def test_interpolate_categorical(mock_stations_database, mock_hourly_fetch):
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
     ts = ms.hourly(
         [
-            ms.stations.meta("10637"),
-            ms.stations.meta("10635"),
-            ms.stations.meta("10532"),
+            station_10637,
+            station_10635,
+            station_10532,
         ],
         start,
         end,
