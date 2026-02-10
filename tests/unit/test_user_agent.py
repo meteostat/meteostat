@@ -85,6 +85,8 @@ class TestUserAgent:
                 mock_response.raise_for_status = MagicMock()
                 mock_net.get.return_value = mock_response
 
+                metar.get_df.__wrapped__("EDDF")
+
                 mock_net.get.assert_called_once()
                 call_args = mock_net.get.call_args
                 headers = call_args.kwargs.get("headers", {})
