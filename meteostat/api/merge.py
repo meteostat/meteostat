@@ -51,8 +51,11 @@ def merge(objs: List[TimeSeries]) -> TimeSeries:
     Raises
     ------
     ValueError
-        If the time series objects have divergent granularity or time zone
+        If the list is empty or time series objects have divergent granularity or time zone
     """
+    if not objs:
+        raise ValueError("Cannot merge empty list of time series")
+
     ts = objs[0]
 
     if not all(

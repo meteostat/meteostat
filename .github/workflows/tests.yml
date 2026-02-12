@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.11', '3.12']
+        python-version: ['3.11', '3.12', '3.13']
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,10 +31,28 @@ jobs:
         run: |
           poetry install --all-groups
 
-      - name: Run unit tests
+      - name: Run unit tests with coverage
+        if: matrix.python-version == '3.13'
+        run: |
+          poetry run pytest tests/unit -v --cov --cov-branch --cov-report=xml
+
+      - name: Run unit tests without coverage
+        if: matrix.python-version != '3.13'
         run: |
           poetry run pytest tests/unit -v
 
-      - name: Run integration tests
+      - name: Run integration tests and append coverage
+        if: matrix.python-version == '3.13'
+        run: |
+          poetry run pytest tests/integration -v --cov --cov-branch --cov-append --cov-report=xml
+
+      - name: Run integration tests without coverage
+        if: matrix.python-version != '3.13'
         run: |
           poetry run pytest tests/integration -v
+
+      - name: Upload coverage to Codecov
+        if: matrix.python-version == '3.13'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}

@@ -102,8 +102,9 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         return df
 
     except HTTPError as error:
+        status_code = error.code
         logger.info(
-            f"Couldn't load DWD POI data for weather station {station} (status: {error.status})"
+            f"Couldn't load DWD POI data for weather station {station} (status: {status_code})"
         )
         return None
 

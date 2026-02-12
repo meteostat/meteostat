@@ -48,18 +48,24 @@ def test_merge_stations(mock_stations_database, mock_hourly_fetch):
     """
     start = datetime(2024, 1, 10, 0, 0)
     end = datetime(2024, 1, 11, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
     ts_10637 = ms.hourly(
-        ms.stations.meta("10637"),
+        station_10637,
         start,
         end,
     )
     ts_10635 = ms.hourly(
-        ms.stations.meta("10635"),
+        station_10635,
         start,
         end,
     )
     ts_10532 = ms.hourly(
-        ms.stations.meta("10532"),
+        station_10532,
         start,
         end,
     )
@@ -87,18 +93,20 @@ def test_merge_time(mock_stations_database, mock_hourly_fetch):
     end2 = datetime(2024, 1, 15, 23, 59)
     start3 = datetime(2024, 1, 20, 0, 0)
     end3 = datetime(2024, 1, 25, 23, 59)
+    station_10637 = ms.stations.meta("10637")
+    assert station_10637 is not None
     ts_1 = ms.hourly(
-        ms.stations.meta("10637"),
+        station_10637,
         start1,
         end1,
     )
     ts_2 = ms.hourly(
-        ms.stations.meta("10637"),
+        station_10637,
         start2,
         end2,
     )
     ts_3 = ms.hourly(
-        ms.stations.meta("10637"),
+        station_10637,
         start3,
         end3,
     )

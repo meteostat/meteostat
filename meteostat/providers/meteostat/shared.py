@@ -1,6 +1,6 @@
 import functools
-from urllib.error import HTTPError
 from typing import Optional, Callable, TypeVar
+from urllib.error import HTTPError
 
 import pandas as pd
 
@@ -39,13 +39,14 @@ def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
         try:
             return func(*args, **kwargs)
         except HTTPError as error:
-            if error.code == 404:
+            status_code = error.code
+            if status_code == 404:
                 logger.info(
                     f"Data file for {_get_station_year_info(args)} was not found"
                 )
             else:
                 logger.warning(
-                    f"HTTP error while loading data file for {_get_station_year_info(args)} (status: {error.code})",
+                    f"HTTP error while loading data file for {_get_station_year_info(args)} (status: {status_code})",
                     exc_info=True,
                 )
         except Exception:

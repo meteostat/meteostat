@@ -2,6 +2,7 @@
 <div align="center">
   
   [![Downloads][downloads-shield]][downloads-url]
+  [![Coverage][coverage-shield]][coverage-url]
   [![Provider Tests][provider-tests-shield]][provider-tests-url]
   [![Issues][issues-shield]][issues-url]
   [![MIT License][license-shield]][license-url]
@@ -102,6 +103,8 @@ Meteostat is licensed under the [**MIT License**](https://github.com/meteostat/m
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
 [downloads-shield]: https://img.shields.io/pypi/dm/meteostat
 [downloads-url]: https://pypi.org/project/meteostat/
+[coverage-shield]: https://codecov.io/gh/meteostat/meteostat/branch/main/graph/badge.svg
+[coverage-url]: https://codecov.io/gh/meteostat/meteostat
 [provider-tests-shield]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml/badge.svg
 [provider-tests-url]: https://github.com/meteostat/meteostat/actions/workflows/provider-tests.yml
 [issues-shield]: https://img.shields.io/github/issues/meteostat/meteostat.svg

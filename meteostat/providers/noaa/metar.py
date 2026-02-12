@@ -18,7 +18,6 @@ from meteostat.core.network import network_service
 
 
 ENDPOINT = config.aviationweather_endpoint
-USER_AGENT = config.aviationweather_user_agent
 CLDC_MAP = {
     "FEW": 2,  # 1-2 octas
     "SCT": 4,  # 3-4 octas
@@ -118,14 +117,9 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     """
     Get CSV file from Meteostat and convert to DataFrame
     """
+    user_agent = config.aviationweather_user_agent
     url = ENDPOINT.format(station=station)
-
-    if not USER_AGENT:
-        logger.warning(
-            "Consider specifying a unique user agent when querying the Aviation Weather Center's data API."
-        )
-
-    headers = {"User-Agent": USER_AGENT}
+    headers = {"User-Agent": user_agent}
 
     response = network_service.get(url, headers=headers)
 
@@ -159,5 +153,16 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
-    if "icao" in req.station.identifiers:
-        return get_df(req.station.identifiers["icao"])
+    if "icao" not in req.station.identifiers:
+        return None
+
+    user_agent = config.aviationweather_user_agent
+    if not user_agent:
+        logger.warning(
+            "Aviation Weather Center requires a user agent. "
+            "Please use config.aviationweather_user_agent to specify your user agent. "
+            "For now, this provider is skipped."
+        )
+        return None
+
+    return get_df(req.station.identifiers["icao"])

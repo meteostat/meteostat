@@ -239,6 +239,15 @@ class TestFillDf:
 class TestLocalize:
     """Test localize function"""
 
+    @staticmethod
+    def _create_df(tz=None):
+        """Create test DataFrame with optional timezone."""
+        dates = pd.date_range(start="2024-01-01", periods=3, freq="h", tz=tz)
+        index = pd.MultiIndex.from_arrays(
+            [["STATION"] * 3, dates], names=["station", "time"]
+        )
+        return pd.DataFrame({"temp": [1.0, 2.0, 3.0]}, index=index)
+
     def test_localize_naive_to_local(self):
         """Test localizing naive datetime to local timezone"""
         # Create a naive datetime (without timezone info)
@@ -269,6 +278,133 @@ class TestLocalize:
         result = localize(df, "Europe/London")
 
         assert result.loc[("station1", slice(None)), "temp"].values[0] == 20.0
+
+    def test_localize_naive_to_timezone(self):
+        """localize() should work with naive (UTC) data"""
+        df = self._create_df(tz=None)
+
+        result = localize(df, "Europe/Berlin")
+
+        time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
+        assert str(time_index.tz) == "Europe/Berlin"
+
+    def test_localize_already_utc_to_other_timezone(self):
+        """localize() should handle already UTC-aware data"""
+        df = self._create_df(tz="UTC")
+
+        result = localize(df, "Europe/Berlin")
+
+        time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
+        assert str(time_index.tz) == "Europe/Berlin"
+
+    def test_localize_from_other_timezone(self):
+        """localize() should handle data from other timezones"""
+        df = self._create_df(tz="America/New_York")
+
+        result = localize(df, "Europe/Berlin")
+
+        time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
+        assert str(time_index.tz) == "Europe/Berlin"
+
+    def test_localize_preserves_actual_time(self):
+        """Timezone conversion should preserve the actual point in time"""
+        df = self._create_df(tz="UTC")
+
+        result = localize(df, "Europe/Berlin")
+
+        original_times = df.index.get_level_values("time")
+        converted_times = result.index.get_level_values("time")
+
+        first_original_utc = original_times[0]
+        first_converted_utc = converted_times[0].tz_convert("UTC")
+
+        assert first_original_utc == first_converted_utc
+
+    def test_localize_est_to_utc(self):
+        """EST to UTC conversion should work correctly"""
+        df = self._create_df(tz="US/Eastern")
+
+        result = localize(df, "UTC")
+
+        converted_times = result.index.get_level_values("time")
+        first_time = converted_times[0]
+
+        assert first_time.hour == 5
+
+    def test_localize_multiple_datetimes_naive(self):
+        """localize() should work with multiple different naive datetimes"""
+        dates = pd.date_range("2024-01-01", periods=10, freq="D")
+        index = pd.MultiIndex.from_arrays(
+            [["STATION"] * 10, dates], names=["station", "time"]
+        )
+        df = pd.DataFrame({"temp": range(10)}, index=index)
+
+        result = localize(df, "Europe/London")
+
+        time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
+        assert str(time_index.tz) == "Europe/London"
+        assert len(result) == 10
+
+    def test_localize_midnight_handling_utc_to_berlin(self):
+        """Midnight conversions should work correctly"""
+        dates = pd.date_range("2024-01-01 00:00:00", periods=3, freq="h", tz="UTC")
+        index = pd.MultiIndex.from_arrays(
+            [["STATION"] * 3, dates], names=["station", "time"]
+        )
+        df = pd.DataFrame({"temp": [1, 2, 3]}, index=index)
+
+        result = localize(df, "Europe/Berlin")
+
+        converted_times = result.index.get_level_values("time")
+        first_berlin_time = converted_times[0]
+
+        assert first_berlin_time.hour == 1
+        assert first_berlin_time.day == 1
+
+    def test_localize_summer_time_handling(self):
+        """DST/Summer time transitions should be handled correctly"""
+        dates = pd.date_range("2024-07-01 12:00:00", periods=3, freq="h", tz="UTC")
+        index = pd.MultiIndex.from_arrays(
+            [["STATION"] * 3, dates], names=["station", "time"]
+        )
+        df = pd.DataFrame({"temp": [20, 21, 22]}, index=index)
+
+        result = localize(df, "Europe/Berlin")
+
+        converted_times = result.index.get_level_values("time")
+        first_berlin_time = converted_times[0]
+
+        assert first_berlin_time.hour == 14
+
+    def test_localize_idempotent_same_timezone(self):
+        """Converting to the same timezone should be idempotent"""
+        df = self._create_df(tz="Europe/Berlin")
+
+        result = localize(df, "Europe/Berlin")
+
+        time_index = result.index.get_level_values("time")
+        assert hasattr(time_index, "tz")
+        assert str(time_index.tz) == "Europe/Berlin"
+
+        assert df.equals(result)
+
+    def test_localize_roundtrip_conversion(self):
+        """Converting to another timezone and back should preserve original"""
+        df_original = self._create_df(tz="UTC")
+
+        df_berlin = localize(df_original, "Europe/Berlin")
+        df_back = localize(df_berlin, "UTC")
+
+        original_times = df_original.index.get_level_values("time")
+        back_times_index = df_back.index.get_level_values("time")
+        # Both should have tz attribute since we've localized them
+        back_times = back_times_index.tz_convert("UTC")  # type: ignore[union-attr]
+
+        assert (original_times == back_times).all()
 
 
 class TestReshapeBySource:

@@ -87,18 +87,20 @@ def get_df(parameter: str, mode: str, station_code: str) -> Optional[pd.DataFram
         return None
 
     ftp = get_ftp_connection()
-    search_term = station_code if mode == "recent" else f"{station_code}_"
-    remote_file = find_file(ftp, mode, param_config["dir"], search_term)
+    try:
+        search_term = station_code if mode == "recent" else f"{station_code}_"
+        remote_file = find_file(ftp, mode, param_config["dir"], search_term)
 
-    if not remote_file:
-        logger.debug(
-            f"No file found for parameter '{parameter}', mode '{mode}', station '{station_code}'"
-        )
-        return None
+        if not remote_file:
+            logger.debug(
+                f"No file found for parameter '{parameter}', mode '{mode}', station '{station_code}'"
+            )
+            return None
 
-    buffer = BytesIO()
-    ftp.retrbinary(f"RETR {remote_file}", buffer.write)
-    ftp.close()
+        buffer = BytesIO()
+        ftp.retrbinary(f"RETR {remote_file}", buffer.write)
+    finally:
+        ftp.quit()
 
     buffer.seek(0)
     df = pd.read_csv(buffer, sep=";").rename(columns=lambda col: col.strip().lower())

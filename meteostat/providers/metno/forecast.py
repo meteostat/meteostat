@@ -1,5 +1,5 @@
 from typing import Optional, Union
-from urllib.error import HTTPError
+from requests.exceptions import HTTPError
 
 import pandas as pd
 
@@ -174,8 +174,9 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
         return df
 
     except HTTPError as error:
+        status_code = error.response.status_code if error.response else "unknown"
         logger.warning(
-            f"Couldn't load weather forecast from met.no (status: {error.status})"
+            f"Couldn't load weather forecast from met.no (status: {status_code})"
         )
 
     except Exception as error:

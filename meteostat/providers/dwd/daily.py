@@ -61,15 +61,16 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
     Get a file from DWD FTP server and convert to DataFrame
     """
     ftp = get_ftp_connection()
-    remote_file = find_file(ftp, mode, f"_{station}_")
+    try:
+        remote_file = find_file(ftp, mode, f"_{station}_")
 
-    if remote_file is None:
-        return None
+        if remote_file is None:
+            return None
 
-    buffer = BytesIO()
-    ftp.retrbinary("RETR " + remote_file, buffer.write)
-
-    ftp.close()
+        buffer = BytesIO()
+        ftp.retrbinary("RETR " + remote_file, buffer.write)
+    finally:
+        ftp.quit()
 
     # Unzip file
     with ZipFile(buffer, "r") as zipped:

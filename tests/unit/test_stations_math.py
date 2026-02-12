@@ -105,3 +105,99 @@ def test_haversine_distance_calculation():
     assert 9000 < distance < 11000, f"Distance = {distance}, expected ~10000m"
 
     conn.close()
+
+
+class TestAcosDomainClamping:
+    """Test that acos argument is clamped to [-1, 1] to handle floating-point edge cases."""
+
+    def test_north_pole_query_no_error(self):
+        """
+        Querying nearby stations from North Pole should not raise math domain error.
+
+        Float precision can cause acos to receive values slightly > 1.
+        """
+        stations = Stations()
+        conn = sqlite3.connect(":memory:")
+        stations._register_math_functions(conn)
+
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE stations (
+                id TEXT PRIMARY KEY,
+                latitude REAL,
+                longitude REAL
+            )
+        """)
+
+        # Insert station at the pole
+        cursor.execute(
+            "INSERT INTO stations VALUES (?, ?, ?)",
+            ("POLE1", 90.0, 0.0),
+        )
+        conn.commit()
+
+        # Query from exact same point - this can cause acos(1.0000001) error
+        sql = """
+            SELECT id,
+                6371000 * acos(
+                    cos(radians(:lat)) * cos(radians(latitude)) * 
+                    cos(radians(longitude) - radians(:lon)) + 
+                    sin(radians(:lat)) * sin(radians(latitude))
+                ) AS distance
+            FROM stations
+        """
+
+        # Should not raise - if it does, the clamping is not working
+        cursor.execute(sql, {"lat": 90.0, "lon": 0.0})
+        result = cursor.fetchone()
+        assert result is not None
+        # Distance to same point should be 0 (or very close)
+        assert result[1] < 1, f"Distance to same point should be ~0, got {result[1]}"
+
+        conn.close()
+
+    def test_antipodal_query_no_error(self):
+        """
+        Querying between antipodal points should not raise math domain error.
+
+        Float precision can cause acos to receive values slightly < -1.
+        """
+        stations = Stations()
+        conn = sqlite3.connect(":memory:")
+        stations._register_math_functions(conn)
+
+        cursor = conn.cursor()
+        cursor.execute("""
+            CREATE TABLE stations (
+                id TEXT PRIMARY KEY,
+                latitude REAL,
+                longitude REAL
+            )
+        """)
+
+        cursor.execute(
+            "INSERT INTO stations VALUES (?, ?, ?)",
+            ("TEST1", 45.0, 0.0),
+        )
+        conn.commit()
+
+        # Query from antipodal point: (-45, 180)
+        sql = """
+            SELECT id,
+                6371000 * acos(
+                    cos(radians(:lat)) * cos(radians(latitude)) * 
+                    cos(radians(longitude) - radians(:lon)) + 
+                    sin(radians(:lat)) * sin(radians(latitude))
+                ) AS distance
+            FROM stations
+        """
+
+        cursor.execute(sql, {"lat": -45.0, "lon": 180.0})
+        result = cursor.fetchone()
+        assert result is not None
+        # Antipodal distance should be ~20000km
+        assert result[1] > 19000000, (
+            f"Antipodal distance should be ~20000km, got {result[1]}"
+        )
+
+        conn.close()

@@ -51,10 +51,18 @@ class TimeSeries:
         self.stations = stations
         self.timezone = timezone
         self._multi_station = multi_station
+
+        # Always preserve start/end if provided
+        self.start = start
+        self.end = end
+
         if df is not None and not df.empty:
             self._df = df
-            self.start = start if start else df.index.get_level_values("time").min()
-            self.end = end if end else df.index.get_level_values("time").max()
+            # Fall back to DataFrame bounds only if start/end weren't provided
+            if self.start is None:
+                self.start = df.index.get_level_values("time").min()
+            if self.end is None:
+                self.end = df.index.get_level_values("time").max()
 
     def __len__(self) -> int:
         """
@@ -73,7 +81,7 @@ class TimeSeries:
         """
         Expected number of non-NaN values
         """
-        if not self.start or not self.end:
+        if self.start is None or self.end is None:
             return 0
 
         diff = self.end - self.start
@@ -277,7 +285,9 @@ class TimeSeries:
             parameter if isinstance(parameter, Parameter) else parameter
         ].count()
 
-    def completeness(self, parameter: Optional[Parameter | str] = None) -> float:
+    def completeness(
+        self, parameter: Optional[Parameter | str] = None
+    ) -> Optional[float]:
         """
         Get completeness for a specific parameter or the entire DataFrame.
 
@@ -289,22 +299,44 @@ class TimeSeries:
 
         Returns
         -------
-        float
+        float or None
             The completeness ratio for the specified parameter or the entire DataFrame.
-            Returns 0 if no data is available, 1 if complete, or a value between 0 and 1 otherwise.
+            Returns None if completeness cannot be determined (e.g., missing end date).
+            Returns 0.0 if no data but dates are defined.
+            Returns 1 if complete, or a value between 0 and 1 otherwise.
         """
+        # Cannot determine completeness without start/end dates
+        if self.start is None or self.end is None:
+            return None
+
+        # Guard against division by zero
+        target_length = self._target_length
+        if target_length == 0:
+            return None
+
         df = self.fetch()
 
+        # No data but dates are defined = 0% complete
         if df is None:
-            return 0
+            return 0.0
 
         if parameter:
             return round(
-                self.count(parameter) / self._target_length,
+                self.count(parameter) / target_length,
                 2,
             )
 
-        return round(mean([self.completeness(p) for p in df.columns]), 2)
+        # Handle case where df has no columns
+        if len(df.columns) == 0:
+            return None
+
+        completeness_values = [self.completeness(p) for p in df.columns]
+        # Filter out None values before calculating mean
+        valid_values: list[float] = [v for v in completeness_values if v is not None]
+        if not valid_values:
+            return None
+
+        return round(mean(valid_values), 2)
 
     def validate(self) -> bool:
         """

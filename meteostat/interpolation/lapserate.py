@@ -1,7 +1,6 @@
 from itertools import combinations
 from statistics import mean
 
-import numpy as np
 import pandas as pd
 
 from meteostat.api.timeseries import TimeSeries
@@ -84,7 +83,7 @@ def apply_lapse_rate(
     """
     for col in config.lapse_rate_parameters:
         if col in df.columns:
-            df.loc[df[col] != np.nan, col] = round(
+            df.loc[df[col].notna(), col] = round(
                 df[col] + ((lapse_rate / 1000) * (df["elevation"] - elevation)), 1
             )
 
