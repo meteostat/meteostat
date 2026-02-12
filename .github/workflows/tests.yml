@@ -33,18 +33,13 @@ jobs:
 
       - name: Run unit tests with coverage
         run: |
-          poetry run pytest tests/unit -v --cov=meteostat --cov-report=xml --cov-report=term-missing
+          poetry run pytest tests/unit -v --cov --cov-branch --cov-report=xml
 
       - name: Run integration tests and append coverage
         run: |
-          poetry run pytest tests/integration -v --cov=meteostat --cov-append --cov-report=xml --cov-report=term-missing
+          poetry run pytest tests/integration -v --cov --cov-branch --cov-append --cov-report=xml
 
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         with:
-          file: ./coverage.xml
-          flags: unittests
-          name: codecov-umbrella
-          fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          token: ${{ secrets.CODECOV_TOKEN }}
