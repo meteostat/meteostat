@@ -81,7 +81,7 @@ class TimeSeries:
         """
         Expected number of non-NaN values
         """
-        if not self.start or not self.end:
+        if self.start is None or self.end is None:
             return 0
 
         diff = self.end - self.start
@@ -306,7 +306,7 @@ class TimeSeries:
             Returns 1 if complete, or a value between 0 and 1 otherwise.
         """
         # Cannot determine completeness without start/end dates
-        if not self.start or not self.end:
+        if self.start is None or self.end is None:
             return None
 
         # Guard against division by zero
