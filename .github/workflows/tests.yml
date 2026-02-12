@@ -12,6 +12,9 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
     strategy:
       matrix:
         python-version: ['3.11', '3.12', '3.13']
@@ -46,5 +49,4 @@ jobs:
           flags: unittests
           name: codecov-umbrella
           fail_ci_if_error: false
-        env:
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          use_oidc: true
