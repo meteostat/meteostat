@@ -70,11 +70,15 @@ def daily(
     --------
     Get data for a specific station:
 
+    >>> from datetime import date
+    >>> import meteostat as ms
     >>> ts = ms.daily("10637", date(2018, 1, 1), date(2018, 12, 31))
     >>> df = ts.fetch()
 
     Get interpolated data for a geographic point (recommended approach):
 
+    >>> from datetime import date
+    >>> import meteostat as ms
     >>> point = ms.Point(50.1155, 8.6842)
     >>> stations = ms.stations.nearby(point, limit=4)
     >>> ts = ms.daily(stations, date(2018, 1, 1), date(2018, 12, 31))
