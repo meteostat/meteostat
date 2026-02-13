@@ -85,8 +85,8 @@ class TestSafeConcat:
 
     def test_safe_concat_preserves_index(self):
         """Test that concat preserves index when ignore_index=False"""
-        df1 = pd.DataFrame({"a": [1, 2]}, index=[10, 20])
-        df2 = pd.DataFrame({"a": [3, 4]}, index=[30, 40])
+        df1 = pd.DataFrame({"a": [1, 2]}, index=pd.Index([10, 20]))
+        df2 = pd.DataFrame({"a": [3, 4]}, index=pd.Index([30, 40]))
         result = safe_concat([df1, df2])
 
         assert result is not None
