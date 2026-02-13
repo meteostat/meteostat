@@ -116,9 +116,9 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
     return df
 
 
-def fetch(req: ProviderRequest):
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if "national" not in req.station.identifiers:
-        return pd.DataFrame()
+        return None
 
     # Check which modes to consider for data fetching
     #
@@ -144,6 +144,6 @@ def fetch(req: ProviderRequest):
     df = safe_concat(data)
 
     if df is None:
-        return pd.DataFrame()
+        return None
 
     return df.loc[~df.index.duplicated(keep="first")]

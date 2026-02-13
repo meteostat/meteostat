@@ -191,7 +191,7 @@ def get_parameter(
         return None
 
 
-def fetch(req: ProviderRequest):
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if "national" not in req.station.identifiers:
         return None
 

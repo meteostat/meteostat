@@ -148,13 +148,13 @@ def get_parameter(
         return None
 
 
-def fetch(req: ProviderRequest) -> pd.DataFrame:
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     """
     Entry point to fetch all requested parameters for a station query.
     """
     station_code = req.station.identifiers.get("wmo")
     if not station_code:
-        return pd.DataFrame()
+        return None
 
     modes = ["historical"]
     if (datetime.now() - req.end).days < 5 * 365:
@@ -166,4 +166,4 @@ def fetch(req: ProviderRequest) -> pd.DataFrame:
         if param in PARAMETER_CONFIGS
     ]
 
-    return safe_concat(data_frames, axis=1) or pd.DataFrame()
+    return safe_concat(data_frames, axis=1)
