@@ -16,30 +16,26 @@ class TestGetDfEmptyFeatures:
     """Test get_df handles empty features from ECCC API (Bug 6)"""
 
     @patch("meteostat.providers.eccc.hourly.network_service")
-    @patch("meteostat.providers.eccc.hourly.cache_service")
-    def test_get_df_returns_none_when_features_empty(self, mock_cache, mock_network):
+    def test_get_df_returns_none_when_features_empty(self, mock_network):
         """When ECCC returns empty features list, get_df should return None instead of KeyError"""
-        mock_cache.cache.return_value = lambda f: f
 
         mock_response = MagicMock()
         mock_response.json.return_value = {"features": []}
         mock_network.get.return_value = mock_response
 
-        result = get_df("1234567", 2023, "America/Toronto")
+        result = get_df.__wrapped__("1234567", 2023, "America/Toronto")
 
         assert result is None
 
     @patch("meteostat.providers.eccc.hourly.network_service")
-    @patch("meteostat.providers.eccc.hourly.cache_service")
-    def test_get_df_returns_none_when_no_features_key(self, mock_cache, mock_network):
+    def test_get_df_returns_none_when_no_features_key(self, mock_network):
         """When ECCC response has no features key at all, get_df should return None"""
-        mock_cache.cache.return_value = lambda f: f
 
         mock_response = MagicMock()
         mock_response.json.return_value = {}
         mock_network.get.return_value = mock_response
 
-        result = get_df("1234567", 2023, "America/Toronto")
+        result = get_df.__wrapped__("1234567", 2023, "America/Toronto")
 
         assert result is None
 
