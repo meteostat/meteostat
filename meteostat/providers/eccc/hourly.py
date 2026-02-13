@@ -6,11 +6,33 @@ import pytz
 
 from meteostat.enumerations import TTL, Parameter
 from meteostat.core.cache import cache_service
+from meteostat.core.logger import logger
 from meteostat.core.network import network_service
 from meteostat.providers.eccc.shared import ENDPOINT, get_meta_data
 from meteostat.typing import ProviderRequest
+from meteostat.utils.data import safe_concat
 
 BATCH_LIMIT = 9000
+
+# Map common timezone abbreviations to IANA timezone names
+# ECCC stations often use abbreviations that pytz cannot resolve
+TZ_ABBREVIATION_MAP = {
+    "NST": "America/St_Johns",
+    "NDT": "America/St_Johns",
+    "AST": "America/Halifax",
+    "ADT": "America/Halifax",
+    "EST": "America/Toronto",
+    "EDT": "America/Toronto",
+    "CST": "America/Winnipeg",
+    "CDT": "America/Winnipeg",
+    "MST": "America/Edmonton",
+    "MDT": "America/Edmonton",
+    "PST": "America/Vancouver",
+    "PDT": "America/Vancouver",
+    "YST": "America/Whitehorse",
+    "YDT": "America/Whitehorse",
+}
+
 PROPERTIES = {
     "UTC_DATE": "time",
     "RELATIVE_HUMIDITY": Parameter.RHUM,
@@ -27,7 +49,12 @@ def get_df(climate_id: str, year: int, tz: str) -> Optional[pd.DataFrame]:
     # Process start & end date
     # ECCC uses the station's local time zone
     from_timezone = pytz.timezone("UTC")
-    to_timezone = pytz.timezone(tz)
+    iana_tz = TZ_ABBREVIATION_MAP.get(tz, tz)
+    try:
+        to_timezone = pytz.timezone(iana_tz)
+    except pytz.exceptions.UnknownTimeZoneError:
+        logger.warning(f"Unknown timezone '{tz}' for ECCC station, skipping")
+        return None
     start = (
         from_timezone.localize(datetime(year, 1, 1, 0, 0, 0))
         .astimezone(to_timezone)
@@ -58,11 +85,12 @@ def get_df(climate_id: str, year: int, tz: str) -> Optional[pd.DataFrame]:
         data.get("features", []),
     )
 
-    # Create a DataFrame from the extracted features
     df = pd.DataFrame(features)
-    df = df.rename(columns=PROPERTIES)
 
-    # Handle time column & set index
+    if df.empty:
+        return None
+
+    df = df.rename(columns=PROPERTIES)
     df["time"] = pd.to_datetime(df["time"])
     df = df.set_index(["time"])
 
@@ -84,6 +112,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     meta_data = get_meta_data(req.station.identifiers["national"])
+
+    if meta_data is None:
+        return None
+
     climate_id = meta_data.get("CLIMATE_IDENTIFIER")
     archive_first = meta_data.get("HLY_FIRST_DATE")
     archive_last = meta_data.get("HLY_LAST_DATE")
@@ -101,4 +133,4 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     )
     data = [get_df(climate_id, year, timezone) for year in years]
 
-    return pd.concat(data) if len(data) and not all(d is None for d in data) else None
+    return safe_concat(data)
