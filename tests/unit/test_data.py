@@ -11,6 +11,7 @@ import pandas as pd
 import numpy as np
 
 from meteostat.utils.data import (
+    safe_concat,
     stations_to_df,
     squash_df,
     fill_df,
@@ -22,6 +23,92 @@ from meteostat.utils.data import (
 )
 from meteostat.typing import Station
 from meteostat.enumerations import Frequency
+
+
+class TestSafeConcat:
+    """Test safe_concat function"""
+
+    def test_safe_concat_all_none(self):
+        """Test that safe_concat returns None when all inputs are None"""
+        result = safe_concat([None, None, None])
+        assert result is None
+
+    def test_safe_concat_single_dataframe(self):
+        """Test concatenating a single DataFrame"""
+        df = pd.DataFrame({"a": [1, 2, 3]})
+        result = safe_concat([df])
+        assert result is not None
+        pd.testing.assert_frame_equal(result, df)
+
+    def test_safe_concat_mixed_none_and_dataframes(self):
+        """Test concatenating mix of None and DataFrames"""
+        df1 = pd.DataFrame({"a": [1, 2]})
+        df2 = pd.DataFrame({"a": [3, 4]})
+        result = safe_concat([None, df1, None, df2, None])
+
+        assert result is not None
+        assert len(result) == 4
+        assert list(result["a"]) == [1, 2, 3, 4]
+
+    def test_safe_concat_axis_0_default(self):
+        """Test that default axis is 0 (row concatenation)"""
+        df1 = pd.DataFrame({"a": [1, 2]})
+        df2 = pd.DataFrame({"a": [3, 4]})
+        result = safe_concat([df1, df2])
+
+        assert result is not None
+        assert len(result) == 4
+
+    def test_safe_concat_axis_1(self):
+        """Test concatenation along axis=1 (columns)"""
+        df1 = pd.DataFrame({"a": [1, 2]})
+        df2 = pd.DataFrame({"b": [3, 4]})
+        result = safe_concat([df1, df2], axis=1)
+
+        assert result is not None
+        assert list(result.columns) == ["a", "b"]
+        assert len(result) == 2
+
+    def test_safe_concat_empty_list(self):
+        """Test that empty list returns None"""
+        result = safe_concat([])
+        assert result is None
+
+    def test_safe_concat_kwargs_passthrough(self):
+        """Test that additional kwargs are passed to pd.concat"""
+        df1 = pd.DataFrame({"a": [1, 2]})
+        df2 = pd.DataFrame({"a": [3, 4]})
+        result = safe_concat([df1, df2], ignore_index=True)
+
+        assert result is not None
+        assert list(result.index) == [0, 1, 2, 3]
+
+    def test_safe_concat_preserves_index(self):
+        """Test that concat preserves index when ignore_index=False"""
+        df1 = pd.DataFrame({"a": [1, 2]}, index=[10, 20])
+        df2 = pd.DataFrame({"a": [3, 4]}, index=[30, 40])
+        result = safe_concat([df1, df2])
+
+        assert result is not None
+        assert list(result.index) == [10, 20, 30, 40]
+
+    def test_safe_concat_with_multiindex(self):
+        """Test concatenation with MultiIndex DataFrames"""
+        idx1 = pd.MultiIndex.from_tuples(
+            [("a", 1), ("a", 2)], names=["letter", "number"]
+        )
+        df1 = pd.DataFrame({"value": [10, 20]}, index=idx1)
+
+        idx2 = pd.MultiIndex.from_tuples(
+            [("b", 1), ("b", 2)], names=["letter", "number"]
+        )
+        df2 = pd.DataFrame({"value": [30, 40]}, index=idx2)
+
+        result = safe_concat([df1, df2])
+
+        assert result is not None
+        assert len(result) == 4
+        assert result.index.names == ["letter", "number"]
 
 
 class TestStationsToDf:
