@@ -18,6 +18,7 @@ from meteostat.api.config import config
 from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
+from meteostat.utils.data import safe_concat
 from meteostat.utils.conversions import ms_to_kmh, pres_to_msl
 from meteostat.providers.dwd.shared import get_ftp_connection
 
@@ -115,9 +116,9 @@ def get_df(station: str, elevation: int, mode: str) -> Optional[pd.DataFrame]:
     return df
 
 
-def fetch(req: ProviderRequest):
+def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if "national" not in req.station.identifiers:
-        return pd.DataFrame()
+        return None
 
     # Check which modes to consider for data fetching
     #
@@ -140,6 +141,9 @@ def fetch(req: ProviderRequest):
         for mode in config.dwd_daily_modes or modes
     ]
 
-    df = pd.concat(data)
+    df = safe_concat(data)
+
+    if df is None:
+        return None
 
     return df.loc[~df.index.duplicated(keep="first")]

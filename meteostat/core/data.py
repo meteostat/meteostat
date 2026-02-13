@@ -17,7 +17,7 @@ from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
 from meteostat.enumerations import Parameter, Provider
 from meteostat.typing import Station, Request
-from meteostat.utils.data import stations_to_df
+from meteostat.utils.data import safe_concat, stations_to_df
 from meteostat.utils.guards import request_size_guard
 
 
@@ -77,10 +77,9 @@ class DataService:
                 df.dropna(how="all", axis=1) if not df.empty else None
                 for df in fragments
             ]
-            filtered = [df for df in cleaned if df is not None]
-            if not filtered:
+            df = safe_concat(cleaned)
+            if df is None:
                 return pd.DataFrame()
-            df = pd.concat(filtered)
             df = schema_service.fill(df, parameters)
             df = schema_service.purge(df, parameters)
             return df
