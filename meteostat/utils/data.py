@@ -11,7 +11,7 @@ The code is licensed under the MIT license.
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import List, Optional, Sequence
+from typing import List, Optional, Sequence, cast
 
 import numpy as np
 import pandas as pd
@@ -32,7 +32,8 @@ def safe_concat(
     valid = [df for df in frames if df is not None]
     if not valid:
         return None
-    return pd.concat(valid, axis=axis, **kwargs)
+    # Cast is safe: concatenating DataFrames always returns a DataFrame
+    return cast(pd.DataFrame, pd.concat(valid, axis=axis, **kwargs))
 
 
 def stations_to_df(stations: List[Station]) -> pd.DataFrame:
