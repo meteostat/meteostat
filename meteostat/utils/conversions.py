@@ -119,11 +119,15 @@ def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter
     pres = row.get(Parameter.PRES)
     t = row.get(temp)
 
-    if pd.isna(pres) or pd.isna(t) or altitude is None or pres < 0:
+    if pd.isna(pres) or pd.isna(t) or altitude is None:
         return None
 
     # Type narrowing for arithmetic operations
     if not isinstance(pres, (int, float)) or not isinstance(t, (int, float)):
+        return None
+
+    # Check for invalid pressure values
+    if pres < 0:
         return None
 
     try:
