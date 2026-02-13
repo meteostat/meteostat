@@ -18,6 +18,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.core.logger import logger
 from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service
+from meteostat.utils.data import safe_concat
 from meteostat.api.config import config
 from meteostat.utils.conversions import ms_to_kmh
 from meteostat.providers.dwd.shared import get_condicode
@@ -181,9 +182,9 @@ def get_parameter(
             get_df(parameter_dir, mode, station.identifiers["national"])
             for mode in modes
         ]
-        if all(d is None for d in data):
+        df = safe_concat(data)
+        if df is None:
             return None
-        df = pd.concat(data)
         return df.loc[~df.index.duplicated(keep="first")]
     except Exception as error:
         logger.warning(error, exc_info=True)
@@ -206,16 +207,10 @@ def fetch(req: ProviderRequest):
     if abs((req.end - datetime.now()).days) < 3 * 365:
         modes.append("recent")
 
-    columns = map(
-        lambda args: get_parameter(*args),
-        (
-            (parameter["dir"], config.dwd_hourly_modes or modes, req.station)
-            for parameter in [
-                param
-                for param in PARAMETERS
-                if not set(req.parameters).isdisjoint(param["names"].values())
-            ]
-        ),
-    )
+    columns_list = [
+        get_parameter(parameter["dir"], config.dwd_hourly_modes or modes, req.station)
+        for parameter in PARAMETERS
+        if not set(req.parameters).isdisjoint(parameter["names"].values())
+    ]
 
-    return pd.concat(columns, axis=1)
+    return safe_concat(columns_list, axis=1)

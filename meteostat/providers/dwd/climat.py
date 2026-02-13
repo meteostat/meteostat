@@ -15,6 +15,7 @@ from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import ProviderRequest, Station
 from meteostat.core.cache import cache_service
 from meteostat.providers.dwd.shared import get_ftp_connection
+from meteostat.utils.data import safe_concat
 
 # Constants
 BASE_DIR = "/climate_environment/CDC/observations_global/CLIMAT/monthly/qc/"
@@ -165,4 +166,4 @@ def fetch(req: ProviderRequest) -> pd.DataFrame:
         if param in PARAMETER_CONFIGS
     ]
 
-    return pd.concat([df for df in data_frames if df is not None], axis=1)
+    return safe_concat(data_frames, axis=1) or pd.DataFrame()

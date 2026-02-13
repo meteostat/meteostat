@@ -8,6 +8,7 @@ from meteostat.core.cache import cache_service
 from meteostat.core.network import network_service
 from meteostat.providers.eccc.shared import ENDPOINT, get_meta_data
 from meteostat.typing import ProviderRequest
+from meteostat.utils.data import safe_concat
 
 BATCH_LIMIT = 9000
 PROPERTIES = {
@@ -84,4 +85,4 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     )
     data = [get_df(climate_id, year) for year in years]
 
-    return pd.concat(data) if len(data) and not all(d is None for d in data) else None
+    return safe_concat(data)

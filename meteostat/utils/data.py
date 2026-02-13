@@ -11,7 +11,7 @@ The code is licensed under the MIT license.
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import List
+from typing import List, Optional, Sequence
 
 import numpy as np
 import pandas as pd
@@ -19,6 +19,20 @@ import pandas as pd
 from meteostat.core.providers import provider_service
 from meteostat.enumerations import Frequency
 from meteostat.typing import Station
+
+
+def safe_concat(
+    frames: Sequence[Optional[pd.DataFrame]], axis: int = 0, **kwargs
+) -> Optional[pd.DataFrame]:
+    """
+    Filter out None values from a list of DataFrames and concatenate the rest.
+
+    Returns None if no valid frames remain.
+    """
+    valid = [df for df in frames if df is not None]
+    if not valid:
+        return None
+    return pd.concat(valid, axis=axis, **kwargs)
 
 
 def stations_to_df(stations: List[Station]) -> pd.DataFrame:

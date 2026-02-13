@@ -10,6 +10,7 @@ from meteostat.core.logger import logger
 from meteostat.core.cache import cache_service
 from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import ms_to_kmh, temp_dwpt_to_rhum
+from meteostat.utils.data import safe_concat
 
 ISD_LITE_ENDPOINT = "https://www.ncei.noaa.gov/pub/data/noaa/isd-lite/"
 COLSPECS = [
@@ -152,4 +153,4 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         )
     )
 
-    return pd.concat(data) if len(data) and not all(d is None for d in data) else None
+    return safe_concat(data)

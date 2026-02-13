@@ -17,6 +17,7 @@ import pandas as pd
 from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
+from meteostat.utils.data import safe_concat
 from meteostat.utils.conversions import ms_to_kmh
 from meteostat.providers.dwd.shared import get_ftp_connection
 
@@ -137,6 +138,9 @@ def fetch(req: ProviderRequest):
         for mode in modes
     ]
 
-    df = pd.concat(data)
+    df = safe_concat(data)
+
+    if df is None:
+        return pd.DataFrame()
 
     return df.loc[~df.index.duplicated(keep="first")]
