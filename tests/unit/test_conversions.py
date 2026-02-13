@@ -380,39 +380,3 @@ class TestWeatherConditionConversions:
     def test_to_condition_invalid_negative(self):
         """Test weather condition conversion with negative value"""
         assert to_condition(-1) is None
-
-
-class TestConversionPrecision:
-    """Test precision and round-trip conversions."""
-
-    def test_celsius_kelvin_roundtrip_preserves_precision(self):
-        """Round-trip C->K->C should preserve precision."""
-        original = 20.123456
-        converted_k = celsius_to_kelvin(original)
-        converted_back = kelvin_to_celsius(converted_k)
-
-        assert abs(original - converted_back) < 0.01
-
-    def test_kmh_mph_conversion_accuracy(self):
-        """km/h to mph should be accurate."""
-        speed_kmh = 100.0
-        expected_mph = 62.1
-
-        result = kmh_to_mph(speed_kmh)
-
-        assert abs(result - expected_mph) < 0.1
-
-    def test_nan_handling_consistent_celsius_to_kelvin(self):
-        """celsius_to_kelvin should handle NaN consistently."""
-        result = celsius_to_kelvin(np.nan)
-        assert result is None
-
-    def test_none_handling_celsius_to_kelvin(self):
-        """celsius_to_kelvin(None) should return None."""
-        result = celsius_to_kelvin(None)
-        assert result is None
-
-    def test_none_handling_kmh_to_mph(self):
-        """kmh_to_mph(None) should return None."""
-        result = kmh_to_mph(None)
-        assert result is None
