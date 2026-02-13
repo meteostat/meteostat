@@ -144,7 +144,8 @@ def generate_dwd_hourly_fixture():
         end=end,
     )
     df = fetch_dwd_hourly(req)
-    df = data_service.filter_time(df, start, end)
+    if df is not None:
+        df = data_service.filter_time(df, start, end)
     return df
 
 
