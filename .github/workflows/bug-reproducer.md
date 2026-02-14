@@ -12,12 +12,13 @@ tools:
     toolsets: [issues, labels]
 safe-outputs:
   add-comment:
-    max: 2
+    max: 10
   add-labels:
     allowed:
       - confirmed
+    max: 10
   close-issue:
-    max: 1
+    max: 10
 ---
 
 # Bug Reproducer Agent
