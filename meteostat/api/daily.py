@@ -44,10 +44,8 @@ def daily(
     ----------
     station : str, Station, Point, List[str | Station | Point], pd.Index, pd.Series
         Weather station(s) or Point(s) to query data for. Can be a single station/point or a list.
-
-        **Note:** Points are converted to virtual stations and only work with geo-location
-        providers. For historical data, use ``stations.nearby(point)`` then interpolate.
-
+        Points are converted to virtual stations (with IDs like $0001, $0002, etc.) and only work
+        with geo-location providers.
     start : datetime, date, optional
         Start date for the data query. If None, the earliest available date will be used.
     end : datetime, date, optional
@@ -61,18 +59,6 @@ def daily(
     -------
     TimeSeries
         A TimeSeries object containing the daily data for the specified stations and parameters.
-
-    Examples
-    --------
-    >>> from datetime import date
-    >>> import meteostat as ms
-    >>> ts = ms.daily("10637", date(2018, 1, 1), date(2018, 12, 31))
-    >>> df = ts.fetch()
-
-    >>> point = ms.Point(50.1155, 8.6842)
-    >>> stations = ms.stations.nearby(point, limit=4)
-    >>> ts = ms.daily(stations, date(2018, 1, 1), date(2018, 12, 31))
-    >>> df = ms.interpolate(ts, point).fetch()
     """
     if parameters is None:
         parameters = DEFAULT_PARAMETERS
