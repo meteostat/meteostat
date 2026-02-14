@@ -3,6 +3,7 @@ description: Automatically reproduce bugs labeled with 'bug' and confirm or clos
 on:
   issues:
     types: [labeled, opened]
+  workflow_dispatch: null
 roles: all
 permissions:
   contents: read
