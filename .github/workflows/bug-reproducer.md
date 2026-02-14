@@ -163,7 +163,12 @@ When you successfully complete your work:
 
 ## Security Considerations
 
-- Only run code from issues - don't fetch external scripts
-- Use temporary directories for test files
-- Don't expose sensitive information in comments
-- Be cautious with code that might have unintended side effects
+- **Only run code from issues** - Don't fetch external scripts or download files from URLs
+- **Use temporary directories** - Create test files in `/tmp/` to isolate them from the repository
+- **Don't expose sensitive information** - Don't include environment variables, API keys, or system paths in comments
+- **Be cautious with resource usage** - Set reasonable timeouts for test scripts to prevent infinite loops or excessive resource consumption
+- **Avoid destructive operations** - Don't run code that:
+  - Modifies files outside `/tmp/`
+  - Makes network requests to external services beyond what's needed for testing
+  - Attempts to access or modify system resources
+  - Could consume excessive memory or CPU
