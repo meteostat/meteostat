@@ -1,13 +1,14 @@
 ---
 on:
-  schedule: 0 14 * * *
+  schedule: daily
   workflow_dispatch: null
 permissions:
   issues: read
 imports:
 - github/gh-aw/.github/workflows/shared/reporting.md@94662b1dee8ce96c876ba9f33b3ab8be32de82a4
 safe-outputs:
-  add-comment: {}
+  add-comment:
+    max: 10
   add-labels:
     allowed:
     - bug
@@ -17,6 +18,7 @@ safe-outputs:
     - question
     - help-wanted
     - good-first-issue
+    max: 10
 source: github/gh-aw/.github/workflows/issue-triage-agent.md@94662b1dee8ce96c876ba9f33b3ab8be32de82a4
 strict: true
 timeout-minutes: 5
