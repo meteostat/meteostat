@@ -1,6 +1,6 @@
 ---
 on:
-  schedule: 0 14 * * *
+  schedule: daily
   workflow_dispatch: null
 permissions:
   issues: read
