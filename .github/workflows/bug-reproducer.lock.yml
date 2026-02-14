@@ -21,7 +21,7 @@
 #
 # Automatically reproduce bugs labeled with 'bug' and confirm or close them
 #
-# frontmatter-hash: 0969809766c832f200e9ebd08fb591112931a5cb1ef40c29ff11939da339aa06
+# frontmatter-hash: 58f917c97fcc633d38ec537d6ef4ca32d3d51eaee0504e0235890d3fc7acb6c3
 
 name: "Bug Reproducer Agent"
 "on":
@@ -29,6 +29,7 @@ name: "Bug Reproducer Agent"
     types:
     - labeled
     - opened
+  workflow_dispatch:
 
 permissions: {}
 
@@ -188,12 +189,12 @@ jobs:
           mkdir -p /tmp/gh-aw/safeoutputs
           mkdir -p /tmp/gh-aw/mcp-logs/safeoutputs
           cat > /opt/gh-aw/safeoutputs/config.json << 'GH_AW_SAFE_OUTPUTS_CONFIG_EOF'
-          {"add_comment":{"max":2},"add_labels":{"allowed":["confirmed"],"max":3},"close_issue":{"max":1},"missing_data":{},"missing_tool":{},"noop":{"max":1}}
+          {"add_comment":{"max":10},"add_labels":{"allowed":["confirmed"],"max":10},"close_issue":{"max":10},"missing_data":{},"missing_tool":{},"noop":{"max":1}}
           GH_AW_SAFE_OUTPUTS_CONFIG_EOF
           cat > /opt/gh-aw/safeoutputs/tools.json << 'GH_AW_SAFE_OUTPUTS_TOOLS_EOF'
           [
             {
-              "description": "Close a GitHub issue with a closing comment. Use this when work is complete, the issue is no longer relevant, or it's a duplicate. The closing comment should explain the resolution or reason for closing. CONSTRAINTS: Maximum 1 issue(s) can be closed.",
+              "description": "Close a GitHub issue with a closing comment. Use this when work is complete, the issue is no longer relevant, or it's a duplicate. The closing comment should explain the resolution or reason for closing. CONSTRAINTS: Maximum 10 issue(s) can be closed.",
               "inputSchema": {
                 "additionalProperties": false,
                 "properties": {
@@ -217,7 +218,7 @@ jobs:
               "name": "close_issue"
             },
             {
-              "description": "Add a comment to an existing GitHub issue, pull request, or discussion. Use this to provide feedback, answer questions, or add information to an existing conversation. For creating new items, use create_issue, create_discussion, or create_pull_request instead. CONSTRAINTS: Maximum 2 comment(s) can be added.",
+              "description": "Add a comment to an existing GitHub issue, pull request, or discussion. Use this to provide feedback, answer questions, or add information to an existing conversation. For creating new items, use create_issue, create_discussion, or create_pull_request instead. CONSTRAINTS: Maximum 10 comment(s) can be added.",
               "inputSchema": {
                 "additionalProperties": false,
                 "properties": {
@@ -238,7 +239,7 @@ jobs:
               "name": "add_comment"
             },
             {
-              "description": "Add labels to an existing GitHub issue or pull request for categorization and filtering. Labels must already exist in the repository. For creating new issues with labels, use create_issue with the labels property instead. CONSTRAINTS: Only these labels are allowed: [confirmed].",
+              "description": "Add labels to an existing GitHub issue or pull request for categorization and filtering. Labels must already exist in the repository. For creating new issues with labels, use create_issue with the labels property instead. CONSTRAINTS: Maximum 10 label(s) can be added. Only these labels are allowed: [confirmed].",
               "inputSchema": {
                 "additionalProperties": false,
                 "properties": {
@@ -1038,7 +1039,7 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8
         env:
           GH_AW_AGENT_OUTPUT: ${{ env.GH_AW_AGENT_OUTPUT }}
-          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":2},\"add_labels\":{\"allowed\":[\"confirmed\"]},\"close_issue\":{\"max\":1},\"missing_data\":{},\"missing_tool\":{}}"
+          GH_AW_SAFE_OUTPUTS_HANDLER_CONFIG: "{\"add_comment\":{\"max\":10},\"add_labels\":{\"allowed\":[\"confirmed\"],\"max\":10},\"close_issue\":{\"max\":10},\"missing_data\":{},\"missing_tool\":{}}"
         with:
           github-token: ${{ secrets.GH_AW_GITHUB_TOKEN || secrets.GITHUB_TOKEN }}
           script: |
