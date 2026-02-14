@@ -34,7 +34,8 @@ def normals(
     ----------
     station : str, Station, Point, List[str | Station | Point], pd.Index, pd.Series
         Weather station(s) or Point(s) to query data for. Can be a single station/point or a list.
-        Points are converted to virtual stations with IDs like $0001, $0002, etc.
+        Points are converted to virtual stations (with IDs like $0001, $0002, etc.) and only work
+        with geo-location providers.
     start : int, optional
         Start year for the data query. Defaults to 1961.
     end : int, optional
