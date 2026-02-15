@@ -44,6 +44,10 @@ def get_df(
 
     # Create a DataFrame from the extracted features
     df = pd.DataFrame(features)
+
+    if df.empty:
+        return None
+
     df = df.rename(columns=PROPERTIES)
 
     # Handle time column & set index
@@ -58,6 +62,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     meta_data = get_meta_data(req.station.identifiers["national"])
+
+    if meta_data is None:
+        return None
+
     climate_id = meta_data.get("CLIMATE_IDENTIFIER")
 
     if not climate_id:
