@@ -90,3 +90,13 @@ class TestGetMetaData:
         result = get_meta_data.__wrapped__("TEST123")
 
         assert result is None
+
+    @patch("meteostat.providers.eccc.shared.network_service")
+    def test_get_meta_data_returns_none_on_timeout(self, mock_network):
+        """Test that get_meta_data returns None on request timeout"""
+
+        mock_network.get.side_effect = requests.exceptions.Timeout()
+
+        result = get_meta_data.__wrapped__("TEST123")
+
+        assert result is None
