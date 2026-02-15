@@ -33,7 +33,7 @@ def get_meta_data(station: str) -> Optional[dict]:
                 "f": "json",
             },
         )
-    except requests.exceptions.ConnectionError:
+    except requests.RequestException:
         logger.warning(f"ECCC API connection failed for station {station}")
         return None
 
