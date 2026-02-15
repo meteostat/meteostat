@@ -51,6 +51,10 @@ def get_df(climate_id: str, year: int) -> Optional[pd.DataFrame]:
 
     # Create a DataFrame from the extracted features
     df = pd.DataFrame(features)
+
+    if df.empty:
+        return None
+
     df = df.rename(columns=PROPERTIES)
 
     # Handle time column & set index
@@ -69,6 +73,10 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         return None
 
     meta_data = get_meta_data(req.station.identifiers["national"])
+
+    if meta_data is None:
+        return None
+
     climate_id = meta_data.get("CLIMATE_IDENTIFIER")
     archive_first = meta_data.get("DLY_FIRST_DATE")
     archive_last = meta_data.get("DLY_LAST_DATE")
