@@ -5,7 +5,6 @@ The code is licensed under the MIT license.
 """
 
 from unittest.mock import patch, MagicMock
-from datetime import datetime
 
 import pandas as pd
 
