@@ -8,6 +8,8 @@ from unittest.mock import patch, MagicMock
 
 from meteostat.providers.eccc.monthly import get_df, fetch
 from meteostat.typing import Station
+from meteostat.enumerations import Parameter
+import pandas as pd
 
 
 class TestGetDfEmptyFeatures:
@@ -109,3 +111,37 @@ class TestFetchMissingIdentifiers:
         result = fetch(req)
 
         assert result is None
+
+
+class TestGetDfWithData:
+    """Test get_df with successful data retrieval"""
+
+    @patch("meteostat.providers.eccc.monthly.network_service")
+    def test_get_df_processes_valid_data(self, mock_network):
+        """Test that get_df properly processes valid ECCC response data"""
+
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "features": [
+                {
+                    "properties": {
+                        "LOCAL_DATE": "2023-01-01",
+                        "MAX_TEMPERATURE": 10.0,
+                        "MEAN_TEMPERATURE": 5.0,
+                        "MIN_TEMPERATURE": 0.0,
+                        "TOTAL_PRECIPITATION": 100.0,
+                        "DAYS_WITH_PRECIP_GE_1MM": 15,
+                        "TOTAL_SNOWFALL": 50.0,
+                    }
+                }
+            ]
+        }
+        mock_network.get.return_value = mock_response
+
+        result = get_df.__wrapped__("1234567")
+
+        assert result is not None
+        assert isinstance(result, pd.DataFrame)
+        assert len(result) == 1
+        assert Parameter.TEMP in result.columns
+        assert result[Parameter.TEMP].iloc[0] == 5.0
