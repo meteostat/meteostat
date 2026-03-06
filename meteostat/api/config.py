@@ -145,6 +145,8 @@ class Config(ConfigService):
 
     # Network settings
     network_proxies: Optional[dict] = None
+    network_timeout: int = 30
+    network_max_retries: int = 3
 
     # Station meta data settings
     stations_db_ttl: int = TTL.WEEK

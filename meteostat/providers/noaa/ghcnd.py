@@ -17,6 +17,7 @@ import pandas as pd
 from meteostat.enumerations import TTL, Parameter
 from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
+from meteostat.core.logger import logger
 from meteostat.utils.conversions import ms_to_kmh, percentage_to_okta
 
 FTP_SERVER = "ftp.ncdc.noaa.gov"
@@ -192,12 +193,16 @@ def dly_to_df(ftp, station_id):
 
 
 @cache_service.cache(TTL.DAY, "pickle")
-def get_df(station: str) -> pd.DataFrame:
-    ftp = connect_to_ftp()
+def get_df(station: str) -> Optional[pd.DataFrame]:
     try:
-        df = dly_to_df(ftp, station)
-    finally:
-        ftp.quit()
+        ftp = connect_to_ftp()
+        try:
+            df = dly_to_df(ftp, station)
+        finally:
+            ftp.quit()
+    except Exception as error:
+        logger.warning("Could not fetch GHCND data for station %s: %s", station, error)
+        return None
     # Filter relevant columns
     df = df.drop(columns=[col for col in df if col not in COLUMN_NAMES.keys()])
     # Add missing columns

@@ -5,6 +5,7 @@ The Network Service provides methods to send HTTP requests
 considering the Meteostat configuration.
 """
 
+import time
 from typing import Optional
 
 import requests
@@ -37,21 +38,55 @@ class NetworkService:
         stream: Optional[bool] = None,
     ) -> requests.Response:
         """
-        Send a GET request using the Meteostat configuration
+        Send a GET request using the Meteostat configuration, with retry on failure.
+
+        4xx client error responses are returned directly without retrying.
+        5xx server errors and connection errors trigger retries with exponential backoff.
         """
         if headers is None:
             headers = {}
 
         headers = self._process_headers(headers)
 
-        return requests.get(
-            url,
-            params,
-            headers=headers,
-            stream=stream,
-            proxies=config.network_proxies,
-            timeout=30,
-        )
+        last_exception: Optional[Exception] = None
+        max_retries = max(0, config.network_max_retries)
+
+        for attempt in range(max_retries + 1):
+            try:
+                response = requests.get(
+                    url,
+                    params,
+                    headers=headers,
+                    stream=stream,
+                    proxies=config.network_proxies,
+                    timeout=config.network_timeout,
+                )
+                # Return immediately for non-server-error responses (including 4xx)
+                if response.status_code < 500:
+                    return response
+                logger.warning(
+                    "Request to '%s' returned status %s (attempt %s/%s)",
+                    url,
+                    response.status_code,
+                    attempt + 1,
+                    max_retries + 1,
+                )
+                last_exception = requests.HTTPError(response=response)
+            except requests.RequestException as exc:
+                logger.warning(
+                    "Request to '%s' failed (attempt %s/%s): %s",
+                    url,
+                    attempt + 1,
+                    max_retries + 1,
+                    exc,
+                )
+                last_exception = exc
+
+            if attempt < max_retries:
+                time.sleep(2**attempt)
+
+        assert last_exception is not None
+        raise last_exception
 
     def get_from_mirrors(
         self,
