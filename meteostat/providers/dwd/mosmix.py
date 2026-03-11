@@ -25,6 +25,8 @@ from meteostat.utils.conversions import (
 from meteostat.core.network import network_service
 
 ENDPOINT = "https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{station}/kml/MOSMIX_L_LATEST_{station}.kmz"
+# DWD publishes MOSMIX_L every 6 hours; 12 hours gives a 6-hour buffer for server delays
+STALENESS_THRESHOLD = 43200  # 12 hours in seconds
 COCO_MAP = {
     "0": 1,
     "1": 2,
@@ -88,7 +90,7 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         )[0].text,
         "%Y-%m-%dT%H:%M:%S.%fZ",
     )
-    if (datetime.now() - issue_time).total_seconds() > 25200:
+    if (datetime.now() - issue_time).total_seconds() > STALENESS_THRESHOLD:
         return None
 
     # Collect all time steps
