@@ -23,6 +23,7 @@ from meteostat.utils.conversions import (
     temp_dwpt_to_rhum,
 )
 from meteostat.core.network import network_service
+from meteostat.api.config import config
 
 ENDPOINT = "https://opendata.dwd.de/weather/local_forecasts/mos/MOSMIX_L/single_stations/{station}/kml/MOSMIX_L_LATEST_{station}.kmz"
 COCO_MAP = {
@@ -88,7 +89,9 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         )[0].text,
         "%Y-%m-%dT%H:%M:%S.%fZ",
     )
-    if (datetime.now() - issue_time).total_seconds() > 25200:
+    if (
+        datetime.now() - issue_time
+    ).total_seconds() > config.dwd_mosmix_staleness_threshold:
         return None
 
     # Collect all time steps
