@@ -89,7 +89,7 @@ class NetworkService:
             time.sleep(2**attempt)
 
         # Unreachable: the loop always returns or raises on the final attempt
-        raise AssertionError("unreachable")  # pragma: no cover
+        raise RuntimeError("NetworkService.get() failed without raising an exception")  # pragma: no cover
 
     def get_from_mirrors(
         self,
