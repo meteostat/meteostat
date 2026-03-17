@@ -74,6 +74,8 @@ class NetworkService:
                 # For 5xx responses, retry with backoff; on final attempt, return the response
                 if attempt == max_retries:
                     return response
+                # Release connection before sleeping to avoid leaking file descriptors
+                response.close()
             except requests.RequestException as exc:
                 logger.warning(
                     "Request to '%s' failed (attempt %s/%s): %s",

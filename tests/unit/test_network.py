@@ -54,8 +54,8 @@ class TestNetworkServiceRetry:
         finally:
             config.network_max_retries = original_retries
 
-    def test_raises_after_max_retries_exceeded(self):
-        """NetworkService should raise after all retries are exhausted"""
+    def test_returns_5xx_response_after_max_retries_exceeded(self):
+        """NetworkService should return the 5xx response after all retries are exhausted"""
         service = NetworkService()
         original_retries = config.network_max_retries
 
@@ -68,9 +68,9 @@ class TestNetworkServiceRetry:
 
                 mock_get.return_value = error_response
 
-                with pytest.raises(requests.HTTPError):
-                    service.get("https://example.com")
+                response = service.get("https://example.com")
 
+                assert response.status_code == 500
                 # Should have tried max_retries + 1 times (1 initial + 2 retries)
                 assert mock_get.call_count == 3
         finally:
@@ -170,6 +170,34 @@ class TestNetworkServiceRetry:
         finally:
             config.network_max_retries = original_retries
 
+    def test_response_closed_before_sleep_on_5xx(self):
+        """NetworkService should close the 5xx response before sleeping to prevent connection leaks"""
+        service = NetworkService()
+        original_retries = config.network_max_retries
+
+        try:
+            config.network_max_retries = 2
+
+            with patch("requests.get") as mock_get, patch("time.sleep"):
+                error_response = MagicMock()
+                error_response.status_code = 503
+
+                success_response = MagicMock()
+                success_response.status_code = 200
+
+                mock_get.side_effect = [
+                    error_response,
+                    error_response,
+                    success_response,
+                ]
+
+                service.get("https://example.com")
+
+                # The two error responses should each have been closed before sleeping
+                assert error_response.close.call_count == 2
+        finally:
+            config.network_max_retries = original_retries
+
     def test_uses_configurable_timeout(self):
         """NetworkService should use config.network_timeout for requests"""
         service = NetworkService()
@@ -191,7 +219,7 @@ class TestNetworkServiceRetry:
             config.network_timeout = original_timeout
 
     def test_zero_retries_makes_single_attempt(self):
-        """With network_max_retries=0, only one attempt should be made"""
+        """With network_max_retries=0, only one attempt should be made and 5xx is returned"""
         service = NetworkService()
         original_retries = config.network_max_retries
 
@@ -203,9 +231,9 @@ class TestNetworkServiceRetry:
                 error_response.status_code = 500
                 mock_get.return_value = error_response
 
-                with pytest.raises(requests.HTTPError):
-                    service.get("https://example.com")
+                response = service.get("https://example.com")
 
+                assert response.status_code == 500
                 assert mock_get.call_count == 1
         finally:
             config.network_max_retries = original_retries
