@@ -48,7 +48,7 @@ class NetworkService:
 
         headers = self._process_headers(headers)
 
-        last_exception: Optional[Exception] = None
+        last_exception: Optional[requests.RequestException] = None
         max_retries = max(0, config.network_max_retries)
 
         for attempt in range(max_retries + 1):
@@ -71,7 +71,9 @@ class NetworkService:
                     attempt + 1,
                     max_retries + 1,
                 )
-                last_exception = requests.HTTPError(response=response)
+                # For 5xx responses, retry with backoff; on final attempt, return the response
+                if attempt == max_retries:
+                    return response
             except requests.RequestException as exc:
                 logger.warning(
                     "Request to '%s' failed (attempt %s/%s): %s",
@@ -81,12 +83,17 @@ class NetworkService:
                     exc,
                 )
                 last_exception = exc
+                # On the final attempt, re-raise the exception
+                if attempt == max_retries:
+                    raise last_exception
 
             if attempt < max_retries:
                 time.sleep(2**attempt)
 
-        assert last_exception is not None
-        raise last_exception
+        # This point should not be reachable; raise any stored exception defensively
+        if last_exception is not None:
+            raise last_exception
+        raise RuntimeError("NetworkService.get() failed without raising an exception")
 
     def get_from_mirrors(
         self,
