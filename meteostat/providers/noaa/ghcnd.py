@@ -201,8 +201,13 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
         finally:
             ftp.quit()
     except Exception as error:
-        logger.warning("Could not fetch GHCND data for station %s: %s", station, error)
-        return None
+        logger.warning(
+            "Could not fetch GHCND data for station %s: %s",
+            station,
+            error,
+        )
+        # Re-raise to avoid caching a failure result
+        raise
     # Filter relevant columns
     df = df.drop(columns=[col for col in df if col not in COLUMN_NAMES.keys()])
     # Add missing columns
