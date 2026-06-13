@@ -2,7 +2,7 @@
 
 - https://github.com/meteostat/meteostat
 - Use `gh` CLI to access issues, workflows, and more
-- Use Conventional Commits
+- Use Conventional Commits (ONLY `chore`, `ci`, `docs`, `feat`, `fix`, `perf`, `refactor`, `style`, `test` types allowed)
 
 ## Documentation
 
