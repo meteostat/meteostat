@@ -12,7 +12,7 @@ import pandas as pd
 from meteostat.core.logger import logger
 from meteostat.api.config import config
 from meteostat.enumerations import TTL, Parameter
-from meteostat.typing import ProviderRequest, Station
+from meteostat.typing import ProviderRequest
 from meteostat.core.cache import cache_service
 from meteostat.providers.dwd.shared import get_ftp_connection
 from meteostat.utils.data import safe_concat
@@ -124,16 +124,12 @@ def get_df(parameter: str, mode: str, station_code: str) -> Optional[pd.DataFram
 
 
 def get_parameter(
-    parameter: str, modes: List[str], station: Station
+    parameter: str, modes: List[str], station_code: str
 ) -> Optional[pd.DataFrame]:
     """
     Fetch and merge data for a parameter over multiple modes (e.g., recent, historical).
     """
     try:
-        station_code = station.identifiers.get("wmo")
-        if not station_code:
-            return None
-
         datasets = [get_df(parameter, mode, station_code) for mode in modes]
         datasets = [df for df in datasets if df is not None]
 
@@ -161,7 +157,7 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
         modes.append("recent")
 
     data_frames = [
-        get_parameter(param.value, config.dwd_climat_modes or modes, req.station)
+        get_parameter(param.value, config.dwd_climat_modes or modes, station_code)
         for param in req.parameters
         if param in PARAMETER_CONFIGS
     ]

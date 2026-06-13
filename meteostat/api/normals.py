@@ -32,7 +32,7 @@ def normals(
 
     Parameters
     ----------
-    station : str, Station, Point, List[str | Station | Point], pd.Index, pd.Series
+    station : str, Station, Point, List[str | Station | Point], pd.DataFrame
         Weather station(s) or Point(s) to query data for. Can be a single station/point or a list.
         Points are converted to virtual stations (with IDs like $0001, $0002, etc.) and only work
         with geo-location providers.
