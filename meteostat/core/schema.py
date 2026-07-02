@@ -94,11 +94,10 @@ class SchemaService:
 
             try:
                 temp[col] = temp[col].astype(parameter.dtype)
+                if "float" in str(parameter.dtype).lower():
+                    temp[col] = temp[col].round(1)
             except (TypeError, ValueError):
                 pass
-
-            if "float" in str(parameter.dtype).lower():
-                temp[col] = temp[col].round(1)
 
         return temp
 

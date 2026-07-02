@@ -22,7 +22,8 @@ from meteostat.utils.data import (
     order_source_columns,
 )
 from meteostat.typing import Station
-from meteostat.enumerations import Frequency
+from meteostat.enumerations import Frequency, Granularity, Parameter
+from meteostat.core.schema import schema_service
 
 
 class TestSafeConcat:
@@ -109,6 +110,28 @@ class TestSafeConcat:
         assert result is not None
         assert len(result) == 4
         assert result.index.names == ["letter", "number"]
+
+    def test_safe_concat_with_none_values(self):
+        """Test safe_concat with None values mixed into a list of provider DataFrames"""
+        df1 = pd.DataFrame(
+            {"temp": [20.0]},
+            index=pd.MultiIndex.from_tuples(
+                [("2024-01-01", "dwd_daily")], names=["time", "source"]
+            ),
+        )
+        df2 = pd.DataFrame(
+            {"temp": [21.0]},
+            index=pd.MultiIndex.from_tuples(
+                [("2024-01-02", "dwd_daily")], names=["time", "source"]
+            ),
+        )
+
+        result = safe_concat([None, df1, None, df2, None])
+        assert result is not None
+        assert len(result) == 2
+
+        result_none = safe_concat([None, None])
+        assert result_none is None
 
 
 class TestStationsToDf:
@@ -699,26 +722,15 @@ class TestPandas3Compatibility:
         assert len(result) == 2
         assert "temp" in result.columns
 
-    def test_safe_concat_with_none_values(self):
-        """Test that safe_concat properly handles None values (replacing pd.concat with Nones)"""
-        df1 = pd.DataFrame(
-            {"temp": [20.0]},
-            index=pd.MultiIndex.from_tuples(
-                [("2024-01-01", "dwd_daily")], names=["time", "source"]
-            ),
-        )
-        df2 = pd.DataFrame(
-            {"temp": [21.0]},
-            index=pd.MultiIndex.from_tuples(
-                [("2024-01-02", "dwd_daily")], names=["time", "source"]
-            ),
+    def test_schema_format_handles_unconvertible_dtype(self):
+        """Test that schema_service.format() silently skips columns that cannot be cast"""
+        # Simulate a column with non-numeric strings that cannot be cast to Float64
+        df = pd.DataFrame(
+            {Parameter.TEMP: ["not-a-number", "also-invalid"]},
+            index=pd.DatetimeIndex(["2024-01-01", "2024-01-02"], name="time"),
         )
 
-        # Should filter None and concat the rest
-        result = safe_concat([None, df1, None, df2, None])
-        assert result is not None
-        assert len(result) == 2
-
-        # All None should return None
-        result_none = safe_concat([None, None])
-        assert result_none is None
+        # Should not raise; the except (TypeError, ValueError) branch keeps original values
+        result = schema_service.format(df, Granularity.DAILY)
+        assert isinstance(result, pd.DataFrame)
+        assert Parameter.TEMP in result.columns
