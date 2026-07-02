@@ -11,7 +11,7 @@ from meteostat.providers.meteostat.shared import filter_model_data, handle_excep
 from meteostat.typing import ProviderRequest
 from meteostat.api.config import config
 from meteostat.core.cache import cache_service
-from meteostat.utils.data import reshape_by_source
+from meteostat.utils.data import reshape_by_source, safe_concat
 
 
 ENDPOINT = config.hourly_endpoint
@@ -55,12 +55,6 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
 
     # Get a list of relevant years
     years = range(req.start.year, req.end.year + 1)
-    # Get list of annual DataFrames
+    # Get list of annual DataFrames and concatenate into a single DataFrame
     df_yearly = [get_df(req.station.id, year) for year in years]
-    # Concatenate into a single DataFrame
-    df = (
-        pd.concat(df_yearly)
-        if len(df_yearly) and not all(d is None for d in df_yearly)
-        else None
-    )
-    return df
+    return safe_concat(df_yearly)
