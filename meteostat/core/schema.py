@@ -92,10 +92,12 @@ class SchemaService:
             if "int" in str(parameter.dtype).lower():
                 temp[col] = pd.to_numeric(temp[col]).round(0)
 
-            temp[col] = temp[col].astype(parameter.dtype, errors="ignore")
-
-            if "float" in str(parameter.dtype).lower():
-                temp[col] = temp[col].round(1)
+            try:
+                temp[col] = temp[col].astype(parameter.dtype)
+                if "float" in str(parameter.dtype).lower():
+                    temp[col] = temp[col].round(1)
+            except (TypeError, ValueError):
+                pass
 
         return temp
 

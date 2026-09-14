@@ -25,6 +25,18 @@ from meteostat.typing import Station
 from meteostat.enumerations import Frequency
 
 
+def _str_dtype_array(values: list):
+    """Create a string array using str dtype if available (pandas 3.0+), else object"""
+    try:
+        arr = pd.array(values, dtype="str")
+        # Verify it's actually str dtype (not object), pandas 3.0+ behaviour
+        if arr.dtype == "object":
+            return pd.array(values, dtype="object")
+        return arr
+    except (TypeError, AttributeError):
+        return pd.array(values, dtype="object")
+
+
 class TestSafeConcat:
     """Test safe_concat function"""
 
@@ -109,6 +121,28 @@ class TestSafeConcat:
         assert result is not None
         assert len(result) == 4
         assert result.index.names == ["letter", "number"]
+
+    def test_safe_concat_with_none_values(self):
+        """Test safe_concat with None values mixed into a list of provider DataFrames"""
+        df1 = pd.DataFrame(
+            {"temp": [20.0]},
+            index=pd.MultiIndex.from_tuples(
+                [("2024-01-01", "dwd_daily")], names=["time", "source"]
+            ),
+        )
+        df2 = pd.DataFrame(
+            {"temp": [21.0]},
+            index=pd.MultiIndex.from_tuples(
+                [("2024-01-02", "dwd_daily")], names=["time", "source"]
+            ),
+        )
+
+        result = safe_concat([None, df1, None, df2, None])
+        assert result is not None
+        assert len(result) == 2
+
+        result_none = safe_concat([None, None])
+        assert result_none is None
 
 
 class TestStationsToDf:
@@ -275,6 +309,29 @@ class TestSquashDf:
 
         # Should have single row for station1/2020-01-01
         assert len(result) == 1
+
+    @patch("meteostat.utils.data.provider_service")
+    def test_squash_df_with_str_dtype_source(self, mock_provider_service):
+        """Test that squash_df handles str dtype source index (pandas 3.0+)"""
+        mock_provider_service.get_source_priority.return_value = 100
+
+        # Create DataFrame with str dtype source index level (pandas 3.0+)
+        source_arr = _str_dtype_array(["dwd_daily", "dwd_daily"])
+        idx = pd.MultiIndex.from_arrays(
+            [
+                ["station1", "station1"],
+                pd.DatetimeIndex(["2024-01-01", "2024-01-02"]),
+                source_arr,
+            ],
+            names=["station", "time", "source"],
+        )
+        df = pd.DataFrame({"temp": [20.0, 21.0], "prcp": [5.0, 3.0]}, index=idx)
+
+        result = squash_df(df)
+
+        assert isinstance(result, pd.DataFrame)
+        assert len(result) == 2
+        assert "temp" in result.columns
 
 
 class TestFillDf:
@@ -530,6 +587,28 @@ class TestReshapeBySource:
 
         assert isinstance(result, pd.DataFrame)
         assert len(result) > 0
+
+    def test_reshape_by_source_with_str_dtype(self):
+        """Test that reshape_by_source handles str dtype source columns (pandas 3.0+)"""
+        # In pandas 3.0+, pd.read_csv returns str dtype for string columns
+        source_arr = _str_dtype_array(["dwd_daily", "dwd_daily"])
+        df = pd.DataFrame(
+            {
+                "temp": [20.0, 21.0],
+                "temp_source": source_arr,
+                "prcp": [10.0, 5.0],
+                "prcp_source": source_arr.copy(),
+            },
+            index=pd.DatetimeIndex(["2024-01-01", "2024-01-02"], name="time"),
+        )
+
+        result = reshape_by_source(df)
+
+        assert isinstance(result, pd.DataFrame)
+        assert "temp" in result.columns
+        assert "prcp" in result.columns
+        assert "source" in result.index.names
+        assert len(result) == 2
 
 
 class TestAggregateeSources:
