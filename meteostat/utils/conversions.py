@@ -195,8 +195,11 @@ def to_condition(value):
     """
     Convert Meteostat condition code to descriptive string
     """
+    # Handle None and NaN values
+    if value is None or pd.isna(value):
+        return None
 
-    if not value or value < 1 or value > 27:
+    if value < 1 or value > 27:
         return None
 
     return [

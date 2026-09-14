@@ -5,6 +5,7 @@ The code is licensed under the MIT license.
 """
 
 import numpy as np
+import pandas as pd
 from meteostat.utils.conversions import (
     celsius_to_fahrenheit,
     celsius_to_kelvin,
@@ -370,3 +371,18 @@ class TestWeatherConditionConversions:
     def test_to_condition_invalid_negative(self):
         """Test weather condition conversion with negative value"""
         assert to_condition(-1) is None
+
+    def test_to_condition_with_nan(self):
+        """to_condition(NaN) should return None, not raise."""
+        assert to_condition(np.nan) is None
+
+    def test_to_condition_with_pandas_na(self):
+        """to_condition(pd.NA) should return None, not raise."""
+        assert to_condition(pd.NA) is None
+
+    def test_to_condition_applied_to_nullable_series(self):
+        """Applying to_condition to a column with missing values must not raise."""
+        result = pd.Series([1, None, 27], dtype="UInt8").apply(to_condition)
+        assert result[0] == "Clear"
+        assert pd.isna(result[1])
+        assert result[2] == "Storm"
