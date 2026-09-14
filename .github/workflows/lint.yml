@@ -21,11 +21,13 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install ruff
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+
+      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install ruff
+          poetry install --all-groups
 
       - name: Run ruff
         run: |
-          ruff check meteostat/ tests/
+          poetry run ruff check meteostat/ tests/
