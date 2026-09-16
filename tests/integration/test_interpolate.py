@@ -3,6 +3,63 @@ from datetime import datetime
 import meteostat as ms
 
 
+def test_interpolate_preserves_all_nan_parameter_column(
+    mocker,
+    mock_stations_database,
+    df_hourly,
+    df_hourly_second_station,
+    df_hourly_third_station,
+):
+    """
+    A parameter that is entirely NaN across every interpolated station must
+    still appear in the result as an all-null column, not disappear.
+
+    reshape_by_source() melts the data and drops every row with a NaN value
+    before pivoting back into columns, so a 100%-empty parameter ends up
+    with zero rows and never reappears as a pivoted column. Regression test
+    for that: fetch() returning a parameter (here "snwd") is not enough --
+    it must survive interpolate() too.
+    """
+    # None of the three mocked stations report any snow depth for this
+    # period; simulate that by nulling out the column in every fixture.
+    no_snwd = [df_hourly, df_hourly_second_station, df_hourly_third_station]
+    for df in no_snwd:
+        df["snwd"] = None
+
+    def side_effect(req):
+        if req.station.id == "10635":
+            return df_hourly_second_station
+        elif req.station.id == "10532":
+            return df_hourly_third_station
+        return df_hourly
+
+    mocker.patch("meteostat.providers.meteostat.hourly.fetch", side_effect=side_effect)
+
+    start = datetime(2024, 1, 10, 0, 0)
+    end = datetime(2024, 1, 10, 2, 0)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    station_10532 = ms.stations.meta("10532")
+    assert station_10637 is not None
+    assert station_10635 is not None
+    assert station_10532 is not None
+
+    ts = ms.hourly([station_10637, station_10635, station_10532], start, end)
+    df = ts.fetch()
+    assert df is not None
+    assert "snwd" in df.columns
+    assert df["snwd"].isna().all()
+
+    point = ms.Point(50.3167, 8.5, 320)
+    df_interpolated = ms.interpolate(ts, point).fetch()
+
+    assert df_interpolated is not None
+    assert "snwd" in df_interpolated.columns
+    assert df_interpolated["snwd"].isna().all()
+    # Other parameters must be unaffected
+    assert df_interpolated["temp"].notna().any()
+
+
 def test_interpolate(mock_stations_database, mock_hourly_fetch):
     """
     It interpolates data for a given point correctly

@@ -26,6 +26,17 @@ from meteostat.core.logger import logger
 # Parameters that are categorical and should not use IDW interpolation
 CATEGORICAL_PARAMETERS = {Parameter.WDIR, Parameter.CLDC, Parameter.COCO}
 
+# Location-related columns added during interpolation that aren't part of
+# the weather data schema and must be excluded from it
+LOCATION_COLUMNS = [
+    "latitude",
+    "longitude",
+    "elevation",
+    "distance",
+    "effective_distance",
+    "elevation_diff",
+]
+
 
 def _create_timeseries(
     ts: TimeSeries, point: Point, df: Optional[pd.DataFrame] = None
@@ -235,18 +246,7 @@ def _postprocess_result(
     Post-process the interpolation result: drop location columns, add sources, format, reshape
     """
     # Drop location-related columns
-    result = result.drop(
-        [
-            "latitude",
-            "longitude",
-            "elevation",
-            "distance",
-            "effective_distance",
-            "elevation_diff",
-        ],
-        axis=1,
-        errors="ignore",
-    )
+    result = result.drop(LOCATION_COLUMNS, axis=1, errors="ignore")
 
     # Add source columns
     result = _add_source_columns(result, df)
@@ -260,8 +260,25 @@ def _postprocess_result(
         ["station", "time", "source"]
     )
 
-    # Reorder columns to match the canonical schema order
-    result = schema_service.purge(result, ts.parameters)
+    # Restore parameters that reshape_by_source() dropped, and reorder
+    # columns to match the canonical schema order.
+    # Note: reshape_by_source() melts the data and drops every row with a
+    # NaN value before pivoting back into columns, so a parameter that is
+    # entirely NaN across every station (e.g. one none of the interpolated
+    # stations report at all) ends up with zero rows and never reappears as
+    # a column in the pivoted result. Also, ts.parameters reflects ts's raw,
+    # pre-fill internal DataFrame, so it doesn't reliably include such
+    # parameters either. Derive the full parameter list from `df` (the
+    # fill-completed data that produced `result`) instead, and re-fill any
+    # columns reshape_by_source() dropped as all-null -- mirroring the
+    # fill+purge pattern already used in DataService.concat_fragments().
+    parameters = [
+        col
+        for col in df.columns
+        if not str(col).endswith("_source") and col not in LOCATION_COLUMNS
+    ]
+    result = schema_service.fill(result, parameters)
+    result = schema_service.purge(result, parameters)
 
     # Format the result using schema_service to apply proper rounding
     result = schema_service.format(result, ts.granularity)
