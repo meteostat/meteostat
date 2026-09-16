@@ -4,6 +4,8 @@ Test IDW (Inverse Distance Weighting) interpolation
 The code is licensed under the MIT license.
 """
 
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -17,7 +19,7 @@ from meteostat.api.timeseries import TimeSeries
 class TestIDW:
     """Test IDW interpolation handles edge cases correctly"""
 
-    def _create_mock_timeseries(self, freq: str = "h") -> TimeSeries:
+    def _create_mock_timeseries(self, freq: Optional[str] = "h") -> TimeSeries:
         """Create a mock TimeSeries object."""
         ts = MagicMock(spec=TimeSeries)
         ts.freq = freq
