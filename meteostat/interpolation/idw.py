@@ -110,10 +110,13 @@ def inverse_distance_weighting(
                 interpolated_row["elevation"] = point.elevation
             interpolated_row["distance"] = 0  # Distance from point to itself
 
-            # Create a DataFrame row with the time index
-            result_df = pd.DataFrame(
-                [interpolated_row], index=pd.DatetimeIndex([time_idx])
-            )
+            # Create a DataFrame row with the time index. Note: time_idx is
+            # not always a real timestamp -- for granularities without a
+            # regular frequency (e.g. normals, grouped by calendar month),
+            # it's a plain int, so a bare pd.Index is used here instead of
+            # pd.DatetimeIndex, which would silently misinterpret an int as
+            # nanoseconds since the epoch.
+            result_df = pd.DataFrame([interpolated_row], index=pd.Index([time_idx]))
             result_df.index.name = "time"
             interpolated_results.append(result_df)
 

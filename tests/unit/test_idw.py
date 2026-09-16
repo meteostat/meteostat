@@ -4,6 +4,8 @@ Test IDW (Inverse Distance Weighting) interpolation
 The code is licensed under the MIT license.
 """
 
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from datetime import datetime
@@ -17,7 +19,7 @@ from meteostat.api.timeseries import TimeSeries
 class TestIDW:
     """Test IDW interpolation handles edge cases correctly"""
 
-    def _create_mock_timeseries(self, freq: str = "h") -> TimeSeries:
+    def _create_mock_timeseries(self, freq: Optional[str] = "h") -> TimeSeries:
         """Create a mock TimeSeries object."""
         ts = MagicMock(spec=TimeSeries)
         ts.freq = freq
@@ -141,6 +143,43 @@ class TestIDW:
         temp_val = result["temp"].iloc[0]
         assert np.isfinite(temp_val)
         assert 19 < temp_val < 25
+
+    def test_non_datetime_time_index_is_preserved(self):
+        """
+        Granularities without a regular frequency (e.g. normals, grouped by
+        calendar month) group by a plain int "time" level, not a real
+        timestamp. The result index must preserve that int rather than
+        being coerced into a DatetimeIndex, which silently reinterprets a
+        small int as nanoseconds since the epoch (e.g. month `6` becomes
+        1970-01-01T00:00:00.000000006) and later breaks source-priority
+        lookups downstream in squash_df with a non-string index value.
+        """
+        month = 6
+
+        df = pd.DataFrame(
+            {
+                "effective_distance": [10.0, 20.0],
+                "temp": [20.0, 22.0],
+                "latitude": [50.0, 51.0],
+                "longitude": [8.0, 9.0],
+                "elevation": [100, 200],
+                "distance": [10, 20],
+            },
+            index=pd.MultiIndex.from_tuples(
+                [(month, "A"), (month, "B")], names=["time", "station"]
+            ),
+        )
+
+        point = Point(50.5, 8.5, 150)
+        # Normals-like granularity: no regular frequency
+        ts = self._create_mock_timeseries(freq=None)
+
+        idw_func = inverse_distance_weighting(power=2.0)
+        result = idw_func(df, ts, point)
+
+        assert not result.empty
+        assert not isinstance(result.index, pd.DatetimeIndex)
+        assert result.index.tolist() == [month]
 
     def test_all_nan_column_returns_nan(self):
         """When all stations have NaN for a column, result should be NaN"""
