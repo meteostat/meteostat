@@ -147,8 +147,11 @@ class Stations:
         """
         Execute a SQL query and return the result as a DataFrame
         """
-        with self.connect() as conn:
+        conn = self.connect()
+        try:
             df = pd.read_sql(sql, conn, index_col=index_col, params=params)
+        finally:
+            conn.close()
 
         return df
 
