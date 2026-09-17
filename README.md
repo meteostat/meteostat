@@ -77,12 +77,6 @@ Take a look at the expected output:
 
 Please read our [contributing guidelines](https://dev.meteostat.net/python/contributing) for details on how to contribute to the Meteostat Python library.
 
-**Top contributors**
-
-<a href="https://github.com/meteostat/meteostat/graphs/contributors">
-  <img src="https://contrib.rocks/image?repo=meteostat/meteostat" alt="Meteostat Contributors" />
-</a>
-
 ## 🌟 Featured In
 
 Meteostat has been featured and used by various media outlets and organizations, including:
