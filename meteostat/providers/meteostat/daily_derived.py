@@ -9,7 +9,7 @@ from meteostat.typing import ProviderRequest
 from meteostat.utils.data import aggregate_sources, reshape_by_source
 
 
-def daily_mean(group: pd.Series):
+def daily_mean(group: pd.Series) -> float:
     """
     Calculate the daily mean from a series of hourly data
     """
@@ -18,7 +18,7 @@ def daily_mean(group: pd.Series):
     return group.interpolate(axis=0).mean()
 
 
-def daily_min(group: pd.Series):
+def daily_min(group: pd.Series) -> float:
     """
     Calculate the daily minimum from a series of hourly data
     """
@@ -27,7 +27,7 @@ def daily_min(group: pd.Series):
     return group.min()
 
 
-def daily_max(group: pd.Series):
+def daily_max(group: pd.Series) -> float:
     """
     Calculate the daily maximum from a series of hourly data
     """
@@ -36,7 +36,7 @@ def daily_max(group: pd.Series):
     return group.max()
 
 
-def daily_sum(group: pd.Series):
+def daily_sum(group: pd.Series) -> float:
     """
     Calculate the daily sum from a series of hourly data
     """

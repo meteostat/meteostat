@@ -1,4 +1,4 @@
-from typing import Optional, Union
+from typing import Any, Callable, Optional, Union
 from requests.exceptions import HTTPError
 
 import pandas as pd
@@ -65,7 +65,12 @@ def get_condicode(code: str) -> Union[int, None]:
     return CONDICODES.get(str(code).split("_")[0], None)
 
 
-def safe_get(data, keys, default=None, transform=lambda x: x):
+def safe_get(
+    data: dict[str, Any],
+    keys: list[str],
+    default: Any = None,
+    transform: Callable[[Any], Any] = lambda x: x,
+) -> Any:
     """
     Safely get a nested value from a dictionary, with an optional transformation.
 
@@ -75,14 +80,15 @@ def safe_get(data, keys, default=None, transform=lambda x: x):
     :param transform: A function to apply to the retrieved value if found.
     :return: The retrieved value or the default.
     """
+    current: Any = data
     for key in keys:
-        data = data.get(key)
-        if data is None:
+        current = current.get(key) if isinstance(current, dict) else None
+        if current is None:
             return default
-    return transform(data)
+    return transform(current)
 
 
-def map_data(record):
+def map_data(record: dict[str, Any]) -> dict[str, Any]:
     """
     Map Met.no JSON data to Meteostat column names
     """
@@ -181,6 +187,8 @@ def get_df(latitude: float, longitude: float, elevation: int) -> Optional[pd.Dat
 
     except Exception as error:
         logger.error(error, exc_info=True)
+
+    return None
 
 
 def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:

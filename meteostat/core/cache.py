@@ -10,12 +10,17 @@ import json
 import os
 from os.path import exists
 from time import time
-from typing import Any, Callable, Optional
+from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
 
 import pandas as pd
 
 from meteostat.api.config import config
 from meteostat.core.logger import logger
+
+
+P = ParamSpec("P")
+CacheableData = pd.DataFrame | dict | list | None
+T = TypeVar("T", bound=CacheableData)
 
 
 class CacheService:
@@ -36,7 +41,7 @@ class CacheService:
             df.to_pickle(path)
 
     @staticmethod
-    def _read_pickle(path) -> Optional[pd.DataFrame]:
+    def _read_pickle(path: str) -> Optional[pd.DataFrame]:
         """
         Read a pickle file into a DataFrame
         """
@@ -52,7 +57,7 @@ class CacheService:
             json.dump(data, file)
 
     @staticmethod
-    def _read_json(path) -> dict | list:
+    def _read_json(path: str) -> dict | list:
         """
         Read JSON data into memory
         """
@@ -61,7 +66,9 @@ class CacheService:
         return json.loads(raw)
 
     @staticmethod
-    def _func_to_uid(func, args: tuple, kwargs: dict[str, Any]) -> str:
+    def _func_to_uid(
+        func: Callable[..., Any], args: tuple[Any, ...], kwargs: dict[str, Any]
+    ) -> str:
         """
         Get a unique ID from a function call based on its module, name and arguments
         """
@@ -69,7 +76,7 @@ class CacheService:
             ";".join(
                 (
                     func.__module__,
-                    func.__name__,
+                    getattr(func, "__name__", repr(func)),
                     *map(str, args),
                     *[f"{key}:{str(value)}" for key, value in kwargs.items()],
                 )
@@ -87,7 +94,7 @@ class CacheService:
             os.makedirs(cache_dir)
 
     @staticmethod
-    def get_cache_path(uid: str, filetype: str):
+    def get_cache_path(uid: str, filetype: str) -> str:
         """
         Get path of a cached file based on its uid and file type
         """
@@ -124,9 +131,7 @@ class CacheService:
                     # Delete file
                     os.remove(path)
 
-    def persist(
-        self, path: str, data: pd.DataFrame | dict | list, data_type: str
-    ) -> None:
+    def persist(self, path: str, data: CacheableData, data_type: str) -> None:
         """
         Persist any given data under a specific path
         """
@@ -138,7 +143,7 @@ class CacheService:
         elif data_type == "pickle" and (isinstance(data, pd.DataFrame) or data is None):
             self._write_pickle(path, data)
 
-    def fetch(self, path, data_type: str) -> pd.DataFrame | dict | list | None:
+    def fetch(self, path: str, data_type: str) -> CacheableData:
         """
         Fetch data from a given path
         """
@@ -147,8 +152,13 @@ class CacheService:
         return self._read_pickle(path)
 
     def from_func(
-        self, func, args, kwargs, ttl: int, data_format: str
-    ) -> pd.DataFrame | dict | list:
+        self,
+        func: Callable[..., T],
+        args: tuple[Any, ...],
+        kwargs: dict[str, Any],
+        ttl: int,
+        data_format: str,
+    ) -> T:
         """
         Cache a function's return value
         """
@@ -163,7 +173,7 @@ class CacheService:
         cache_status = "is" if isinstance(result, pd.DataFrame) or result else "is not"
         logger.debug(
             "%s from module %s with args=%s and kwargs=%s returns %s and %s served from cache",
-            func.__name__,
+            getattr(func, "__name__", repr(func)),
             func.__module__,
             args,
             kwargs,
@@ -172,7 +182,7 @@ class CacheService:
         )
 
         if isinstance(result, pd.DataFrame) or result:
-            return result
+            return cast(T, result)
 
         result = func(*args, **kwargs)
         if ttl > 0:
@@ -184,7 +194,7 @@ class CacheService:
         self,
         ttl: int | Callable[..., int] = 60 * 60 * 24,
         data_format: str = "json",
-    ):
+    ) -> Callable[[Callable[P, T]], Callable[P, T]]:
         """
         A simple decorator which caches a function's return value
         based on its payload.
@@ -192,13 +202,13 @@ class CacheService:
         All data is persisted in either JSON or Pickle format.
         """
 
-        def decorator(func):
+        def decorator(func: Callable[P, T]) -> Callable[P, T]:
             @wraps(func)
-            def wrapper(*args, **kwargs):
+            def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
                 if not config.cache_enable:
                     logger.debug(
                         "Omitting cache for %s from module %s with args=%s and kwargs=%s",
-                        func.__name__,
+                        getattr(func, "__name__", repr(func)),
                         func.__module__,
                         args,
                         kwargs,
