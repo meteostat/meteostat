@@ -14,7 +14,7 @@ from meteostat.core.logger import logger
 from meteostat.enumerations import Parameter, Unit, UnitSystem
 
 
-def celsius_to_fahrenheit(value):
+def celsius_to_fahrenheit(value: int | float | None) -> Optional[float]:
     """
     Convert Celsius to Fahrenheit
     """
@@ -23,7 +23,7 @@ def celsius_to_fahrenheit(value):
     return round((value * 9 / 5) + 32, 1)
 
 
-def celsius_to_kelvin(value):
+def celsius_to_kelvin(value: int | float | None) -> Optional[float]:
     """
     Convert Celsius to Kelvin.
 
@@ -34,7 +34,7 @@ def celsius_to_kelvin(value):
     return value + 273.15
 
 
-def millimeters_to_inches(value):
+def millimeters_to_inches(value: int | float | None) -> Optional[float]:
     """
     Convert millimeters to inches
     """
@@ -43,7 +43,7 @@ def millimeters_to_inches(value):
     return round(value / 25.4, 3)
 
 
-def centimeters_to_inches(value):
+def centimeters_to_inches(value: int | float | None) -> Optional[float]:
     """
     Convert centimeters to inches
     """
@@ -52,7 +52,7 @@ def centimeters_to_inches(value):
     return round(value / 2.54, 3)
 
 
-def meters_to_feet(value):
+def meters_to_feet(value: int | float | None) -> Optional[float]:
     """
     Convert meters to feet
     """
@@ -61,7 +61,7 @@ def meters_to_feet(value):
     return round(value / 0.3048, 1)
 
 
-def kmh_to_ms(value):
+def kmh_to_ms(value: int | float | None) -> Optional[float]:
     """
     Convert kilometers per hour to meters per second
     """
@@ -70,7 +70,7 @@ def kmh_to_ms(value):
     return round(value / 3.6, 1)
 
 
-def kmh_to_mph(value):
+def kmh_to_mph(value: int | float | None) -> Optional[float]:
     """
     Convert kilometers per hour to miles per hour
     """
@@ -79,43 +79,63 @@ def kmh_to_mph(value):
     return round(value * 0.621371, 1)
 
 
-def kelvin_to_celsius(value):
+def kelvin_to_celsius(value: int | float | None) -> Optional[float]:
     """
     Convert Kelvin to Celsius
     """
-    return value - 273.15 if not pd.isna(value) else None
+    if value is None or pd.isna(value):
+        return None
+    return float(value) - 273.15
 
 
-def ms_to_kmh(value):
+def ms_to_kmh(value: int | float | None) -> Optional[float]:
     """
     Convert m/s to km/h
     """
-    return value * 3.6 if not pd.isna(value) else None
+    if value is None or pd.isna(value):
+        return None
+    return float(value) * 3.6
 
 
-def hours_to_minutes(value):
+def hours_to_minutes(value: int | float | None) -> Optional[float]:
     """
     Convert duration from hours to minutes
     """
-    return value * 60 if not pd.isna(value) else None
+    if value is None or pd.isna(value):
+        return None
+    return float(value) * 60
 
 
-def temp_dwpt_to_rhum(row: dict):
+def temp_dwpt_to_rhum(
+    row: pd.Series | dict[str, int | float | None],
+) -> Optional[float]:
     """
     Get relative humidity from temperature and dew point
     """
-    return (
-        100
-        * (
-            math.exp((17.625 * row["dwpt"]) / (243.04 + row["dwpt"]))
-            / math.exp((17.625 * row["temp"]) / (243.04 + row["temp"]))
-        )
-        if not pd.isna(row["temp"]) and not pd.isna(row["dwpt"])
-        else None
+    temp = row["temp"]
+    dew_point = row["dwpt"]
+
+    if (
+        temp is None
+        or dew_point is None
+        or pd.isna(temp)
+        or pd.isna(dew_point)
+        or not isinstance(temp, (int, float))
+        or not isinstance(dew_point, (int, float))
+    ):
+        return None
+
+    return 100 * (
+        math.exp((17.625 * dew_point) / (243.04 + dew_point))
+        / math.exp((17.625 * temp) / (243.04 + temp))
     )
 
 
-def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter.TEMP):
+def pres_to_msl(
+    row: pd.Series | dict[str, object],
+    altitude: Optional[int] = None,
+    temp: str = Parameter.TEMP,
+) -> Optional[float]:
     pres = row.get(Parameter.PRES)
     t = row.get(temp)
 
@@ -144,21 +164,25 @@ def pres_to_msl(row: dict, altitude: Optional[int] = None, temp: str = Parameter
         return None
 
 
-def percentage_to_okta(value):
+def percentage_to_okta(value: int | float | None) -> Optional[int]:
     """
     Convert cloud cover percentage to oktas
     """
-    return round(value / 12.5) if not pd.isna(value) else None
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value) / 12.5)
 
 
-def jcm2_to_wm2(value):
+def jcm2_to_wm2(value: int | float | None) -> Optional[int]:
     """
     Convert Joule/CM^2 to Watt/M^2
     """
-    return round(value * 2.78) if not pd.isna(value) else None
+    if value is None or pd.isna(value):
+        return None
+    return round(float(value) * 2.78)
 
 
-def to_direction(value):
+def to_direction(value: int | float | None) -> Optional[str]:
     """
     Convert degrees to wind direction
     """
@@ -191,7 +215,7 @@ def to_direction(value):
     return wdir
 
 
-def to_condition(value):
+def to_condition(value: int | float | None) -> Optional[str]:
     """
     Convert Meteostat condition code to descriptive string
     """

@@ -1,5 +1,5 @@
 import functools
-from typing import Optional, Callable, TypeVar
+from typing import Optional, Callable, ParamSpec, TypeVar
 from urllib.error import HTTPError
 
 import pandas as pd
@@ -10,6 +10,7 @@ from meteostat.core.providers import provider_service
 from meteostat.enumerations import Grade
 
 T = TypeVar("T")
+P = ParamSpec("P")
 
 
 def _get_station_year_info(args: tuple) -> str:
@@ -29,13 +30,13 @@ def _get_station_year_info(args: tuple) -> str:
     return info
 
 
-def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optional[T]]:
+def handle_exceptions(func: Callable[P, Optional[T]]) -> Callable[P, Optional[T]]:
     """
     Decorator to handle exceptions during data fetching
     """
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Optional[T]:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> Optional[T]:
         try:
             return func(*args, **kwargs)
         except HTTPError as error:
@@ -59,13 +60,13 @@ def handle_exceptions(func: Callable[..., Optional[T]]) -> Callable[..., Optiona
     return wrapper
 
 
-def filter_model_data(func: Callable[..., Optional[T]]) -> Callable[..., Optional[T]]:
+def filter_model_data(func: Callable[P, Optional[T]]) -> Callable[P, Optional[T]]:
     """
     Decorator to filter out model/forecast data based on configuration
     """
 
     @functools.wraps(func)
-    def wrapper(*args, **kwargs) -> Optional[T]:
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> Optional[T]:
         result = func(*args, **kwargs)
 
         if (

@@ -87,7 +87,7 @@ def get_coco(report: Metar.Metar) -> Optional[int]:
         return None
 
 
-def map_data(record):
+def map_data(record: str) -> Optional[dict[str, Any]]:
     """
     Map METAR data to Meteostat column names
     """
@@ -118,6 +118,8 @@ def get_df(station: str) -> Optional[pd.DataFrame]:
     Get CSV file from Meteostat and convert to DataFrame
     """
     user_agent = config.aviationweather_user_agent
+    if not user_agent:
+        return None
     url = ENDPOINT.format(station=station)
     headers = {"User-Agent": user_agent}
 

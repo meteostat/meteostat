@@ -7,7 +7,7 @@ DataFrames based on a set of parameters.
 
 from copy import copy
 from inspect import isfunction
-from typing import Callable, List
+from typing import Any, Callable, List
 
 import pandas as pd
 
@@ -25,7 +25,9 @@ class SchemaService:
 
     @staticmethod
     def _apply_validator(
-        validator: Validator | Callable, df: pd.DataFrame, col: str
+        validator: Validator | Callable[..., bool | pd.Series],
+        df: pd.DataFrame,
+        col: str,
     ) -> pd.Series:
         """
         Apply a validator
@@ -103,7 +105,7 @@ class SchemaService:
 
     @classmethod
     def clean(
-        cls, df: pd.DataFrame, granularity: Granularity, fill=None
+        cls, df: pd.DataFrame, granularity: Granularity, fill: Any = None
     ) -> pd.DataFrame:
         """
         Remove invalid data from a DataFrame
@@ -143,7 +145,9 @@ class SchemaService:
         return temp
 
     @classmethod
-    def convert(cls, df, granularity: Granularity, units: UnitSystem) -> pd.DataFrame:
+    def convert(
+        cls, df: pd.DataFrame, granularity: Granularity, units: UnitSystem
+    ) -> pd.DataFrame:
         """
         Convert units in a DataFrame
         """

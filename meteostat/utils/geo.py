@@ -7,7 +7,7 @@ The code is licensed under the MIT license.
 import numpy as np
 
 
-def get_distance(lat1, lon1, lat2, lon2) -> int:
+def get_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> int:
     """
     Calculate distance between two geographical points using the Haversine formula
     """

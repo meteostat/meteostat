@@ -10,7 +10,7 @@ from meteostat.utils.data import aggregate_sources, reshape_by_source
 from meteostat.utils.parsers import parse_month
 
 
-def monthly_mean(group: pd.Series):
+def monthly_mean(group: pd.Series) -> float:
     """
     Calculate the monthly mean from a series of daily data
     """
@@ -19,7 +19,7 @@ def monthly_mean(group: pd.Series):
     return group.interpolate(axis=0).mean()
 
 
-def monthly_sum(group: pd.Series):
+def monthly_sum(group: pd.Series) -> float:
     """
     Calculate the monthly sum from a series of daily data
     """
@@ -28,7 +28,7 @@ def monthly_sum(group: pd.Series):
     return group.sum()
 
 
-def monthly_min(group: pd.Series):
+def monthly_min(group: pd.Series) -> float:
     """
     Calculate the absolute minimum from a series of daily data
     """
@@ -37,7 +37,7 @@ def monthly_min(group: pd.Series):
     return group.interpolate(axis=0).min()
 
 
-def monthly_max(group: pd.Series):
+def monthly_max(group: pd.Series) -> float:
     """
     Calculate the absolute maximum from a series of daily data
     """
