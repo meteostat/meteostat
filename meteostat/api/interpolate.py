@@ -331,8 +331,9 @@ def interpolate(
         A DataFrame containing the interpolated data for the specified point,
         or None if no data is available.
     """
-    # Fetch DataFrame, filling missing values and adding location data
-    df = ts.fetch(fill=True, location=True, sources=True)
+    # Fetch DataFrame without filling synthetic gaps so interpolation uses
+    # observed rows only, while still enriching them with location and source data
+    df = ts.fetch(fill=False, location=True, sources=True)
 
     # If no data is returned, return None
     if df is None:
