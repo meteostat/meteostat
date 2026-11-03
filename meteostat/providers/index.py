@@ -29,7 +29,7 @@ PROVIDER_HOURLY = ProviderSpec(
         Parameter.CLDC,
         Parameter.COCO,
     ],
-    start=date(1931, 1, 1),
+    start=date(1890, 1, 1),
     module="meteostat.providers.meteostat.hourly",
 )
 
@@ -53,7 +53,7 @@ PROVIDER_DAILY = ProviderSpec(
         Parameter.TSUN,
         Parameter.CLDC,
     ],
-    start=date(1899, 1, 1),
+    start=date(1781, 1, 1),
     module="meteostat.providers.meteostat.daily",
 )
 
@@ -77,7 +77,7 @@ PROVIDER_DAILY_DERIVED = ProviderSpec(
         Parameter.TSUN,
         Parameter.CLDC,
     ],
-    start=date(1931, 1, 1),
+    start=date(1890, 1, 1),
     module="meteostat.providers.meteostat.daily_derived",
 )
 
@@ -96,7 +96,7 @@ PROVIDER_MONTHLY = ProviderSpec(
         Parameter.PRES,
         Parameter.TSUN,
     ],
-    start=date(1899, 1, 1),
+    start=date(1781, 1, 1),
     module="meteostat.providers.meteostat.monthly",
 )
 
@@ -115,7 +115,7 @@ PROVIDER_MONTHLY_DERIVED = ProviderSpec(
         Parameter.PRES,
         Parameter.TSUN,
     ],
-    start=date(1899, 1, 1),
+    start=date(1781, 1, 1),
     module="meteostat.providers.meteostat.monthly_derived",
 )
 
