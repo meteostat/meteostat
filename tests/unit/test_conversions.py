@@ -120,6 +120,7 @@ class TestHumidityConversions:
         # Test with equal temp and dew point (100% humidity)
         row = {"temp": 20.0, "dwpt": 20.0}
         result = temp_dwpt_to_rhum(row)
+        assert result is not None
         assert abs(result - 100.0) < 0.1
 
     def test_temp_dwpt_to_rhum_typical(self):
@@ -127,6 +128,7 @@ class TestHumidityConversions:
         # Typical case: temperature = 20°C, dew point = 10°C
         row = {"temp": 20.0, "dwpt": 10.0}
         result = temp_dwpt_to_rhum(row)
+        assert result is not None
         assert 50 < result < 65  # Reasonable range
 
     def test_temp_dwpt_to_rhum_with_none_temp(self):

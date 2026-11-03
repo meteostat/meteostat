@@ -10,7 +10,7 @@ import json
 import os
 from os.path import exists
 from time import time
-from typing import Any, Callable, Optional, ParamSpec, TypeVar, cast
+from typing import Any, Callable, Optional, ParamSpec, Protocol, TypeVar, cast
 
 import pandas as pd
 
@@ -21,6 +21,16 @@ from meteostat.core.logger import logger
 P = ParamSpec("P")
 CacheableData = pd.DataFrame | dict | list | None
 T = TypeVar("T", bound=CacheableData)
+
+
+class _CachedFunc(Protocol[P, T]):
+    """
+    A cached function, preserving the `__wrapped__` attribute added by `functools.wraps`
+    """
+
+    __wrapped__: Callable[P, T]
+
+    def __call__(self, *args: P.args, **kwargs: P.kwargs) -> T: ...
 
 
 class CacheService:
@@ -194,7 +204,7 @@ class CacheService:
         self,
         ttl: int | Callable[..., int] = 60 * 60 * 24,
         data_format: str = "json",
-    ) -> Callable[[Callable[P, T]], Callable[P, T]]:
+    ) -> Callable[[Callable[P, T]], _CachedFunc[P, T]]:
         """
         A simple decorator which caches a function's return value
         based on its payload.
@@ -202,7 +212,7 @@ class CacheService:
         All data is persisted in either JSON or Pickle format.
         """
 
-        def decorator(func: Callable[P, T]) -> Callable[P, T]:
+        def decorator(func: Callable[P, T]) -> _CachedFunc[P, T]:
             @wraps(func)
             def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
                 if not config.cache_enable:

@@ -17,7 +17,7 @@ from meteostat.core.parameters import parameter_service
 from meteostat.core.validator import Validator
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
-from meteostat.enumerations import Parameter, Granularity, Provider, UnitSystem
+from meteostat.enumerations import Parameter, Granularity, UnitSystem
 from meteostat.typing import License
 from meteostat.utils.data import fill_df, localize, squash_df
 

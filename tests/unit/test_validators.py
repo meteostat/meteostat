@@ -168,6 +168,7 @@ class TestValidatorChaining:
 
         # First 50 values should be False (< 0)
         # Last 51 values should be True (>= 0)
+        assert isinstance(result, pd.Series)
         assert sum(result) == 51
 
     def test_multiple_validators_intersection(self):

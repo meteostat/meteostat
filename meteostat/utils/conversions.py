@@ -6,7 +6,7 @@ The code is licensed under the MIT license.
 """
 
 import math
-from typing import Optional
+from typing import Any, Optional
 
 import pandas as pd
 
@@ -215,11 +215,14 @@ def to_direction(value: int | float | None) -> Optional[str]:
     return wdir
 
 
-def to_condition(value: int | float | None) -> Optional[str]:
+def to_condition(value: Any) -> Optional[str]:
     """
     Convert Meteostat condition code to descriptive string
+
+    Accepts `Any` since callers may pass pandas missing-value sentinels
+    (e.g. `pd.NA`) alongside `int`/`float`/`None`.
     """
-    # Handle None and NaN values
+    # Handle None, NaN and pd.NA values
     if value is None or pd.isna(value):
         return None
 
