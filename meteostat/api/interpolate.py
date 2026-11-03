@@ -269,8 +269,8 @@ def _postprocess_result(
     # a column in the pivoted result. Also, ts.parameters reflects ts's raw,
     # pre-fill internal DataFrame, so it doesn't reliably include such
     # parameters either. Derive the full parameter list from `df` (the
-    # fill-completed data that produced `result`) instead, and re-fill any
-    # columns reshape_by_source() dropped as all-null -- mirroring the
+    # unfilled, enriched data that produced `result`) instead, and re-fill
+    # any columns reshape_by_source() dropped as all-null -- mirroring the
     # fill+purge pattern already used in DataService.concat_fragments().
     parameters = [
         col
