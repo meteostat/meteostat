@@ -11,8 +11,14 @@ License.
 The code is licensed under the MIT license.
 """
 
+from importlib.metadata import PackageNotFoundError, version
+
 __appname__ = "meteostat"
-__version__ = "2.1.5"
+
+try:
+    __version__ = version("meteostat")
+except PackageNotFoundError:  # pragma: no cover
+    __version__ = "0.0.0"
 
 from meteostat.api.daily import daily
 from meteostat.api.hourly import hourly
