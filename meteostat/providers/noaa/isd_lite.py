@@ -12,7 +12,7 @@ from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import ms_to_kmh, temp_dwpt_to_rhum
 from meteostat.utils.data import safe_concat
 
-ISD_LITE_ENDPOINT = "https://www.ncei.noaa.gov/pub/data/noaa/isd-lite/"
+ISD_LITE_ENDPOINT = "https://noaa-isd-pds.s3.amazonaws.com/isd-lite/data/"
 COLSPECS = [
     (0, 4),
     (5, 7),
