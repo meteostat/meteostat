@@ -60,6 +60,27 @@ def test_interpolate_preserves_all_nan_parameter_column(
     assert df_interpolated["temp"].notna().any()
 
 
+def test_interpolate_fetches_unfilled_hourly_series(
+    mocker, mock_stations_database, mock_hourly_fetch
+):
+    """
+    It must not fill missing hourly rows before spatial interpolation.
+    """
+    start = datetime(2024, 1, 10, 0, 0)
+    end = datetime(2024, 1, 10, 2, 0)
+    station_10637 = ms.stations.meta("10637")
+    station_10635 = ms.stations.meta("10635")
+    assert station_10637 is not None
+    assert station_10635 is not None
+
+    ts = ms.hourly([station_10637, station_10635], start, end)
+    fetch_spy = mocker.patch.object(ts, "fetch", wraps=ts.fetch)
+
+    ms.interpolate(ts, ms.Point(50.3167, 8.5, 320))
+
+    fetch_spy.assert_called_once_with(fill=False, location=True, sources=True)
+
+
 def test_interpolate(mock_stations_database, mock_hourly_fetch):
     """
     It interpolates data for a given point correctly

@@ -269,8 +269,8 @@ def _postprocess_result(
     # a column in the pivoted result. Also, ts.parameters reflects ts's raw,
     # pre-fill internal DataFrame, so it doesn't reliably include such
     # parameters either. Derive the full parameter list from `df` (the
-    # fill-completed data that produced `result`) instead, and re-fill any
-    # columns reshape_by_source() dropped as all-null -- mirroring the
+    # unfilled, enriched data that produced `result`) instead, and re-fill
+    # any columns reshape_by_source() dropped as all-null -- mirroring the
     # fill+purge pattern already used in DataService.concat_fragments().
     parameters = [
         col
@@ -331,8 +331,9 @@ def interpolate(
         A DataFrame containing the interpolated data for the specified point,
         or None if no data is available.
     """
-    # Fetch DataFrame, filling missing values and adding location data
-    df = ts.fetch(fill=True, location=True, sources=True)
+    # Fetch DataFrame without filling synthetic gaps so interpolation uses
+    # observed rows only, while still enriching them with location and source data
+    df = ts.fetch(fill=False, location=True, sources=True)
 
     # If no data is returned, return None
     if df is None:
