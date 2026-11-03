@@ -12,6 +12,7 @@ def test_hourly(mock_hourly_fetch, mock_stations_database):
     ts = ms.hourly("10637", datetime(2024, 1, 1, 15), datetime(2024, 1, 1, 17))
     df = ts.fetch()
 
+    assert df is not None
     assert len(df) == 3
     assert df.iloc[0]["temp"] == 8.3
 
@@ -28,6 +29,7 @@ def test_hourly_timezone(mock_hourly_fetch, mock_stations_database):
     )
     df = ts.fetch()
 
+    assert df is not None
     assert len(df) == 3
     assert df.iloc[0]["temp"] == 8.5
 
@@ -108,6 +110,7 @@ def test_hourly_fetch_with_fill(mock_hourly_fetch, mock_stations_database):
     df_unfilled = ts.fetch(fill=False)
 
     assert df_filled is not None
+    assert df_unfilled is not None
     # Filled DataFrame should have at least as many rows as unfilled
     assert len(df_filled) >= len(df_unfilled)
 
@@ -209,6 +212,7 @@ def test_hourly_multiple_providers_no_squash(
         providers=[ms.Provider.DWD_HOURLY, ms.Provider.DWD_POI, ms.Provider.DWD_MOSMIX],
     )
     df = ts.fetch(sources=True, squash=False)
+    assert df is not None
     df_1 = data_service.filter_time(
         df, datetime(2025, 12, 1, 0, 0), datetime(2025, 12, 1, 0, 59)
     )
@@ -221,7 +225,6 @@ def test_hourly_multiple_providers_no_squash(
     df_4 = data_service.filter_time(
         df, datetime(2025, 12, 18, 6, 0), datetime(2025, 12, 18, 6, 59)
     )
-    assert df is not None
     assert len(df) == 519
     assert len(df_1) == 1
     assert df_1.index.get_level_values("source").unique().tolist() == [

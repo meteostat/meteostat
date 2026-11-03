@@ -19,7 +19,7 @@ class Inventory:
 
     df: Optional[pd.DataFrame] = None
 
-    def __init__(self, df: Optional[pd.DataFrame] = None):
+    def __init__(self, df: Optional[pd.DataFrame] = None) -> None:
         if df is not None and not df.empty:
             self.df = df
 
@@ -46,7 +46,7 @@ class Inventory:
         )
 
     @property
-    def parameters(self) -> Optional[List[Parameter]]:
+    def parameters(self) -> List[Parameter]:
         """
         Get the list of available parameters from the inventory
         """

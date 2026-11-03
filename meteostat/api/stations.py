@@ -38,7 +38,7 @@ class Stations:
 
         # Register a safe acos that clamps the input to [-1, 1] to avoid ValueError
         # This can happen due to floating point precision issues at poles
-        def safe_acos(x):
+        def safe_acos(x: float) -> float:
             return math.acos(max(-1.0, min(1.0, x)))
 
         conn.create_function("acos", 1, safe_acos)
@@ -49,7 +49,7 @@ class Stations:
         conn.create_function("radians", 1, math.radians)
         conn.create_function("degrees", 1, math.degrees)
 
-    def _fetch_file(self, stream=False) -> Response:
+    def _fetch_file(self, stream: bool = False) -> Response:
         """
         Download the SQLite database file from the configured URL
         """
@@ -221,7 +221,9 @@ class Stations:
 
         return Inventory(df)
 
-    def nearby(self, point: Point, radius=50000, limit=100) -> pd.DataFrame:
+    def nearby(
+        self, point: Point, radius: int = 50000, limit: int = 100
+    ) -> pd.DataFrame:
         """
         Get a list of weather station IDs ordered by distance
         """

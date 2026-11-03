@@ -16,11 +16,16 @@ class Validator:
     Schema Column Validator
     """
 
-    func: Callable
+    func: Callable[..., bool | Series]
     ignore_na = False
     is_relational = False
 
-    def __init__(self, func: Callable, ignore_na=False, is_relational=False):
+    def __init__(
+        self,
+        func: Callable[..., bool | Series],
+        ignore_na: bool = False,
+        is_relational: bool = False,
+    ) -> None:
         self.func = func
         self.ignore_na = ignore_na
         self.is_relational = is_relational

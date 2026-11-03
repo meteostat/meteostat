@@ -90,7 +90,7 @@ PARAMETERS: List[ParameterDefinition] = [
 ]
 
 
-def find_file(ftp: FTP, path: str, needle: str):
+def find_file(ftp: FTP, path: str, needle: str) -> Optional[str]:
     """
     Find file in directory
     """

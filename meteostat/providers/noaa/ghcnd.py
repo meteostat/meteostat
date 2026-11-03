@@ -36,7 +36,7 @@ COLUMN_NAMES = {
 }
 
 
-def connect_to_ftp():
+def connect_to_ftp() -> FTP:
     """
     Connect to FTP server
     """
@@ -46,7 +46,7 @@ def connect_to_ftp():
     return ftp
 
 
-def get_flags(string):
+def get_flags(string: StringIO) -> list[str]:
     """
     Get flags, replacing empty flags with '_' for clarity (' S ' becomes '_S_')
     """
@@ -60,7 +60,7 @@ def get_flags(string):
     return [m_flag + q_flag + s_flag]
 
 
-def create_df(element, dict_element):
+def create_df(element: str, dict_element: dict[str, list[str]]) -> pd.DataFrame:
     """
     Create dataframes from dicts, turn indices into date strings (YYYY-MM-DD)
     """
@@ -88,7 +88,7 @@ def create_df(element, dict_element):
     return df_element
 
 
-def move_col_to_front(element, df):
+def move_col_to_front(element: str, df: pd.DataFrame) -> pd.DataFrame:
     """
     Move DataFrame column to position 0
     """
@@ -101,7 +101,7 @@ def move_col_to_front(element, df):
 
 
 # pylint: disable=too-many-locals
-def dly_to_df(ftp, station_id):
+def dly_to_df(ftp: FTP, station_id: str) -> pd.DataFrame:
     """
     Convert .dly files to DataFrame
     """

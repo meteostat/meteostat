@@ -39,7 +39,7 @@ NAMES = {
 }
 
 
-def find_file(ftp: FTP, mode: str, needle: str):
+def find_file(ftp: FTP, mode: str, needle: str) -> Optional[str]:
     """
     Find file in directory
     """

@@ -26,7 +26,7 @@ def normals(
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
     max_missing: int = 3,
-):
+) -> TimeSeries:
     """
     Access climate normals data.
 
@@ -58,7 +58,7 @@ def normals(
     if providers is None:
         providers = [Provider.MONTHLY]
 
-    def _mean(group: pd.Series):
+    def _mean(group: pd.Series) -> float:
         """
         Calculate the monthly mean from multiple years of monthly data
         """

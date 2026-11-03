@@ -11,6 +11,7 @@ def test_daily(mock_daily_fetch, mock_stations_database):
     ts = ms.daily("10637", datetime(2024, 1, 5), datetime(2024, 1, 10))
     df = ts.fetch()
 
+    assert df is not None
     assert len(df) == 6
     assert df.iloc[0]["temp"] == 6.6
 
@@ -91,6 +92,7 @@ def test_daily_fetch_with_fill(mock_daily_fetch, mock_stations_database):
     df_unfilled = ts.fetch(fill=False)
 
     assert df_filled is not None
+    assert df_unfilled is not None
     # Filled DataFrame should have at least as many rows as unfilled
     assert len(df_filled) >= len(df_unfilled)
 

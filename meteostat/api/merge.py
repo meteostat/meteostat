@@ -16,7 +16,7 @@ from meteostat.api.timeseries import TimeSeries
 
 
 def _get_dt(
-    dt_a: Optional[datetime], dt_b: Optional[datetime], start=True
+    dt_a: Optional[datetime], dt_b: Optional[datetime], start: bool = True
 ) -> Optional[datetime]:
     """
     Return the earlier or later (depending on "start" argument) of two datetimes,

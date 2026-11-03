@@ -9,6 +9,7 @@ def test_normals(mock_monthly_fetch, mock_stations_database):
     ts = ms.normals("10637", 2005, 2015)
     df = ts.fetch()
 
+    assert df is not None
     assert len(df) == 12
     assert df.iloc[0]["temp"] == 2.3
 

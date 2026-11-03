@@ -17,7 +17,7 @@ from meteostat.core.parameters import parameter_service
 from meteostat.core.validator import Validator
 from meteostat.core.providers import provider_service
 from meteostat.core.schema import schema_service
-from meteostat.enumerations import Parameter, Granularity, Provider, UnitSystem
+from meteostat.enumerations import Parameter, Granularity, UnitSystem
 from meteostat.typing import License
 from meteostat.utils.data import fill_df, localize, squash_df
 
@@ -132,7 +132,7 @@ class TimeSeries:
         return True if self._df is None else self._df.empty
 
     @property
-    def providers(self) -> List[Provider]:
+    def providers(self) -> List[str]:
         """
         Get included providers
         """
@@ -187,12 +187,12 @@ class TimeSeries:
 
     def fetch(
         self,
-        squash=True,
-        fill=False,
-        sources=False,
-        location=False,
-        clean=True,
-        humanize=False,
+        squash: bool = True,
+        fill: bool = False,
+        sources: bool = False,
+        location: bool = False,
+        clean: bool = True,
+        humanize: bool = False,
         units: UnitSystem = UnitSystem.METRIC,
     ) -> Optional[pd.DataFrame]:
         """

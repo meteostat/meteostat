@@ -13,6 +13,7 @@ from meteostat.core.data import data_service
 from meteostat.enumerations import Parameter, Provider, Granularity
 from meteostat.typing import Station, Request
 from meteostat.api.point import Point
+from meteostat.api.timeseries import TimeSeries
 from meteostat.utils.parsers import parse_station, parse_time
 
 DEFAULT_PARAMETERS = [
@@ -36,7 +37,7 @@ def daily(
     end: Optional[datetime | date],
     parameters: Optional[List[Parameter]] = None,
     providers: Optional[List[Provider]] = None,
-):
+) -> TimeSeries:
     """
     Access daily time series data.
 

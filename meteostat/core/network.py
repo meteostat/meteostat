@@ -6,7 +6,7 @@ considering the Meteostat configuration.
 """
 
 import time
-from typing import Optional
+from typing import Any, Optional
 
 import requests
 
@@ -21,7 +21,7 @@ class NetworkService:
     """
 
     @staticmethod
-    def _process_headers(headers: dict) -> dict:
+    def _process_headers(headers: dict[str, str]) -> dict[str, str]:
         """
         Process headers
         """
@@ -33,8 +33,8 @@ class NetworkService:
     def get(
         self,
         url: str,
-        params=None,
-        headers: Optional[dict] = None,
+        params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
         stream: Optional[bool] = None,
     ) -> requests.Response:
         """
@@ -96,8 +96,8 @@ class NetworkService:
     def get_from_mirrors(
         self,
         mirrors: list[str],
-        params=None,
-        headers: Optional[dict] = None,
+        params: Optional[dict[str, Any]] = None,
+        headers: Optional[dict[str, str]] = None,
         stream: Optional[bool] = None,
     ) -> Optional[requests.Response]:
         """

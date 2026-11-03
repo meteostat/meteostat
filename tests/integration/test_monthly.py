@@ -11,6 +11,7 @@ def test_monthly(mock_monthly_fetch, mock_stations_database):
     ts = ms.monthly("10637", datetime(2015, 1, 1), datetime(2018, 12, 31))
     df = ts.fetch()
 
+    assert df is not None
     assert len(df) == 48
     assert df.iloc[0]["temp"] == 3.1
 
@@ -91,6 +92,7 @@ def test_monthly_fetch_with_fill(mock_monthly_fetch, mock_stations_database):
     df_unfilled = ts.fetch(fill=False)
 
     assert df_filled is not None
+    assert df_unfilled is not None
     # Filled DataFrame should have at least as many rows as unfilled
     assert len(df_filled) >= len(df_unfilled)
 

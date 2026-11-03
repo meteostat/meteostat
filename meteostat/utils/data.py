@@ -11,7 +11,7 @@ The code is licensed under the MIT license.
 from collections import Counter
 from datetime import datetime
 from itertools import chain
-from typing import List, Optional, Sequence, cast
+from typing import Any, List, Optional, Sequence, cast
 
 import numpy as np
 import pandas as pd
@@ -22,7 +22,7 @@ from meteostat.typing import Station
 
 
 def safe_concat(
-    frames: Sequence[Optional[pd.DataFrame]], axis: int = 0, **kwargs
+    frames: Sequence[Optional[pd.DataFrame]], axis: int = 0, **kwargs: Any
 ) -> Optional[pd.DataFrame]:
     """
     Filter out None values from a list of DataFrames and concatenate the rest.
@@ -61,7 +61,7 @@ def stations_to_df(stations: List[Station]) -> pd.DataFrame:
     )
 
 
-def squash_df(df: pd.DataFrame, sources=False) -> pd.DataFrame:
+def squash_df(df: pd.DataFrame, sources: bool = False) -> pd.DataFrame:
     """
     Squash a DataFrame based on the source priority
     """
