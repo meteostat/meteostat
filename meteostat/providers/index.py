@@ -381,6 +381,33 @@ PROVIDER_GHCND = ProviderSpec(
     module="meteostat.providers.noaa.ghcnd",
 )
 
+PROVIDER_GHCNH = ProviderSpec(
+    id=Provider.GHCNH,
+    name="NOAA GHCN-Hourly",
+    granularity=Granularity.HOURLY,
+    priority=Priority.HIGH,
+    grade=Grade.OBSERVATION,
+    license=License(
+        commercial=True,
+        name="CC0 1.0 Universal",
+        url="https://creativecommons.org/publicdomain/zero/1.0/",
+    ),  # source: https://registry.opendata.aws/noaa-ghcnh/
+    parameters=[
+        Parameter.TEMP,
+        Parameter.DWPT,
+        Parameter.RHUM,
+        Parameter.PRES,
+        Parameter.WDIR,
+        Parameter.WSPD,
+        Parameter.WPGT,
+        Parameter.PRCP,
+        Parameter.SNWD,
+        Parameter.VSBY,
+    ],
+    start=date(1750, 1, 1),
+    module="meteostat.providers.noaa.ghcnh",
+)
+
 PROVIDER_CLIMAT = ProviderSpec(
     id=Provider.CLIMAT,
     name="DWD CLIMAT",
@@ -575,6 +602,7 @@ DEFAULT_PROVIDERS = [
     PROVIDER_ECCC_MONTHLY,
     PROVIDER_ISD_LITE,
     PROVIDER_GHCND,
+    PROVIDER_GHCNH,
     PROVIDER_CLIMAT,
     PROVIDER_METAR,
     PROVIDER_METNO_FORECAST,
