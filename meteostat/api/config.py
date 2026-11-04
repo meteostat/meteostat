@@ -192,5 +192,11 @@ class Config(ConfigService):
     # [Provider] GSA settings
     gsa_api_base_url: str = "https://dataset.api.hub.geosphere.at/v1"
 
+    # [Provider] ERA5 settings
+    era5_bucket: str = "earthmover-icechunk-era5"
+    era5_prefix: str = "icechunkV2"
+    era5_region: str = "us-east-1"
+    era5_group: str = "single/temporal"
+
 
 config = Config("MS")
