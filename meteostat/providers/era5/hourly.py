@@ -70,8 +70,8 @@ def _get_dataset() -> Any:
     """
     Open (or reuse an already opened) handle to the Icechunk ERA5 store
     """
-    import icechunk
-    import xarray as xr
+    import icechunk  # ty: ignore[unresolved-import]
+    import xarray as xr  # ty: ignore[unresolved-import]
 
     key = (
         config.era5_bucket,
