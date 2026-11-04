@@ -10,7 +10,10 @@ this provider works with any Point/Station coordinates, not just Meteostat's
 known weather stations. The nearest 0.25-degree grid cell is used.
 
 Requires the optional "icechunk", "xarray", "zarr" and "numcodecs[pcodec]"
-packages (see the "extras" dependency group).
+packages (see the "extras" dependency group). The Icechunk v2 store format
+used by this dataset requires icechunk>=2.0, which in turn requires
+Python >= 3.12; on older Python versions these extras are not installed
+and this provider is a no-op.
 
 License: CC BY 4.0 - https://registry.opendata.aws/earthmover-era5/
 """

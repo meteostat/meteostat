@@ -1,7 +1,13 @@
 from datetime import datetime
+import pytest
 import meteostat as ms
 from meteostat.providers.era5.hourly import fetch
 from meteostat.typing import ProviderRequest
+
+# The icechunk/zarr/numcodecs[pcodec] stack required to read this dataset's
+# Icechunk v2 store only supports Python >= 3.12, so the "extras" dependency
+# group is not installable (and these tests are skipped) below that.
+pytest.importorskip("icechunk")
 
 
 def test_era5_hourly():
