@@ -8,7 +8,6 @@ from meteostat.providers.era5.hourly import (
     GRID_LON_START,
     GRID_STEP,
 )
-from meteostat.providers.era5.elevation import _geopotential_grid_index
 from meteostat.typing import ProviderRequest
 
 
@@ -31,13 +30,6 @@ def test_era5_grid_index_half_point_tie_breaks_up():
     lat_idx, lon_idx = _grid_index(51.4833, -0.45)  # London Heathrow
     assert round(GRID_LAT_START + lat_idx * GRID_STEP, 2) == 51.5
     assert round(GRID_LON_START + lon_idx * GRID_STEP, 2) == -0.4
-
-    # the geopotential (elevation) grid uses a different axis convention
-    # (descending latitude, 0-360 longitude) and must resolve to the same
-    # real-world cell as the main data grid above
-    glat_idx, glon_idx = _geopotential_grid_index(50.05, 8.6)
-    assert round(90.0 + glat_idx * -0.1, 2) == 50.1
-    assert round(0.0 + glon_idx * 0.1, 2) == 8.6
 
 
 def test_era5_hourly():
@@ -165,25 +157,3 @@ def test_era5_hourly_chunk_cache():
 
     assert df_sub is not None and not df_sub.empty
     assert len(df_sub) == 240  # 10 days * 24 hours
-
-
-def test_era5_hourly_elevation_filter_not_called_by_default(mocker):
-    """
-    The grid-cell elevation lookup should not run unless era5_max_elevation_diff
-    is explicitly set - it requires downloading a ~50MB auxiliary file, so it
-    must not be a hidden cost of every ordinary fetch
-    """
-    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
-    ms.config.era5_max_elevation_diff = None
-
-    mocked = mocker.patch("meteostat.providers.era5.elevation.grid_elevation")
-
-    query = ProviderRequest(
-        start=datetime(2023, 1, 1),
-        end=datetime(2023, 1, 1, 23, 59),
-        station=ms.Station(id="$0001", latitude=50.0333, longitude=8.5706, elevation=100),
-        parameters=[ms.Parameter.TEMP],
-    )
-    fetch(query)
-
-    mocked.assert_not_called()

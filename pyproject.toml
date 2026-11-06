@@ -28,7 +28,6 @@ numcodecs = [
     {version = "^0.16.6", python = ">=3.11,<3.12"},
     {version = "^0.17.1", python = ">=3.12"},
 ]
-h5py = "^3.11.0"
 
 [tool.coverage.run]
 source = ["meteostat"]

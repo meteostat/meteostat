@@ -1,5 +1,5 @@
 """
-ERA5 hourly data import routine
+Hourly ERA5-Land Reanalysis Data Provider
 
 Get hourly ERA5-Land reanalysis data (0.1-degree resolution) for any
 coordinates worldwide, from ECMWF's official Climate Data Store Analysis
@@ -343,23 +343,6 @@ def fetch(req: ProviderRequest) -> Optional[pd.DataFrame]:
     if not raw_vars:
         logger.info("No mappable parameters for ERA5 hourly data")
         return None
-
-    if req.station.elevation is not None and config.era5_max_elevation_diff is not None:
-        from meteostat.providers.era5.elevation import grid_elevation
-
-        elevation = grid_elevation(req.station.latitude, req.station.longitude)
-
-        if elevation is not None:
-            elevation_diff = abs(req.station.elevation - elevation)
-
-            if elevation_diff > config.era5_max_elevation_diff:
-                logger.info(
-                    f"Skipping ERA5: elevation difference ({elevation_diff:.0f}m) "
-                    f"exceeds era5_max_elevation_diff "
-                    f"({config.era5_max_elevation_diff}m) for "
-                    f"({req.station.latitude}, {req.station.longitude})"
-                )
-                return None
 
     start = pd.Timestamp(req.start or pd.Timestamp(1950, 1, 1))
     end = pd.Timestamp(req.end or pd.Timestamp.now())

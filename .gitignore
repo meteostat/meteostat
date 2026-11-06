@@ -131,6 +131,3 @@ dmypy.json
 # Pyre type checker
 .pyre/
 .DS_Store
-
-# Climate Data Store API credentials
-.cdsapirc
