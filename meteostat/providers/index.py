@@ -586,6 +586,33 @@ PROVIDER_GSA_MONTHLY = ProviderSpec(
 )
 
 
+PROVIDER_ERA5_HOURLY = ProviderSpec(
+    id=Provider.ERA5_HOURLY,
+    name="ERA5 Hourly",
+    granularity=Granularity.HOURLY,
+    priority=Priority.LOWEST -2,  # ERA5-Land showed the highest bias compared to forecasts
+    grade=Grade.ANALYSIS,
+    license=License(
+        commercial=True,
+        attribution="ECMWF ERA5-Land (Copernicus Climate Change Service)",
+        name="CC BY 4.0",
+        url="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land",
+    ),
+    parameters=[
+        Parameter.TEMP,
+        Parameter.DWPT,
+        Parameter.RHUM,
+        Parameter.PRCP,
+        Parameter.SNOW,
+        Parameter.SNWD,
+        Parameter.WDIR,
+        Parameter.WSPD,
+    ],
+    start=date(1950, 1, 1),
+    module="meteostat.providers.era5.hourly",
+)
+
+
 DEFAULT_PROVIDERS = [
     PROVIDER_HOURLY,
     PROVIDER_DAILY,
@@ -610,4 +637,5 @@ DEFAULT_PROVIDERS = [
     PROVIDER_GSA_SYNOP,
     PROVIDER_GSA_DAILY,
     PROVIDER_GSA_MONTHLY,
+    PROVIDER_ERA5_HOURLY,
 ]

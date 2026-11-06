@@ -24,6 +24,10 @@ pytest-cov = "^7.0.0"
 matplotlib = "^3.9.2"
 metar = "^1.11.0"
 lxml = "^5.3.0"
+numcodecs = [
+    {version = "^0.16.6", python = ">=3.11,<3.12"},
+    {version = "^0.17.1", python = ">=3.12"},
+]
 
 [tool.coverage.run]
 source = ["meteostat"]

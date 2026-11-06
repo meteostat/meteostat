@@ -192,5 +192,9 @@ class Config(ConfigService):
     # [Provider] GSA settings
     gsa_api_base_url: str = "https://dataset.api.hub.geosphere.at/v1"
 
+    # [Provider] ERA5 settings
+    era5_endpoint: str = "https://arco.datastores.ecmwf.int"
+    copernicus_cds_api_key: Optional[str] = None
+
 
 config = Config("MS")
