@@ -193,10 +193,25 @@ class Config(ConfigService):
     gsa_api_base_url: str = "https://dataset.api.hub.geosphere.at/v1"
 
     # [Provider] ERA5 settings
-    era5_bucket: str = "earthmover-icechunk-era5"
-    era5_prefix: str = "icechunkV2"
-    era5_region: str = "us-east-1"
-    era5_group: str = "single/temporal"
+    era5_endpoint: str = "https://arco.datastores.ecmwf.int"
+    copernicus_cds_api_key: Optional[str] = None
+    # ERA5-Land's own invariant geopotential field (elevation), a public ECMWF
+    # Confluence attachment - no CDS API key needed, unlike the hourly ARCO data
+    era5_geopotential_url: str = (
+        "https://confluence.ecmwf.int/download/attachments/140385202/"
+        "geo_1279l4_0.1x0.1.grib2_v4_unpack.nc?version=1&modificationDate=1591983422003&api=v2"
+    )
+    era5_geopotential_file: str = (
+        os.path.expanduser("~") + os.sep + ".meteostat" + os.sep + "era5_geopotential.nc"
+    )
+    era5_geopotential_ttl: int = (
+        TTL.MONTH * 12
+    )  # time-invariant; just an occasional sanity re-check
+    # Maximum allowed difference (in meters) between a requested point's elevation
+    # and ERA5-Land's own grid-cell elevation before the provider refuses to serve
+    # data for it. Skipped if the point has no elevation, or this is None (default,
+    # meaning the grid-cell elevation lookup never runs at all).
+    era5_max_elevation_diff: Optional[float] = None
 
 
 config = Config("MS")

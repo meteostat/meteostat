@@ -1,19 +1,51 @@
+import os
 from datetime import datetime
-import pytest
 import meteostat as ms
-from meteostat.providers.era5.hourly import fetch
+from meteostat.providers.era5.hourly import (
+    fetch,
+    _grid_index,
+    GRID_LAT_START,
+    GRID_LON_START,
+    GRID_STEP,
+)
+from meteostat.providers.era5.elevation import _geopotential_grid_index
 from meteostat.typing import ProviderRequest
 
-# The icechunk/zarr/numcodecs[pcodec] stack required to read this dataset's
-# Icechunk v2 store only supports Python >= 3.12, so the "extras" dependency
-# group is not installable (and these tests are skipped) below that.
-pytest.importorskip("icechunk")
+
+def test_era5_grid_index_half_point_tie_breaks_up():
+    """
+    It should break an exact half-grid-point tie (a coordinate landing precisely
+    between two 0.1-degree cells) toward the higher coordinate, consistently
+
+    Verified against Open-Meteo's independent ERA5-Land extraction, which
+    resolves both of these real-world cases (Frankfurt Airport's latitude,
+    London Heathrow's longitude) to the higher neighboring cell. Python's
+    builtin round() uses banker's rounding instead, which picked the lower
+    neighbor for both of these specific coordinates - silently reading data
+    for a point up to a full grid cell (~11km) away from the intended one.
+    """
+    lat_idx, lon_idx = _grid_index(50.05, 8.6)  # Frankfurt Airport
+    assert round(GRID_LAT_START + lat_idx * GRID_STEP, 2) == 50.1
+    assert round(GRID_LON_START + lon_idx * GRID_STEP, 2) == 8.6
+
+    lat_idx, lon_idx = _grid_index(51.4833, -0.45)  # London Heathrow
+    assert round(GRID_LAT_START + lat_idx * GRID_STEP, 2) == 51.5
+    assert round(GRID_LON_START + lon_idx * GRID_STEP, 2) == -0.4
+
+    # the geopotential (elevation) grid uses a different axis convention
+    # (descending latitude, 0-360 longitude) and must resolve to the same
+    # real-world cell as the main data grid above
+    glat_idx, glon_idx = _geopotential_grid_index(50.05, 8.6)
+    assert round(90.0 + glat_idx * -0.1, 2) == 50.1
+    assert round(0.0 + glon_idx * 0.1, 2) == 8.6
 
 
 def test_era5_hourly():
     """
-    It should load ERA5 reanalysis data for an arbitrary coordinate (Earthmover Icechunk mirror)
+    It should load ERA5-Land reanalysis data for an arbitrary coordinate (CDS ARCO store)
     """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+
     query = ProviderRequest(
         start=datetime(2023, 1, 1),
         end=datetime(2023, 1, 2),
@@ -36,8 +68,10 @@ def test_era5_hourly():
 
 def test_era5_hourly_negative_longitude():
     """
-    It should correctly resolve negative (western hemisphere) longitudes on the 0-360 grid
+    It should correctly resolve negative (western hemisphere) longitudes on the -180/180 grid
     """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+
     df = ms.hourly(
         ms.Point(40.7128, -74.0060),  # New York City
         start=datetime(2023, 7, 1),
@@ -48,7 +82,6 @@ def test_era5_hourly_negative_longitude():
 
     assert df is not None and not df.empty, "No data returned for arbitrary point"
     assert df["temp"].notna().sum() >= 20, "Insufficient temperature data returned."
-    # Sanity check: should be a plausible summer temperature, not a wrapped/wrong grid cell
     assert df["temp"].between(10, 40).all(), "Implausible temperature values returned."
 
 
@@ -56,6 +89,8 @@ def test_era5_hourly_wind():
     """
     It should derive wind speed and direction from the u10/v10 components
     """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+
     df = ms.hourly(
         ms.Point(35.6762, 139.6503),  # Tokyo
         start=datetime(2023, 1, 1),
@@ -67,3 +102,88 @@ def test_era5_hourly_wind():
     assert df is not None and not df.empty, "No wind data returned"
     assert df["wspd"].notna().sum() >= 20, "Insufficient wind speed data returned."
     assert df["wdir"].between(0, 360).all(), "Wind direction out of range."
+
+
+def test_era5_hourly_matches_observations():
+    """
+    It should roughly agree with real observations for a low-elevation station
+
+    This is a regression test for a time-origin bug: the ARCO store's time axis
+    index 0 does not correspond to the 1970-01-01 epoch used in its own units
+    attribute (the dataset actually starts around 1950), so naively using
+    "hours since 1970-01-01" as an array index silently read data from ~20
+    years off target. A pure plausibility check (e.g. "is it a sane
+    temperature") doesn't catch that; comparing against real observations does.
+    """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+
+    start, end = datetime(2018, 1, 1), datetime(2018, 1, 1, 23, 59)
+
+    # Frankfurt Westend (D1424), low elevation (124m) - avoid stations on
+    # isolated peaks, where reanalysis grid cells are expected to diverge
+    # from real observations regardless of any implementation bug
+    obs = ms.hourly("D1424", start, end, parameters=[ms.Parameter.TEMP]).fetch()
+    land = ms.hourly(
+        ms.Point(50.1269, 8.6694),
+        start,
+        end,
+        providers=[ms.Provider.ERA5_HOURLY],
+        parameters=[ms.Parameter.TEMP],
+    ).fetch()
+
+    assert obs is not None and not obs.empty
+    assert land is not None and not land.empty
+
+    diff = (obs["temp"] - land["temp"]).abs()
+    assert diff.mean() < 3, (
+        f"ERA5-Land diverges too far from observations (mean |diff|={diff.mean()})"
+    )
+
+
+def test_era5_hourly_chunk_cache():
+    """
+    A query for a sub-range of an already-fetched chunk should be served from cache
+    """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+
+    query_full = ProviderRequest(
+        start=datetime(2023, 1, 1),
+        end=datetime(2023, 12, 31, 23),
+        station=ms.Station(id="$0001", latitude=50.0333, longitude=8.5706),
+        parameters=[ms.Parameter.TEMP],
+    )
+    df_full = fetch(query_full)
+    assert df_full is not None and not df_full.empty
+
+    query_sub = ProviderRequest(
+        start=datetime(2023, 3, 1),
+        end=datetime(2023, 3, 10, 23),
+        station=ms.Station(id="$0001", latitude=50.0333, longitude=8.5706),
+        parameters=[ms.Parameter.TEMP],
+    )
+    df_sub = fetch(query_sub)
+
+    assert df_sub is not None and not df_sub.empty
+    assert len(df_sub) == 240  # 10 days * 24 hours
+
+
+def test_era5_hourly_elevation_filter_not_called_by_default(mocker):
+    """
+    The grid-cell elevation lookup should not run unless era5_max_elevation_diff
+    is explicitly set - it requires downloading a ~50MB auxiliary file, so it
+    must not be a hidden cost of every ordinary fetch
+    """
+    ms.config.copernicus_cds_api_key = os.environ.get("CDS_API_KEY")
+    ms.config.era5_max_elevation_diff = None
+
+    mocked = mocker.patch("meteostat.providers.era5.elevation.grid_elevation")
+
+    query = ProviderRequest(
+        start=datetime(2023, 1, 1),
+        end=datetime(2023, 1, 1, 23, 59),
+        station=ms.Station(id="$0001", latitude=50.0333, longitude=8.5706, elevation=100),
+        parameters=[ms.Parameter.TEMP],
+    )
+    fetch(query)
+
+    mocked.assert_not_called()

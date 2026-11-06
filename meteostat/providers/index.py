@@ -590,13 +590,13 @@ PROVIDER_ERA5_HOURLY = ProviderSpec(
     id=Provider.ERA5_HOURLY,
     name="ERA5 Hourly",
     granularity=Granularity.HOURLY,
-    priority=Priority.LOW,
+    priority=Priority.LOWEST -2,  # ERA5-Land showed the highest bias compared to forecasts
     grade=Grade.ANALYSIS,
     license=License(
         commercial=True,
-        attribution="ECMWF ERA5 (Copernicus Climate Change Service), via Earthmover",
+        attribution="ECMWF ERA5-Land (Copernicus Climate Change Service)",
         name="CC BY 4.0",
-        url="https://registry.opendata.aws/earthmover-era5/",
+        url="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land",
     ),
     parameters=[
         Parameter.TEMP,
@@ -607,11 +607,8 @@ PROVIDER_ERA5_HOURLY = ProviderSpec(
         Parameter.SNWD,
         Parameter.WDIR,
         Parameter.WSPD,
-        Parameter.WPGT,
-        Parameter.PRES,
-        Parameter.CLDC,
     ],
-    start=date(1940, 1, 1),
+    start=date(1950, 1, 1),
     module="meteostat.providers.era5.hourly",
 )
 
