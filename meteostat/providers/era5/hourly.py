@@ -70,9 +70,22 @@ def _snap_index(value: float, start: float, step: float) -> int:
     picks the lower or higher neighboring cell arbitrarily depending on the
     resulting index's parity, silently reading data up to a full grid cell
     (~11km) away from the intended point.
+
+    The 1e-9 nudge below matters: (value - start) / step lands on an exact
+    *.5 mathematically for a tie, but floating-point subtraction can put it
+    a few ULPs on either side (e.g. (8.45 - -179.9) / 0.1 == 1883.4999999999998,
+    not 1883.5 - found via a real cross-check against independent ERA5-Land extraction for a
+    Kleiner Feldberg request, where this silently read the grid cell 0.1
+    degrees west of the intended one). Real station/point coordinates are
+    never specified to anywhere near 1e-9-degree precision, so the nudge
+    can't flip a genuine (non-tied) coordinate to the wrong cell.
     """
     idx_float = (value - start) / step
-    return math.floor(idx_float + 0.5) if step > 0 else math.ceil(idx_float - 0.5)
+    return (
+        math.floor(idx_float + 0.5 + 1e-9)
+        if step > 0
+        else math.ceil(idx_float - 0.5 - 1e-9)
+    )
 
 
 # "geo-chunked" stores are chunked (time, lat, lon) with a huge time span

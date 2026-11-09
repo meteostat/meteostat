@@ -107,7 +107,7 @@ class Provider(StrEnum):
     GSA_SYNOP = "gsa_synop"
     GSA_DAILY = "gsa_daily"
     GSA_MONTHLY = "gsa_monthly"
-    ERA5_HOURLY = "era5_hourly"
+    ERA5 = "era5"
 
     HOURLY = "hourly"
     DAILY = "daily"

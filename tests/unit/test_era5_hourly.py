@@ -8,7 +8,12 @@ import pandas as pd
 
 import meteostat as ms
 from meteostat.providers.era5 import hourly as era5_hourly
-from meteostat.providers.era5.hourly import _grid_index, GRID_LAT_START, GRID_LON_START, GRID_STEP
+from meteostat.providers.era5.hourly import (
+    _grid_index,
+    GRID_LAT_START,
+    GRID_LON_START,
+    GRID_STEP,
+)
 from meteostat.typing import ProviderRequest
 from meteostat.utils.conversions import kelvin_to_celsius, ms_to_kmh, temp_dwpt_to_rhum
 
@@ -32,6 +37,21 @@ def test_era5_grid_index_half_point_tie_breaks_up():
     lat_idx, lon_idx = _grid_index(51.4833, -0.45)  # London Heathrow
     assert round(GRID_LAT_START + lat_idx * GRID_STEP, 2) == 51.5
     assert round(GRID_LON_START + lon_idx * GRID_STEP, 2) == -0.4
+
+
+def test_era5_grid_index_half_point_tie_breaks_up_despite_float_error():
+    """
+    Same tie-break rule as above, but for a coordinate where plain
+    (value - start) / step lands a few ULPs *below* the exact tie instead
+    of exactly on it: (8.45 - -179.9) / 0.1 == 1883.4999999999998 in
+    float64, not 1883.5. Caught via a real cross-check against
+    independent ERA5-Land extraction for Kleiner Feldberg,
+    where this silently read the grid cell 0.1 degrees (~7km) west of the
+    intended one.
+    """
+    lat_idx, lon_idx = _grid_index(50.2167, 8.45)  # Kleiner Feldberg
+    assert round(GRID_LAT_START + lat_idx * GRID_STEP, 2) == 50.2
+    assert round(GRID_LON_START + lon_idx * GRID_STEP, 2) == 8.5
 
 
 # ---- _get_chunk ----
@@ -60,7 +80,9 @@ def test_get_chunk_gives_up_after_retries_exhausted(mocker):
     mock_network = mocker.patch("meteostat.providers.era5.hourly.network_service")
     mocker.patch("meteostat.providers.era5.hourly.sleep")
 
-    mock_network.get.return_value = MagicMock(status_code=403, text="LICENSES_NOT_ACCEPTED")
+    mock_network.get.return_value = MagicMock(
+        status_code=403, text="LICENSES_NOT_ACCEPTED"
+    )
 
     assert era5_hourly._get_chunk("https://example.test/chunk") is None
     assert mock_network.get.call_count == 5
@@ -93,15 +115,21 @@ def test_get_time_origin_returns_none_when_chunk_fetch_fails(mocker):
 
 def test_get_time_origin_returns_none_on_malformed_payload(mocker):
     era5_hourly._time_origin_cache.clear()
-    mocker.patch.object(era5_hourly, "_get_chunk", return_value=b"not-a-valid-blosc-payload")
+    mocker.patch.object(
+        era5_hourly, "_get_chunk", return_value=b"not-a-valid-blosc-payload"
+    )
 
     assert era5_hourly._get_time_origin("group-malformed", "bucket-malformed") is None
 
 
 def test_get_time_origin_parses_and_caches(mocker):
     era5_hourly._time_origin_cache.clear()
-    compressed = numcodecs.blosc.compress(np.array([424242], dtype="<i8").tobytes(), b"lz4", 5)
-    mock_get_chunk = mocker.patch.object(era5_hourly, "_get_chunk", return_value=compressed)
+    compressed = numcodecs.blosc.compress(
+        np.array([424242], dtype="<i8").tobytes(), b"lz4", 5
+    )
+    mock_get_chunk = mocker.patch.object(
+        era5_hourly, "_get_chunk", return_value=compressed
+    )
 
     assert era5_hourly._get_time_origin("group-cache", "bucket-cache") == 424242
     assert mock_get_chunk.call_count == 1
@@ -136,7 +164,9 @@ def test_get_chunk_series_returns_none_when_chunk_fetch_fails(mocker):
 
 def test_get_chunk_series_returns_none_on_malformed_payload(mocker):
     mocker.patch.object(era5_hourly, "_get_time_origin", return_value=0)
-    mocker.patch.object(era5_hourly, "_get_chunk", return_value=b"not-a-valid-blosc-payload")
+    mocker.patch.object(
+        era5_hourly, "_get_chunk", return_value=b"not-a-valid-blosc-payload"
+    )
 
     assert era5_hourly.get_chunk_series.__wrapped__("t2m", 0, 0, 0, 0, 0) is None
 
@@ -156,7 +186,9 @@ def test_get_chunk_series_decodes_real_payload(mocker):
     mocker.patch.object(era5_hourly, "_get_chunk", return_value=compressed)
 
     lat_within, lon_within = 1, 3
-    df = era5_hourly.get_chunk_series.__wrapped__("t2m", 0, 0, lat_within, lon_within, 0)
+    df = era5_hourly.get_chunk_series.__wrapped__(
+        "t2m", 0, 0, lat_within, lon_within, 0
+    )
 
     assert df is not None
     assert list(df.columns) == ["t2m"]

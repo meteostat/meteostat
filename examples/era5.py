@@ -27,7 +27,7 @@ start = datetime(2018, 1, 1)
 end = datetime(2018, 1, 1, 23, 59)
 
 # Get hourly data
-ts = ms.hourly(location, start, end, providers=[ms.Provider.ERA5_HOURLY])
+ts = ms.hourly(location, start, end, providers=[ms.Provider.ERA5])
 df = ts.fetch()
 
 # Print DataFrame
