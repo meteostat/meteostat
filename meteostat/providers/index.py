@@ -586,11 +586,11 @@ PROVIDER_GSA_MONTHLY = ProviderSpec(
 )
 
 
-PROVIDER_ERA5_HOURLY = ProviderSpec(
-    id=Provider.ERA5_HOURLY,
-    name="ERA5 Hourly",
+PROVIDER_ERA5 = ProviderSpec(
+    id=Provider.ERA5,
+    name="ERA5-Land Hourly",
     granularity=Granularity.HOURLY,
-    priority=Priority.LOWEST -2,  # ERA5-Land showed the highest bias compared to forecasts
+    priority=Priority.LOWEST-2,  # ERA5-Land showed the highest bias compared to forecasts
     grade=Grade.ANALYSIS,
     license=License(
         commercial=True,
@@ -637,5 +637,5 @@ DEFAULT_PROVIDERS = [
     PROVIDER_GSA_SYNOP,
     PROVIDER_GSA_DAILY,
     PROVIDER_GSA_MONTHLY,
-    PROVIDER_ERA5_HOURLY,
+    PROVIDER_ERA5,
 ]

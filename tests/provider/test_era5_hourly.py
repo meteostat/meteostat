@@ -41,7 +41,7 @@ def test_era5_hourly_negative_longitude():
         ms.Point(40.7128, -74.0060),  # New York City
         start=datetime(2023, 7, 1),
         end=datetime(2023, 7, 1, 23, 59),
-        providers=[ms.Provider.ERA5_HOURLY],
+        providers=[ms.Provider.ERA5],
         parameters=[ms.Parameter.TEMP],
     ).fetch()
 
@@ -60,7 +60,7 @@ def test_era5_hourly_wind():
         ms.Point(35.6762, 139.6503),  # Tokyo
         start=datetime(2023, 1, 1),
         end=datetime(2023, 1, 1, 23, 59),
-        providers=[ms.Provider.ERA5_HOURLY],
+        providers=[ms.Provider.ERA5],
         parameters=[ms.Parameter.WSPD, ms.Parameter.WDIR],
     ).fetch()
 
@@ -92,7 +92,7 @@ def test_era5_hourly_matches_observations():
         ms.Point(50.1269, 8.6694),
         start,
         end,
-        providers=[ms.Provider.ERA5_HOURLY],
+        providers=[ms.Provider.ERA5],
         parameters=[ms.Parameter.TEMP],
     ).fetch()
 
