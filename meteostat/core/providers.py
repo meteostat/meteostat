@@ -7,7 +7,7 @@ The Provider Service provides methods to interact with data providers.
 from datetime import datetime
 from importlib import import_module
 from statistics import fmean
-from typing import List, Optional, TypeGuard, cast
+from typing import List, Optional, TypeGuard
 
 import pandas as pd
 
@@ -163,6 +163,12 @@ class ProviderService:
         if not provider:
             return None
 
+        if not provider.module:
+            logger.info(
+                "Skipping provider '%s' as it has no fetch module", provider_id
+            )
+            return None
+
         query = ProviderRequest(
             station=station,
             start=req.start
@@ -175,7 +181,7 @@ class ProviderService:
             parameters=req.parameters,
         )
 
-        module = import_module(cast(str, provider.module))
+        module = import_module(provider.module)
         df = module.fetch(query)
 
         return df
