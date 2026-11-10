@@ -164,9 +164,7 @@ class ProviderService:
             return None
 
         if not provider.module:
-            logger.info(
-                "Skipping provider '%s' as it has no fetch module", provider_id
-            )
+            logger.info("Skipping provider '%s' as it has no fetch module", provider_id)
             return None
 
         query = ProviderRequest(
