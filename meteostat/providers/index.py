@@ -630,7 +630,7 @@ PROVIDER_REANALYSIS = ProviderSpec(
         Parameter.WSPD,
         Parameter.SNWD,
         Parameter.WDIR,
-    ],  # Only parameters that meet the bias-correction criteria are included
+    ],  # Bias-corrected parameters plus raw wind direction passthrough
     start=date(1950, 1, 1),
 )
 
