@@ -9,7 +9,7 @@ from datetime import date
 import pandas as pd
 
 from meteostat.core.providers import ProviderService
-from meteostat.enumerations import Granularity, Grade, Parameter, Priority
+from meteostat.enumerations import Granularity, Grade, Parameter, Priority, Provider
 from meteostat.typing import ProviderSpec, Request, Station
 
 
@@ -17,10 +17,11 @@ def _make_station() -> Station:
     return Station(id="10637")
 
 
-def _make_request(provider_id: str) -> Request:
+def _make_request() -> Request:
+    # fetch_data() never reads req.providers, so the exact value doesn't matter here
     return Request(
         granularity=Granularity.HOURLY,
-        providers=[provider_id],
+        providers=[Provider.HOURLY],
         parameters=[Parameter.TEMP],
         station=_make_station(),
     )
@@ -32,7 +33,7 @@ class TestFetchData:
     def test_returns_none_for_unknown_provider(self):
         service = ProviderService(providers=[])
 
-        df = service.fetch_data("unknown", _make_request("unknown"), _make_station())
+        df = service.fetch_data("unknown", _make_request(), _make_station())
 
         assert df is None
 
@@ -49,13 +50,11 @@ class TestFetchData:
         )
         service = ProviderService(providers=[provider])
 
-        df = service.fetch_data(
-            "reanalysis", _make_request("reanalysis"), _make_station()
-        )
+        df = service.fetch_data("reanalysis", _make_request(), _make_station())
 
         assert df is None
 
-    def test_dispatches_to_module_when_present(self, monkeypatch):
+    def test_dispatches_to_module_when_present(self):
         provider = ProviderSpec(
             id="dummy",
             name="Dummy provider",
@@ -69,7 +68,7 @@ class TestFetchData:
         )
         service = ProviderService(providers=[provider])
 
-        df = service.fetch_data("dummy", _make_request("dummy"), _make_station())
+        df = service.fetch_data("dummy", _make_request(), _make_station())
 
         assert isinstance(df, pd.DataFrame)
         assert not df.empty

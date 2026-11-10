@@ -153,7 +153,7 @@ class ProviderService:
         return list(filter(_filter, query.providers))
 
     def fetch_data(
-        self, provider_id: Provider, req: Request, station: Station
+        self, provider_id: Provider | str, req: Request, station: Station
     ) -> Optional[pd.DataFrame]:
         """
         Fetch data from a given provider
