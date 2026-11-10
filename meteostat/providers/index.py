@@ -588,15 +588,15 @@ PROVIDER_GSA_MONTHLY = ProviderSpec(
 
 PROVIDER_ERA5 = ProviderSpec(
     id=Provider.ERA5,
-    name="ERA5-Land Hourly",
+    name="ERA5-Land",
     granularity=Granularity.HOURLY,
-    priority=Priority.LOWEST-2,  # ERA5-Land showed the highest bias compared to forecasts
+    priority=Priority.LOWEST - 3,  # ERA5-Land showed the highest bias compared to forecasts
     grade=Grade.ANALYSIS,
     license=License(
         commercial=True,
-        attribution="ECMWF ERA5-Land (Copernicus Climate Change Service)",
+        attribution="ECMWF ERA5-Land",
         name="CC BY 4.0",
-        url="https://cds.climate.copernicus.eu/datasets/reanalysis-era5-land",
+        url="https://creativecommons.org/licenses/by/4.0/",
     ),
     parameters=[
         Parameter.TEMP,
@@ -610,6 +610,28 @@ PROVIDER_ERA5 = ProviderSpec(
     ],
     start=date(1950, 1, 1),
     module="meteostat.providers.era5.hourly",
+)
+
+PROVIDER_REANALYSIS = ProviderSpec(
+    id="reanalysis",
+    name="ERA5-Land (Bias-Corrected)",
+    granularity=Granularity.HOURLY,
+    priority=Priority.LOWEST - 2,  # Bias-corrected ERA5-Land is slightly more reliable than raw ERA5-Land
+    grade=Grade.ANALYSIS,
+    license=License(
+        commercial=True,
+        attribution="ECMWF ERA5-Land",
+        name="CC BY 4.0",
+        url="https://creativecommons.org/licenses/by/4.0/",
+    ),
+    parameters=[
+        Parameter.TEMP,
+        Parameter.RHUM,
+        Parameter.WSPD,
+        Parameter.SNWD,
+        Parameter.WDIR,
+    ],  # Only parameters that meet the bias-correction criteria are included
+    start=date(1950, 1, 1),
 )
 
 
@@ -638,4 +660,5 @@ DEFAULT_PROVIDERS = [
     PROVIDER_GSA_DAILY,
     PROVIDER_GSA_MONTHLY,
     PROVIDER_ERA5,
+    PROVIDER_REANALYSIS,
 ]
