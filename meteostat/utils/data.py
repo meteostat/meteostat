@@ -200,9 +200,17 @@ def aggregate_sources(series: pd.Series) -> str:
 def enforce_freq(df: pd.DataFrame, freq: Frequency) -> pd.DataFrame:
     """
     Enforce a specific frequency on a DataFrame by resampling
+
+    Sources like GHCNh/METAR report sub-interval observations where
+    different parameters (e.g. pressure vs. wind) are only populated at
+    different timestamps within the same hour. Binning with
+    closed="right", label="right" and taking the last non-null value per
+    column picks the reading closest to (and not after) the labeled
+    timestamp, matching standard hourly reporting conventions, instead of
+    an arbitrary early reading from later in the hour.
     """
     df.index = pd.to_datetime(df.index.get_level_values("time"))
-    return df.resample(freq).first()
+    return df.resample(freq, closed="right", label="right").last()
 
 
 def order_source_columns(columns: pd.Index) -> List[str]:
