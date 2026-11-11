@@ -4,7 +4,7 @@ Provider Index
 This module contains a list of all available data providers.
 """
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 
 from meteostat.typing import License, ProviderSpec
 from meteostat.enumerations import Grade, Granularity, Parameter, Provider, Priority
@@ -351,6 +351,7 @@ PROVIDER_ISD_LITE = ProviderSpec(
         Parameter.CLDC,
     ],
     start=date(1931, 1, 1),
+    end=datetime(2025, 8, 27),
     module="meteostat.providers.noaa.isd_lite",
 )
 
