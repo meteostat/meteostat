@@ -680,6 +680,62 @@ class TestEnforceFreq:
 
         assert len(result) >= 1
 
+    def test_enforce_freq_hourly_picks_reading_closest_to_boundary(self):
+        """
+        Sub-hourly readings should be assigned to the hour whose boundary
+        they precede (closed="right", label="right"), not the hour they
+        fall after.
+        """
+        idx = pd.DatetimeIndex(
+            [
+                "2020-01-01 00:20",
+                "2020-01-01 00:50",
+                "2020-01-01 01:20",
+            ],
+            name="time",
+        )
+        df = pd.DataFrame({"wdir": [210.0, 200.0, 220.0]}, index=idx)
+
+        result = enforce_freq(df, Frequency.HOURLY)
+
+        # The 00:20 and 00:50 readings both precede the 01:00 boundary, so
+        # the most recent of the two (00:50) is reported for 01:00.
+        assert result.loc["2020-01-01 01:00", "wdir"] == 200.0
+        # The 01:20 reading precedes the 02:00 boundary.
+        assert result.loc["2020-01-01 02:00", "wdir"] == 220.0
+
+    def test_enforce_freq_hourly_does_not_mix_columns_across_timestamps(self):
+        """
+        GHCNh/METAR report different parameters at different sub-hourly
+        timestamps within the same hour (e.g. pressure only on the hour,
+        wind only at :20/:50). Resampling must not stitch together values
+        from different observation times into a single row.
+        """
+        idx = pd.DatetimeIndex(
+            [
+                "2020-01-01 00:00",
+                "2020-01-01 00:20",
+                "2020-01-01 00:50",
+                "2020-01-01 01:00",
+            ],
+            name="time",
+        )
+        df = pd.DataFrame(
+            {
+                "pres": [1003.6, None, None, 1003.9],
+                "wdir": [None, 210.0, 200.0, None],
+            },
+            index=idx,
+        )
+
+        result = enforce_freq(df, Frequency.HOURLY)
+
+        # The hour labeled 01:00 covers (00:00, 01:00]: pressure comes from
+        # the 01:00 reading itself, wind from the closest preceding reading
+        # (00:50) -- not an arbitrary early reading from 00:20.
+        assert result.loc["2020-01-01 01:00", "pres"] == 1003.9
+        assert result.loc["2020-01-01 01:00", "wdir"] == 200.0
+
 
 class TestOrderSourceColumns:
     """Test order_source_columns function"""
