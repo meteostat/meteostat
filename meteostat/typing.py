@@ -62,7 +62,7 @@ class ProviderSpec:
     license: Optional[License]  # The provider's license
     parameters: List[Parameter]  # List of supported meteorological parameters
     start: date  # The start date of the provider's data
-    end: Optional[datetime] = None  # The end date of the provider's data
+    end: Optional[date] = None  # The end date of the provider's data
     countries: Optional[list[str]] = None  # List of supported countries
     module: Optional[str] = None  # Module path to the provider's API
 

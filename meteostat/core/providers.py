@@ -4,7 +4,7 @@ Provider Service
 The Provider Service provides methods to interact with data providers.
 """
 
-from datetime import datetime
+from datetime import date, datetime
 from importlib import import_module
 from statistics import fmean
 from typing import List, Optional, TypeGuard
@@ -20,6 +20,10 @@ from meteostat.typing import (
     Station,
     Request,
 )
+
+
+def _as_datetime(value: Optional[date]) -> Optional[datetime]:
+    return datetime.combine(value, datetime.min.time()) if value else None
 
 
 class ProviderService:
@@ -169,13 +173,8 @@ class ProviderService:
 
         query = ProviderRequest(
             station=station,
-            start=req.start
-            or (
-                datetime.combine(provider.start, datetime.min.time())
-                if provider.start
-                else None
-            ),
-            end=req.end or (provider.end or datetime.now()),
+            start=req.start or _as_datetime(provider.start),
+            end=req.end or _as_datetime(provider.end) or datetime.now(),
             parameters=req.parameters,
         )
 

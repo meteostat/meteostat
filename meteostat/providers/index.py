@@ -351,6 +351,7 @@ PROVIDER_ISD_LITE = ProviderSpec(
         Parameter.CLDC,
     ],
     start=date(1931, 1, 1),
+    end=date(2025, 8, 27),
     module="meteostat.providers.noaa.isd_lite",
 )
 
